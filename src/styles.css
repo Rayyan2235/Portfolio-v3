@@ -80,8 +80,23 @@ kbd { font: 400 11px/1 var(--mono); padding: 5px 8px; border: 1px solid var(--li
 .btn.solid { background: var(--sea); color: var(--cream); }
 .btn:hover { transform: translateY(-1px); }
 
+/* paintings set into the paper */
+/* No z-index or isolation on .painting, so the image can multiply into the page behind it. */
+.painting { position: absolute; pointer-events: none; overflow: hidden; }
+.painting img { display: block; width: 100%; height: auto; mix-blend-mode: multiply; }
+.painting.crane { right: max(-40px, calc((100vw - 1320px) / 2)); top: clamp(10px, 3vw, 40px); width: min(42vw, 580px); height: clamp(420px, 46vw, 640px); }
+.painting.crane img { -webkit-mask: radial-gradient(75% 70% at 55% 45%, #000 60%, transparent 100%); mask: radial-gradient(75% 70% at 55% 45%, #000 60%, transparent 100%); }
+.exp .rows p { max-width: 54ch; }
+.painting.blossom { right: 0; top: 0; width: min(30vw, 420px); height: clamp(520px, 56vw, 820px); }
+.painting.blossom img { -webkit-mask: linear-gradient(200deg, #000 35%, transparent 80%); mask: linear-gradient(200deg, #000 35%, transparent 80%); }
+.statement > .wrap, .exp > .wrap { position: relative; z-index: 1; }
+@media (max-width: 760px) {
+  .painting.crane { width: 70vw; height: 420px; top: -40px; opacity: .45; }
+  .painting.blossom { width: 60vw; opacity: .5; }
+}
+
 /* statement */
-.statement { padding-block: clamp(96px, 12vw, 160px) 0; }
+.statement { position: relative; padding-block: clamp(96px, 12vw, 160px) 0; min-height: clamp(420px, 46vw, 640px); }
 .statement p { margin: 0; font: 500 clamp(32px, 4.6vw, 60px)/1.08 var(--display); font-variation-settings: "SOFT" 100; letter-spacing: -.02em; max-width: 20ch; }
 .statement p span { color: #6f685f; }
 
@@ -124,12 +139,12 @@ kbd { font: 400 11px/1 var(--mono); padding: 5px 8px; border: 1px solid var(--li
 .hx .r { color: var(--soft); font-size: 15px; }
 .hx a:hover, .hx a:focus-visible { padding-left: 16px; }
 .hx a:hover .t, .hx a:focus-visible .t { color: var(--sun); }
-.pv { position: fixed; left: 0; top: 0; z-index: 20; width: 240px; height: 160px; border-radius: 6px; pointer-events: none; opacity: 0; background: url(/great-wave.jpg) no-repeat; background-size: 420% auto; box-shadow: 0 24px 44px -20px rgba(29, 53, 87, .55); transition: opacity .25s, background-position .45s; }
+.pv { position: fixed; left: 0; top: 0; z-index: 20; width: 240px; height: 160px; border-radius: 6px; pointer-events: none; opacity: 0; background: center / cover no-repeat; box-shadow: 0 24px 44px -20px rgba(29, 53, 87, .55); transition: opacity .25s, background-position .45s; }
 .pv.on { opacity: 1; }
 @media (hover: none), (max-width: 680px) { .hx a { grid-template-columns: 36px minmax(0, 1fr); } .hx .r { grid-column: 2; } .hx .y { display: none; } .pv { display: none; } }
 
 /* experience */
-.exp { padding-block: clamp(110px, 10vw, 140px) clamp(90px, 10vw, 130px); }
+.exp { position: relative; overflow: hidden; padding-block: clamp(110px, 10vw, 140px) clamp(90px, 10vw, 130px); }
 .rows { list-style: none; margin: 0; padding: 0; }
 .rows li { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 8px 32px; padding: 24px 0; border-top: 1px solid var(--line); }
 .rows li:last-child { border-bottom: 1px solid var(--line); }
@@ -152,6 +167,15 @@ kbd { font: 400 11px/1 var(--mono); padding: 5px 8px; border: 1px solid var(--li
 .mnote svg { width: 110px; height: 54px; }
 .mnote span { font: 500 25px/1.15 var(--hand); color: #ffd1ad; }
 @media (max-width: 680px) { .mnote { margin-left: 0; } }
+
+/* 3D island */
+.island { position: relative; padding-block: clamp(100px, 10vw, 140px) 0; background: linear-gradient(180deg, var(--paper) 0%, #fbe3c7 100%); }
+.island-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.island-head .head { margin-bottom: 0; }
+.shrine3d { position: relative; height: clamp(420px, 60vw, 680px); cursor: grab; touch-action: pan-y; }
+.shrine3d:active { cursor: grabbing; }
+.shrine3d canvas { display: block; width: 100% !important; height: 100% !important; }
+.shrine3d.no-3d { background: url(/art/crane-chikanobu.jpg) center 20% / cover; }
 
 /* contact */
 .close { position: relative; overflow: hidden; background: linear-gradient(180deg, #f7b27a 0%, #fde7c4 55%, #fff8ee 100%); padding-block: clamp(110px, 12vw, 170px) 0; }

@@ -27,11 +27,11 @@ export const featured = [
 ];
 
 export const scraps = [
-  { name: 'Englishly', result: 'Whisper fine tune, +35% accuracy on Arabic accents', year: '2025', url: 'https://github.com/Rayyan2235/Englishly', pos: '8% 72%' },
-  { name: 'FPL Predictor', result: 'Match outcomes, 15% over baseline', year: '2025', url: 'https://github.com/Rayyan2235/FPL_Predictor', pos: '82% 22%' },
-  { name: 'HotSeat', result: 'Voice first mock interviews', year: '[YEAR]', url: '#', pos: '45% 38%' },
-  { name: 'GymAI Logger', result: 'Workout tracker with an AI coach', year: '[YEAR]', url: '#', pos: '92% 88%' },
-  { name: 'Murabit', result: 'Blocks distractions during prayer times', year: '[YEAR]', url: '#', pos: '25% 55%' }
+  { name: 'Englishly', result: 'Whisper fine tune, +35% accuracy on Arabic accents', year: '2025', url: 'https://github.com/Rayyan2235/Englishly', img: '' },
+  { name: 'FPL Predictor', result: 'Match outcomes, 15% over baseline', year: '2025', url: 'https://github.com/Rayyan2235/FPL_Predictor', img: '' },
+  { name: 'HotSeat', result: 'Voice first mock interviews', year: '[YEAR]', url: '#', img: '' },
+  { name: 'GymAI Logger', result: 'Workout tracker with an AI coach', year: '[YEAR]', url: '#', img: '' },
+  { name: 'Murabit', result: 'Blocks distractions during prayer times', year: '[YEAR]', url: '#', img: '' }
 ];
 
 export const experience = [

@@ -20,13 +20,14 @@ function write(key, value) {
 }
 
 export function PrefsProvider({ children }) {
-  const systemReduce = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const [motionOn, setMotionOn] = useState(() => read('motion', !systemReduce));
+  // Motion is the point of this site, so it starts on even when the system asks for less.
+  // Visitors can switch it off in the sky panel or the Ctrl K menu, and the choice is remembered.
+  const [motionOn, setMotionOn] = useState(() => read('motion2', true));
   const [sky, setSky] = useState(() => read('sky', 'auto'));
   const [transition, setTransition] = useState(() => read('transition', 'mixed'));
   const [sound, setSound] = useState(false);
 
-  useEffect(() => write('motion', motionOn), [motionOn]);
+  useEffect(() => write('motion2', motionOn), [motionOn]);
   useEffect(() => write('sky', sky), [sky]);
   useEffect(() => write('transition', transition), [transition]);
   useEffect(() => {

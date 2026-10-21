@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion, useScroll, useTransform } from 'motion/react';
+import { AnimatePresence, motion, useInView, useScroll, useTransform } from 'motion/react';
 import Stack from './reactbits/Stack/Stack.jsx';
 import { usePrefs } from '../prefs.jsx';
 import { featured, scraps, experience, EMAIL, GITHUB, LINKEDIN, RESUME } from '../data.js';
@@ -28,10 +28,56 @@ export function HeroText() {
   );
 }
 
+// A real painting set into the page. The aged silk is divided out (each pixel over a blurred
+// estimate of the background), so the paper goes white and multiplies away into the cream page,
+// leaving only the ink, the sun and the blossoms.
+function liftPaper(img, crop, width) {
+  const sx = 0, sy = Math.round(img.naturalHeight * crop[0]), sw = img.naturalWidth, sh = Math.round(img.naturalHeight * (crop[1] - crop[0]));
+  const w = width, h = Math.round(sh * width / sw);
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const c = cv.getContext('2d', { willReadFrequently: true });
+  c.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+  // background estimate: shrink a lot, then stretch back with smoothing
+  const small = document.createElement('canvas'); small.width = Math.max(4, Math.round(w / 28)); small.height = Math.max(4, Math.round(h / 28));
+  const s = small.getContext('2d'); s.imageSmoothingQuality = 'high'; s.drawImage(cv, 0, 0, small.width, small.height);
+  const bgc = document.createElement('canvas'); bgc.width = w; bgc.height = h;
+  const b = bgc.getContext('2d', { willReadFrequently: true }); b.imageSmoothingQuality = 'high'; b.filter = 'blur(6px)'; b.drawImage(small, 0, 0, w, h);
+  const px = c.getImageData(0, 0, w, h), bg = b.getImageData(0, 0, w, h).data, d = px.data;
+  for (let i = 0; i < d.length; i += 4) {
+    for (let k = 0; k < 3; k++) d[i + k] = 255 * Math.pow(Math.min(1, (d[i + k] / Math.max(40, bg[i + k])) * 1.03), 1.9);
+  }
+  c.putImageData(px, 0, 0);
+  return cv.toDataURL('image/png');
+}
+
+function Painting({ src, className, drift = 60, label, crop = [0, 1], width = 760 }) {
+  const ref = useRef(null);
+  const [lifted, setLifted] = useState('');
+  const { motionOn } = usePrefs();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
+  const y = useTransform(scrollYProgress, [0, 1], [drift, -drift]);
+  useEffect(() => {
+    let alive = true;
+    const img = new Image();
+    img.onload = () => { if (alive) setLifted(liftPaper(img, crop, width)); };
+    img.src = src;
+    return () => { alive = false; };
+  }, [src, crop[0], crop[1], width]);
+  return (
+    <div ref={ref} className={`painting ${className}`} role="img" aria-label={label}>
+      {lifted && <motion.img src={lifted} alt="" style={motionOn ? { y } : undefined} />}
+    </div>
+  );
+}
+
 export function Statement() {
   return (
-    <section className="statement wrap" aria-label="Summary">
-      <motion.p {...head}>Software that listens first. <span>Then it does the work, and shows what it did.</span></motion.p>
+    <section className="statement" aria-label="Summary">
+      <Painting src="/art/crane-chikanobu.jpg" className="crane" drift={70} crop={[0.03, 0.46]}
+        label="A crane flying under a red rising sun, after Kano Chikanobu" />
+      <div className="wrap">
+        <motion.p {...head}>Software that listens first. <span>Then it does the work, and shows what it did.</span></motion.p>
+      </div>
     </section>
   );
 }
@@ -90,7 +136,13 @@ function HoverIndex() {
         {scraps.map((s, i) => (
           <li key={s.name}>
             <a href={s.url}
-              onMouseEnter={e => { Object.assign(st.current, { x: e.clientX, y: e.clientY, tx: e.clientX, ty: e.clientY }); pv.current.style.backgroundPosition = s.pos; pv.current.classList.add('on'); if (!st.current.on) { st.current.on = true; loop(); } }}
+              onMouseEnter={e => {
+                // Preview only shows once a project has a real screenshot (set `img` in data.js).
+                if (!s.img) return;
+                Object.assign(st.current, { x: e.clientX, y: e.clientY, tx: e.clientX, ty: e.clientY });
+                pv.current.style.backgroundImage = `url(${s.img})`; pv.current.classList.add('on');
+                if (!st.current.on) { st.current.on = true; loop(); }
+              }}
               onMouseLeave={() => { pv.current.classList.remove('on'); st.current.on = false; }}>
               <span className="n">0{i + 4}</span><span className="t">{s.name}</span><span className="r">{s.result}</span><span className="y">{s.year}</span>
             </a>
@@ -137,13 +189,17 @@ export function Work() {
 
 export function Experience() {
   return (
-    <section className="exp wrap" id="experience" aria-labelledby="exp-title">
+    <section className="exp" id="experience" aria-labelledby="exp-title">
+      <Painting src="/art/blossom-goshun.jpg" className="blossom" drift={50}
+        label="Ink cherry blossom branch, after Matsumura Goshun" />
+      <div className="wrap">
       <motion.div className="head" {...head}><span className="label"><span className="jp" aria-hidden="true">葉</span> · Experience</span><h2 id="exp-title">Where I have worked</h2></motion.div>
       <ol className="rows">
         {experience.map(([when, title, body]) => (
           <li key={title}><span className="when">{when}</span><div><h3>{title}</h3><p>{body}</p></div></li>
         ))}
       </ol>
+      </div>
     </section>
   );
 }
@@ -162,6 +218,20 @@ export function Lessons() {
           ))}
         </div>
       </div>
+    </section>
+  );
+}
+
+export function Island({ Scene }) {
+  const ref = useRef(null);
+  const near = useInView(ref, { once: true, margin: '800px 0px' });
+  return (
+    <section ref={ref} className="island" id="island" aria-labelledby="island-title">
+      <div className="wrap island-head">
+        <motion.div className="head" {...head}><span className="label"><span className="jp" aria-hidden="true">島</span> · A quiet place</span><h2 id="island-title">Stay a while</h2></motion.div>
+        <p className="hint">Drag to look around. The light follows the sky you picked.</p>
+      </div>
+      {near ? <Scene /> : <div className="shrine3d" />}
     </section>
   );
 }
@@ -203,5 +273,5 @@ function SeaBand() {
 }
 
 export function Footer() {
-  return <footer><div className="wrap"><span>Rayyan Syed, 2026. Drawn with the Daybreak design system.</span><span>Wave after Hokusai, The Met, public domain.</span></div></footer>;
+  return <footer><div className="wrap"><span>Rayyan Syed, 2026. Drawn with the Daybreak design system.</span><span>Art after Hokusai, Kano Chikanobu and Matsumura Goshun. The Met, public domain.</span></div></footer>;
 }
