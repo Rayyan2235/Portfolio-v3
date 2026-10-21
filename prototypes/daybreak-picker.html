@@ -1,0 +1,258 @@
+<title>Daybreak Picker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono&family=Instrument+Serif&family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Figtree:wght@400;500&family=Gloock&family=Hanken+Grotesk:wght@400;500&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700&family=Shippori+Mincho:wght@700&display=swap">
+<style>
+/* Layout: one column of questions; each question is a row of live option tiles you pick with a radio. Single committed light look. */
+:root{
+  color-scheme: light;
+  --bg:#f5f2ec; --card:#fffdf9; --ink:#1b1a18; --soft:#4a4640; --muted:#6b665d; --line:#ddd6c8; --pick:#1d3557; --pick-tint:#e7ecf4; --warm:#c8502b;
+  --sans:Geist, ui-sans-serif, system-ui, sans-serif; --mono:"Geist Mono", ui-monospace, monospace; --serif:"Instrument Serif", Georgia, serif;
+}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--sans)}
+*{box-sizing:border-box}
+.page{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:48px 140px;display:flex;flex-direction:column;gap:56px}
+header h1{font:400 clamp(44px,6vw,72px)/1 var(--serif);letter-spacing:-.02em;margin:0 0 12px;text-wrap:balance}
+header p{margin:0;color:var(--soft);max-width:62ch}
+fieldset{border:0;margin:0;padding:0;min-width:0;display:flex;flex-direction:column;gap:16px}
+legend{padding:0;margin-bottom:16px;display:flex;flex-direction:column;gap:4px}
+legend .n{font:400 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+legend .q{font:400 clamp(28px,3.2vw,38px)/1.1 var(--serif)}
+legend .h{color:var(--soft);font-size:15px}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.opt{position:relative;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt:hover{border-color:#b9b09e}
+.opt:has(input:checked){border-color:var(--pick);box-shadow:0 0 0 2px var(--pick)}
+.opt:has(input:focus-visible){outline:2px solid var(--warm);outline-offset:3px}
+.opt .art{aspect-ratio:16/10;max-width:100%;display:block;background:#eee}
+.opt .art svg{display:block;width:100%;height:100%}
+.opt .meta{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:12px 14px 14px}
+.opt .meta b{font-weight:600;font-size:15px}
+.opt .meta span{display:block;color:var(--muted);font-size:14px;line-height:1.45}
+.opt .tick{flex:none;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center}
+.opt:has(input:checked) .tick{background:var(--pick);border-color:var(--pick)}
+.opt:has(input:checked) .tick::after{content:"";width:8px;height:8px;border-radius:50%;background:#fff}
+.type{aspect-ratio:16/10;max-width:100%;padding:20px;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;background:linear-gradient(180deg,#fde7c4,#fff6e8)}
+.type .big{font-size:40px;line-height:.95;letter-spacing:-.02em}
+.type .small{font-size:15px;line-height:1.45;color:var(--soft)}
+.jp{aspect-ratio:16/10;max-width:100%;padding:20px;display:flex;flex-direction:column;justify-content:center;gap:10px;background:#fbf7ef}
+.jp .lab{font:400 12px/1 var(--mono);letter-spacing:.1em;color:var(--muted)}
+.jp .hd{display:flex;align-items:center;gap:12px;font:400 32px/1.05 var(--serif)}
+.seal{width:30px;height:30px;border-radius:4px;background:#c8382b;color:#fff;display:grid;place-items:center;font:600 15px/1 var(--sans);transform:rotate(-6deg);flex:none}
+.brush{font:700 40px/1 "Shippori Mincho",serif;color:#c8382b}
+.sw{aspect-ratio:16/10;max-width:100%;display:grid;grid-template-rows:1fr auto}
+.sw .bar{display:flex}
+.sw .bar i{flex:1;height:44px}
+textarea{width:100%;min-height:96px;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;resize:vertical}
+textarea:focus-visible{outline:2px solid var(--pick);outline-offset:1px}
+label.note{font-size:14px;color:var(--soft);display:flex;flex-direction:column;gap:6px}
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:5;background:rgba(255,253,249,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);padding-block:12px calc(12px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.dock .in{max-width:1240px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.dock .sum{font:400 13px/1.4 var(--mono);color:var(--soft);min-width:0}
+.dock button{min-height:46px;padding:0 22px;border-radius:999px;border:0;background:var(--ink);color:#fff;font:500 15px/1 var(--sans);cursor:pointer}
+.dock button:focus-visible{outline:2px solid var(--warm);outline-offset:2px}
+.dock .st{font-size:14px;color:var(--soft)}
+.drift{animation:drift 9s ease-in-out infinite alternate}
+.drift2{animation:drift 13s ease-in-out infinite alternate-reverse}
+@keyframes drift{from{transform:translateX(-12px)}to{transform:translateX(12px)}}
+@media (prefers-reduced-motion:reduce){.drift,.drift2{animation:none}}
+</style>
+
+<div class="page">
+  <header>
+    <h1>Pick your Daybreak</h1>
+    <p>One pick per question. Everything moves live, so judge the feel, not the details. Add a note anywhere, then press Save at the bottom. Claude reads your picks straight from this page and rebuilds the design system and the wireframe from them.</p>
+  </header>
+
+  <fieldset>
+    <legend><span class="n">1 of 6</span><span class="q">The hero: sun and sea</span><span class="h">The first screen people see.</span></legend>
+    <div class="opts" data-q="hero">
+      <label class="opt"><input type="radio" name="hero" value="sunrise-breathing"><span class="art" data-art="breathDawn"></span><span class="meta"><span><b>Sunrise + cloud foam waves</b><span>New, from your reference. Sweeping blue ribbons with curly white foam under a rising sun.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="hero" value="sunrise-foam"><span class="art" data-art="heroA"></span><span class="meta"><span><b>Sunrise over foam</b><span>Big warm sun on the horizon, curling foam waves in front.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="hero" value="sun-rays"><span class="art" data-art="heroB"></span><span class="meta"><span><b>Sun with rays</b><span>Print style rays behind the sun, layered patterned sea.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="hero" value="soft-glow"><span class="art" data-art="heroC"></span><span class="meta"><span><b>Soft morning glow</b><span>Pastel sky, blurred sun, thin line waves. Calm.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="hero" value="great-wave"><span class="art" data-art="heroD"></span><span class="meta"><span><b>Great wave, small sun</b><span>One huge foam crest framing the page, small sun far away.</span></span><span class="tick"></span></span></label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend><span class="n">2 of 6</span><span class="q">The wave style</span><span class="h">Used across the site: section bands, transitions, footer.</span></legend>
+    <div class="opts" data-q="wave">
+      <label class="opt"><input type="radio" name="wave" value="cloud-foam-ribbons"><span class="art" data-art="breathDark"></span><span class="meta"><span><b>Cloud foam ribbons</b><span>New, from your reference. Tapered blue streams, white foam that curls into cloud scrolls, spray.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="wave" value="foam-claws"><span class="art" data-art="waveA"></span><span class="meta"><span><b>Foam claws</b><span>Woodblock crests with curling foam fingers.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="wave" value="pattern-bands"><span class="art" data-art="waveB"></span><span class="meta"><span><b>Patterned bands</b><span>Flat layers with the scale wave pattern. What you have now.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="wave" value="ink-lines"><span class="art" data-art="waveC"></span><span class="meta"><span><b>Ink lines</b><span>Single stroke waves, like a pen drawing. Most modern.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="wave" value="soft-swells"><span class="art" data-art="waveD"></span><span class="meta"><span><b>Soft swells</b><span>Smooth color gradients, no outlines. Quietest.</span></span><span class="tick"></span></span></label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend><span class="n">3 of 6</span><span class="q">Fonts</span><span class="h">Big headline font plus body font.</span></legend>
+    <div class="opts" data-q="fonts">
+      <label class="opt"><input type="radio" name="fonts" value="instrument-geist"><span class="type"><span class="big" style="font-family:'Instrument Serif',serif">Rayyan [Last name]</span><span class="small" style="font-family:Geist,sans-serif">I build software you talk to. Senior in CS at Penn State.</span></span><span class="meta"><span><b>Instrument Serif + Geist</b><span>Current. Thin, elegant, a bit cold.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="fonts" value="fraunces-figtree"><span class="type"><span class="big" style="font-family:Fraunces,serif;font-weight:600;font-variation-settings:'SOFT' 100">Rayyan [Last name]</span><span class="small" style="font-family:Figtree,sans-serif">I build software you talk to. Senior in CS at Penn State.</span></span><span class="meta"><span><b>Fraunces + Figtree</b><span>Soft, warm, friendly. Good vibes.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="fonts" value="gloock-hanken"><span class="type"><span class="big" style="font-family:Gloock,serif">Rayyan [Last name]</span><span class="small" style="font-family:'Hanken Grotesk',sans-serif">I build software you talk to. Senior in CS at Penn State.</span></span><span class="meta"><span><b>Gloock + Hanken Grotesk</b><span>Bold, high contrast, poster like.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="fonts" value="bricolage"><span class="type"><span class="big" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;letter-spacing:-.03em">Rayyan [Last name]</span><span class="small" style="font-family:'Bricolage Grotesque',sans-serif">I build software you talk to. Senior in CS at Penn State.</span></span><span class="meta"><span><b>Bricolage Grotesque</b><span>Chunky modern sans. Playful, techy, no serif.</span></span><span class="tick"></span></span></label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend><span class="n">4 of 6</span><span class="q">How much Japanese text</span><span class="h">The art can stay Japanese even with no Japanese words.</span></legend>
+    <div class="opts" data-q="japanese">
+      <label class="opt"><input type="radio" name="japanese" value="none"><span class="jp"><span class="lab">WORK</span><span class="hd">What I have built</span></span><span class="meta"><span><b>None</b><span>English only. Japanese feel comes from the art.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="japanese" value="seal-only"><span class="jp"><span class="lab">WORK</span><span class="hd"><span class="seal" aria-hidden="true">R</span>What I have built</span></span><span class="meta"><span><b>One seal mark</b><span>A small red stamp with your initial. No kanji.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="japanese" value="tiny-labels"><span class="jp"><span class="lab">波 · WORK</span><span class="hd">What I have built</span></span><span class="meta"><span><b>Tiny labels</b><span>One small character in section labels only.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="japanese" value="current"><span class="jp"><span class="lab">WORK</span><span class="hd"><span class="brush" aria-hidden="true">波</span>What I have built</span></span><span class="meta"><span><b>Current</b><span>Big kanji beside every heading, vertical titles.</span></span><span class="tick"></span></span></label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend><span class="n">5 of 6</span><span class="q">Colors</span><span class="h">The mood of the whole site.</span></legend>
+    <div class="opts" data-q="palette">
+      <label class="opt"><input type="radio" name="palette" value="peach-dawn"><span class="sw" data-sw="#fde7c4,#f7b27a,#e4572e,#1d3557,#fff8ee"></span><span class="meta"><span><b>Peach dawn</b><span>Peach sky, orange sun, deep indigo sea.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="palette" value="coral-teal"><span class="sw" data-sw="#ffe3d3,#ff8c69,#e05a47,#1f6f78,#f7fbf9"></span><span class="meta"><span><b>Coral and teal</b><span>Brighter and fresher. Teal water.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="palette" value="gold-navy"><span class="sw" data-sw="#fbf1d6,#f2c14e,#d1495b,#14213d,#fffaf0"></span><span class="meta"><span><b>Gold and navy</b><span>Golden hour, darker sea, more contrast.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="palette" value="washi-indigo"><span class="sw" data-sw="#f4efe4,#e9dcc0,#c8382b,#14284b,#fbf8f0"></span><span class="meta"><span><b>Washi and indigo</b><span>Current Wa colors. Paper, red sun, indigo.</span></span><span class="tick"></span></span></label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend><span class="n">6 of 6</span><span class="q">Screen transitions</span><span class="h">What plays when you click to another section.</span></legend>
+    <div class="opts" data-q="transitions">
+      <label class="opt"><input type="radio" name="transitions" value="wave-only"><span class="art" data-art="waveA"></span><span class="meta"><span><b>Wave only</b><span>The crashing wave for every jump. One signature move.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="transitions" value="all-four"><span class="art" data-art="four"></span><span class="meta"><span><b>All four</b><span>Wave, ink, petals, fire, one per section. Most dramatic.</span></span><span class="tick"></span></span></label>
+      <label class="opt"><input type="radio" name="transitions" value="sunrise-wave"><span class="art" data-art="heroA"></span><span class="meta"><span><b>Wave plus sunrise</b><span>Wave for jumps, and the sun rises as you scroll to the end.</span></span><span class="tick"></span></span></label>
+    </div>
+  </fieldset>
+
+  <label class="note" for="notes">Anything else? What you love, what you hate, a site you like.
+    <textarea id="notes" placeholder="Example: hero A but with the sun from C. Smaller headings."></textarea>
+  </label>
+</div>
+
+<div class="dock"><div class="in"><span class="sum" id="sum">Nothing picked yet</span><span class="st" id="st" role="status"></span><button type="button" id="save">Save my picks</button></div></div>
+
+<script>
+(function(){
+var NS='http://www.w3.org/2000/svg';
+function S(tag,a,p){var e=document.createElementNS(NS,tag);for(var k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+function svg(host){var s=S('svg',{viewBox:'0 0 400 250',preserveAspectRatio:'xMidYMid slice','aria-hidden':'true'});host.appendChild(s);return s}
+function grad(s,id,stops,vert){var d=s.querySelector('defs')||S('defs',{},s);var g=S('linearGradient',{id:id,x1:0,y1:0,x2:vert===false?1:0,y2:vert===false?0:1},d);stops.forEach(function(c,i){S('stop',{offset:i/(stops.length-1),'stop-color':c},g)});return 'url(#'+id+')'}
+function wavePath(base,amp,P,n,bottom){var d='M-40 '+base;for(var i=0;i<n;i++){var x=-40+i*P;d+=' Q'+(x+P/4)+' '+(base-amp)+' '+(x+P/2)+' '+base+' T'+(x+P)+' '+base}return d+(bottom?' V'+bottom+' H-40Z':'')}
+function seig(s,id,a,b){var d=s.querySelector('defs')||S('defs',{},s);var p=S('pattern',{id:id,width:40,height:20,patternUnits:'userSpaceOnUse'},d);for(var k=-1;k<=2;k++)for(var i=-1;i<=1;i++){var x=40*i+20*((k%2+2)%2),y=10*k;[20,15,10,5].forEach(function(r,j){S('circle',{cx:x,cy:y,r:r,fill:j%2?b:a,stroke:'#f4f1ea','stroke-width':.8,'stroke-opacity':.7},p)})}return 'url(#'+id+')'}
+/* a curling foam crest: body path, inner stripes, claws */
+function crest(g,x,y,R,body,foam,line){
+  S('path',{d:'M'+(x-R*2.2)+' '+(y+R*2.4)+' C'+(x-R*1.6)+' '+(y+R*.6)+' '+(x-R*.6)+' '+(y-R*.9)+' '+(x+R*.3)+' '+(y-R*.6)+' C'+(x+R*1.1)+' '+(y-R*.3)+' '+(x+R*1.2)+' '+(y+R*.6)+' '+(x+R*.7)+' '+(y+R*.7)+' C'+(x+R*.4)+' '+(y+R*.2)+' '+(x-R*.1)+' '+(y+R*.3)+' '+(x-R*.2)+' '+(y+R*.9)+' C'+(x-R*.3)+' '+(y+R*1.6)+' '+(x+R*.2)+' '+(y+R*2.1)+' '+(x+R*.8)+' '+(y+R*2.4)+'Z',fill:body},g);
+  for(var k=1;k<5;k++)S('path',{d:'M'+(x-R*.2-k*R*.25)+' '+(y+R*.9+k*3)+' C'+(x-R*.3-k*R*.25)+' '+(y+R*1.6)+' '+(x+R*.2-k*R*.25)+' '+(y+R*2.1)+' '+(x+R*.8-k*R*.25)+' '+(y+R*2.4),fill:'none',stroke:line,'stroke-width':1.4,opacity:.7},g);
+  for(var i=0;i<=9;i++){var t=i/9,a=Math.PI*(1.15-t*1.25),cx=x+R*.35+Math.cos(a)*R*.85,cy=y+R*.05+Math.sin(a)*R*.7;
+    for(var j=0;j<3;j++)S('circle',{cx:cx+(j-1)*R*.09,cy:cy-(j%2)*R*.08,r:R*(.11-j*.02),fill:foam,stroke:body,'stroke-width':1},g)}
+}
+var arts={
+  heroA:function(s){S('rect',{width:400,height:250,fill:grad(s,'ga',['#f9c8a0','#fde3c0','#fff4e2'])},s);
+    S('circle',{cx:262,cy:150,r:78,fill:'#ffd9a8',opacity:.6},s);S('circle',{cx:262,cy:150,r:52,fill:'#f08a4b'},s);
+    var g1=S('g',{'class':'drift2'},s);S('path',{d:wavePath(158,7,60,9,250),fill:'#3b5a86'},g1);
+    var g2=S('g',{'class':'drift'},s);S('path',{d:wavePath(190,10,80,8,250),fill:'#1d3557'},g2);S('path',{d:wavePath(190,10,80,8),fill:'none',stroke:'#fff8ee','stroke-width':2.5},g2);
+    var g3=S('g',{},s);crest(g3,70,170,46,'#1d3557','#fff8ee','#9fb6d6')},
+  heroB:function(s){S('rect',{width:400,height:250,fill:'#fbe6c8'},s);var g=S('g',{},s);for(var i=0;i<20;i++){var a=i/20*Math.PI*2,b=a+Math.PI/20;S('path',{d:'M200 150 L'+(200+Math.cos(a)*500)+' '+(150+Math.sin(a)*500)+' L'+(200+Math.cos(b)*500)+' '+(150+Math.sin(b)*500)+'Z',fill:'#f6cf9c'},g)}
+    S('circle',{cx:200,cy:150,r:48,fill:'#e4572e'},s);
+    var p=seig(s,'sb','#1d3557','#3b5a86');var g1=S('g',{'class':'drift'},s);S('path',{d:wavePath(160,8,60,9,250),fill:'#6f93bd'},g1);
+    var g2=S('g',{'class':'drift2'},s);S('path',{d:wavePath(185,10,90,7,250),fill:p},g2);S('path',{d:wavePath(185,10,90,7),fill:'none',stroke:'#fff8ee','stroke-width':2.5},g2)},
+  heroC:function(s){S('rect',{width:400,height:250,fill:grad(s,'gc',['#e9e1f4','#fcdcc6','#fff7ec'])},s);var d=s.querySelector('defs');var f=S('filter',{id:'bl'},d);S('feGaussianBlur',{stdDeviation:14},f);
+    S('circle',{cx:200,cy:140,r:70,fill:'#ffb38a',filter:'url(#bl)'},s);S('circle',{cx:200,cy:140,r:36,fill:'#ffc9a3'},s);
+    S('rect',{y:150,width:400,height:100,fill:'#fff7ec'},s);
+    for(var k=0;k<5;k++){var g=S('g',{'class':k%2?'drift':'drift2'},s);S('path',{d:wavePath(160+k*18,5+k,70+k*10,9),fill:'none',stroke:'#2b4c7e','stroke-width':1.6,opacity:.35+k*.12},g)}},
+  heroD:function(s){S('rect',{width:400,height:250,fill:'#f3e9d2'},s);S('circle',{cx:320,cy:70,r:22,fill:'#d1495b'},s);
+    var g0=S('g',{'class':'drift2'},s);S('path',{d:wavePath(205,6,50,12,250),fill:'#6f93bd'},g0);
+    var g=S('g',{},s);crest(g,170,70,88,'#1d3557','#fbf6ea','#9fb6d6');
+    S('path',{d:wavePath(225,8,70,9,250),fill:'#1d3557'},s);S('path',{d:wavePath(225,8,70,9),fill:'none',stroke:'#fbf6ea','stroke-width':2.5},s)},
+  waveA:function(s){S('rect',{width:400,height:250,fill:'#f3e9d2'},s);var g=S('g',{},s);crest(g,110,90,60,'#1d3557','#fbf6ea','#9fb6d6');crest(g,290,120,44,'#2b4c7e','#fbf6ea','#9fb6d6');
+    S('path',{d:wavePath(215,8,60,10,250),fill:'#1d3557'},s);S('path',{d:wavePath(215,8,60,10),fill:'none',stroke:'#fbf6ea','stroke-width':2.5},s)},
+  waveB:function(s){S('rect',{width:400,height:250,fill:'#e9dcc0'},s);var p=seig(s,'sw','#14284b','#2c5a86');
+    var a=S('g',{'class':'drift'},s);S('path',{d:wavePath(110,12,100,7,250),fill:'#6fa3bf'},a);
+    var b=S('g',{'class':'drift2'},s);S('path',{d:wavePath(150,16,120,6,250),fill:'#2c5a86'},b);S('path',{d:wavePath(150,16,120,6),fill:'none',stroke:'#f1f4f2','stroke-width':3},b);
+    var c=S('g',{'class':'drift'},s);S('path',{d:wavePath(190,14,110,6,250),fill:p},c);S('path',{d:wavePath(190,14,110,6),fill:'none',stroke:'#f1f4f2','stroke-width':3},c)},
+  waveC:function(s){S('rect',{width:400,height:250,fill:'#fbf7ef'},s);for(var k=0;k<9;k++){var g=S('g',{'class':k%2?'drift':'drift2'},s);S('path',{d:wavePath(50+k*22,6+k%3*3,60+k*6,10),fill:'none',stroke:'#1d3557','stroke-width':k%3?1.2:2.2,opacity:.85},g);
+      if(k%3===2)for(var i=0;i<6;i++)S('path',{d:'M'+(i*70+10)+' '+(50+k*22-8)+' q8 -12 16 0',fill:'none',stroke:'#1d3557','stroke-width':1.2},g)}},
+  waveD:function(s){S('rect',{width:400,height:250,fill:grad(s,'gd',['#fde7c4','#fff6e8'])},s);
+    [['#a9c4de',.9,110],['#6f93bd',.9,145],['#3b5a86',1,180],['#1d3557',1,212]].forEach(function(l,i){var g=S('g',{'class':i%2?'drift':'drift2'},s);S('path',{d:wavePath(l[2],10+i*3,140+i*20,5,250),fill:l[0],opacity:l[1]},g)})},
+  four:function(s){var cols=[['#1d3557','Wave'],['#101a30','Ink'],['#f2b8c6','Petals'],['#e0452a','Fire']];cols.forEach(function(c,i){S('rect',{x:i*100,width:100,height:250,fill:c[0]},s);var t=S('text',{x:i*100+50,y:135,'text-anchor':'middle','font-family':'Geist, sans-serif','font-size':16,fill:i===2?'#1b1a18':'#ffffff'},s);t.textContent=c[1]})}
+};
+/* water breathing: tapered ribbon streams, scalloped foam rim with navy outlines, spiral cloud curls, tendrils. Canvas, animated while visible. */
+function breath(host,mode){
+  var cv=document.createElement('canvas');cv.style.cssText='display:block;width:100%;height:100%';host.appendChild(cv);
+  var c=cv.getContext('2d'),W,H,vis=false,still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var dawn=mode==='dawn',INK='#0b1f45',LINE='#1a3c7a';
+  var blues=['#07215a','#0d3a8f','#1550b8','#2266d4','#2f7be6','#4d94f2','#6fb2ff','#9fd0ff'];
+  function hash(n){var x=Math.sin(n*127.1)*43758.5453;return x-Math.floor(x)}
+  function size(){var d=Math.min(devicePixelRatio||1,2);W=host.clientWidth;H=host.clientHeight;cv.width=W*d;cv.height=H*d;c.setTransform(d,0,0,d,0,0)}
+  function bez(P,s){var m=1-s;return[m*m*m*P[0][0]+3*m*m*s*P[1][0]+3*m*s*s*P[2][0]+s*s*s*P[3][0],m*m*m*P[0][1]+3*m*m*s*P[1][1]+3*m*s*s*P[2][1]+s*s*s*P[3][1]]}
+  function ctrl(t){var w=Math.sin(t*.7)*.04;return dawn?[[-.1*W,.8*H],[.3*W,(.55+w)*H],[.6*W,(.95-w)*H],[1.1*W,.5*H]]:[[1.1*W,1.05*H],[.62*W,(.82+w)*H],[.42*W,(.22-w)*H],[-.12*W,.08*H]]}
+  /* frame at s: point, unit tangent, unit normal pointing UP the screen (the foam side) */
+  function at(P,s){var p=bez(P,s),q=bez(P,Math.min(1,s+.004)),r=bez(P,Math.max(0,s-.004)),dx=q[0]-r[0],dy=q[1]-r[1],l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l;if(ny>0){nx=-nx;ny=-ny}return{x:p[0],y:p[1],tx:dx/l,ty:dy/l,nx:nx,ny:ny}}
+  function spiral(x,y,r,turns,dir){c.beginPath();for(var i=0;i<=48;i++){var a=dir*i/48*Math.PI*2*turns,rr=r*(1-i/52);var px=x+Math.cos(a)*rr,py=y+Math.sin(a)*rr;i?c.lineTo(px,py):c.moveTo(px,py)}c.stroke()}
+  function frame(ms){var t=ms/1000,P=ctrl(t);
+    if(dawn){var g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'#f9c8a0');g.addColorStop(.55,'#fde3c0');g.addColorStop(1,'#fff4e2');c.fillStyle=g;c.fillRect(0,0,W,H);
+      var gl=c.createRadialGradient(W*.7,H*.36,0,W*.7,H*.36,H*.5);gl.addColorStop(0,'rgba(255,214,160,.95)');gl.addColorStop(1,'rgba(255,214,160,0)');c.fillStyle=gl;c.fillRect(0,0,W,H);
+      c.fillStyle='#f08a4b';c.beginPath();c.arc(W*.7,H*.36,H*.15,0,7);c.fill()}
+    else{var g2=c.createLinearGradient(0,0,W,H);g2.addColorStop(0,'#16293f');g2.addColorStop(1,'#050b14');c.fillStyle=g2;c.fillRect(0,0,W,H);
+      c.strokeStyle='rgba(170,205,255,.14)';c.lineWidth=1;for(var k=0;k<22;k++){var f=at(P,hash(k)),d=(hash(k+9)-.5)*H*.9;c.beginPath();c.moveTo(f.x+f.nx*d,f.y+f.ny*d);c.lineTo(f.x+f.nx*d+f.tx*H*.35,f.y+f.ny*d+f.ty*H*.35);c.stroke()}}
+    var R=9,gap=H*.034,N=90,foamEdge=[];
+    if(dawn){c.beginPath();c.moveTo(-10,H+10);for(var z=0;z<=40;z++){var fz=at(P,z/40),oz=-H*.03;c.lineTo(fz.x+fz.nx*oz,fz.y+fz.ny*oz)}c.lineTo(W+10,H+10);c.closePath();c.fillStyle='#07215a';c.fill()}
+    /* ribbons: back (deep) first, outermost (light) last so the foam sits on the light edge */
+    for(var i=0;i<R;i++){var a=.0+hash(i+1)*.14,b=(dawn?1.02:.86)+hash(i+3)*.14,wB=H*(.025+hash(i+5)*.03),off=(i-R+1)*gap*1.1,phase=hash(i+7)*6;
+      var up=[],dn=[];
+      for(var j=0;j<=N;j++){var s=a+(b-a)*j/N,f2=at(P,s),u=(s-a)/(b-a),tp=Math.pow(Math.sin(Math.PI*u),1.25),wob=Math.sin(s*9+t*2.2+phase)*H*.01,o=off*Math.sin(Math.PI*Math.min(1,s*1.05))+wob,w=wB*tp;
+        up.push([f2.x+f2.nx*(o+w),f2.y+f2.ny*(o+w)]);dn.push([f2.x+f2.nx*(o-w*.2),f2.y+f2.ny*(o-w*.2)]);if(i===R-1)foamEdge.push({x:up[j][0],y:up[j][1],f:f2,s:s,tp:tp})}
+      c.beginPath();up.forEach(function(p,k){k?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1])});for(var m=dn.length-1;m>=0;m--)c.lineTo(dn[m][0],dn[m][1]);c.closePath();
+      c.fillStyle=blues[Math.round(i/(R-1)*(blues.length-1))];c.fill();c.strokeStyle='rgba(5,18,48,.7)';c.lineWidth=1.2;c.stroke();
+      /* a light streak inside each ribbon */
+      c.strokeStyle='rgba(200,230,255,.45)';c.lineWidth=1.1;c.beginPath();up.forEach(function(p,k){var q=dn[k],x=p[0]*.55+q[0]*.45,y=p[1]*.55+q[1]*.45;k?c.lineTo(x,y):c.moveTo(x,y)});c.stroke()}
+    /* foam rim: scalloped white mass riding the top ribbon, navy outline pass first */
+    var blobs=[];for(var e=4;e<foamEdge.length-2;e+=2){var fe=foamEdge[e],nz=.5+.5*Math.sin(e*1.3+t*2.5)*Math.sin(e*.37-t),r=H*(.016+.042*nz)*(.4+.6*fe.tp);blobs.push({x:fe.x+fe.f.nx*r*.35,y:fe.y+fe.f.ny*r*.35,r:r,f:fe.f,s:fe.s})}
+    c.fillStyle=INK;blobs.forEach(function(q){c.beginPath();c.arc(q.x,q.y,q.r+2.4,0,7);c.fill()});
+    c.fillStyle='#ffffff';blobs.forEach(function(q){c.beginPath();c.arc(q.x,q.y,q.r,0,7);c.fill()});
+    c.strokeStyle=LINE;c.lineCap='round';blobs.forEach(function(q,k){if(q.r>H*.03&&k%3===0){c.lineWidth=Math.max(1.1,q.r*.08);spiral(q.x,q.y-q.r*.1,q.r*.6,2.2,k%2?1:-1)}});
+    /* tendrils: tapered white flicks curling off the foam, each ending in a small curl */
+    for(var n=0;n<0;n++){var s5=((hash(n+20)+t*.05)%1)*.8+.1,idx=Math.min(foamEdge.length-1,Math.round((s5-foamEdge[0].s)/(foamEdge[foamEdge.length-1].s-foamEdge[0].s)*(foamEdge.length-1)));if(idx<0)continue;
+      var fe2=foamEdge[idx],L=H*(.07+hash(n+30)*.07),bx=fe2.x,by=fe2.y,ex=bx+fe2.f.nx*L*.9-fe2.f.tx*L*.6,ey=by+fe2.f.ny*L*.9-fe2.f.ty*L*.6,cx2=bx+fe2.f.nx*L*1.1+fe2.f.tx*L*.3,cy2=by+fe2.f.ny*L*1.1+fe2.f.ty*L*.3,wd=H*.022;
+      c.beginPath();c.moveTo(bx-fe2.f.tx*wd,by-fe2.f.ty*wd);c.quadraticCurveTo(cx2,cy2,ex,ey);c.quadraticCurveTo(cx2+fe2.f.tx*wd*1.6,cy2+fe2.f.ty*wd*1.6,bx+fe2.f.tx*wd,by+fe2.f.ty*wd);c.closePath();
+      c.fillStyle='#ffffff';c.fill();c.strokeStyle=INK;c.lineWidth=1.6;c.stroke();
+      c.lineWidth=1.4;c.strokeStyle=LINE;spiral(ex,ey,H*.012,1.6,n%2?1:-1)}
+    /* big cloud scroll at the leading tip */
+    var tip=foamEdge[Math.round(foamEdge.length*.86)],TR=H*.06;
+    var cl=[[0,0,1],[-.9,.3,.7],[.85,.35,.66],[.3,-.65,.58],[-.4,-.6,.5]];
+    c.fillStyle=INK;cl.forEach(function(p){c.beginPath();c.arc(tip.x+p[0]*TR,tip.y-TR*.6+p[1]*TR,p[2]*TR+2.4,0,7);c.fill()});
+    c.fillStyle='#ffffff';cl.forEach(function(p){c.beginPath();c.arc(tip.x+p[0]*TR,tip.y-TR*.6+p[1]*TR,p[2]*TR,0,7);c.fill()});
+    c.strokeStyle=LINE;c.lineWidth=1.8;spiral(tip.x,tip.y-TR*.65,TR*.7,2.4,1);spiral(tip.x-TR*.9,tip.y-TR*.3,TR*.45,1.8,-1);spiral(tip.x+TR*.85,tip.y-TR*.25,TR*.42,1.8,1);
+    /* droplets */
+    c.fillStyle='#ffffff';for(var d2=0;d2<14;d2++){var fe3=foamEdge[Math.floor(hash(d2+40)*foamEdge.length)],dist=H*(.05+((hash(d2+50)+t*.15)%1)*.18);
+      c.beginPath();c.ellipse(fe3.x+fe3.f.nx*dist+fe3.f.tx*dist*.6,fe3.y+fe3.f.ny*dist+fe3.f.ty*dist*.6,H*.009,H*.0045,Math.atan2(fe3.f.ty,fe3.f.tx),0,7);c.fill()}
+  }
+  size();addEventListener('resize',function(){size();if(still)frame(4000)});
+  new IntersectionObserver(function(es){vis=es[0].isIntersecting}).observe(host);
+  if(still){frame(4000);return}
+  (function loop(ms){if(vis)frame(ms);requestAnimationFrame(loop)})(0);
+}
+[].forEach.call(document.querySelectorAll('[data-art]'),function(h){var a=h.dataset.art;if(a==='breathDark')return breath(h,'dark');if(a==='breathDawn')return breath(h,'dawn');arts[a](svg(h))});
+[].forEach.call(document.querySelectorAll('[data-sw]'),function(h){var c=h.dataset.sw.split(',');
+  var top=document.createElement('span');top.style.cssText='display:block;background:linear-gradient(180deg,'+c[0]+','+c[4]+');position:relative;overflow:hidden';
+  var sun=document.createElement('span');sun.style.cssText='position:absolute;left:58%;top:30%;width:22%;aspect-ratio:1;border-radius:50%;background:'+c[2];
+  var sea=document.createElement('span');sea.style.cssText='position:absolute;left:0;right:0;bottom:0;height:34%;background:'+c[3];
+  top.appendChild(sun);top.appendChild(sea);var bar=document.createElement('span');bar.className='bar';c.forEach(function(x){var i=document.createElement('i');i.style.background=x;bar.appendChild(i)});h.appendChild(top);h.appendChild(bar)});
+
+/* picks */
+var Q=['hero','wave','fonts','japanese','palette','transitions'];
+function picks(){var o={};Q.forEach(function(q){var c=document.querySelector('input[name="'+q+'"]:checked');o[q]=c?c.value:null});o.notes=document.getElementById('notes').value.trim();return o}
+function sum(){var p=picks(),n=Q.filter(function(q){return p[q]}).length;document.getElementById('sum').textContent=n?n+' of 6 picked · '+Q.map(function(q){return p[q]||'?'}).join(' · '):'Nothing picked yet'}
+document.addEventListener('change',sum);
+var st=document.getElementById('st'),dbRef=null;
+function apply(p){Q.forEach(function(q){if(p[q]){var el=document.querySelector('input[name="'+q+'"][value="'+p[q]+'"]');if(el)el.checked=true}});if(p.notes)document.getElementById('notes').value=p.notes;sum()}
+(async function(){try{var db=await window.claude?.use('db');if(!db){st.textContent='Saving is off in this view. Copy your picks into the chat instead.';return}
+  dbRef=db.doc('picks/latest');var snap=await dbRef.get();if(snap.exists){apply(snap.data());st.textContent='Loaded your last saved picks.'}}catch(e){st.textContent='Could not reach saved picks. You can still copy them into the chat.'}})();
+document.getElementById('save').onclick=async function(){var p=picks();p.savedAt=new Date().toISOString();
+  if(!dbRef){var t=JSON.stringify(p);try{await navigator.clipboard.writeText(t);st.textContent='Copied. Paste it into the chat.'}catch(e){st.textContent=t}return}
+  st.textContent='Saving…';try{await dbRef.set(p);st.textContent='Saved. Tell Claude you are done.'}catch(e){st.textContent='Save failed ('+(e&&e.code||'error')+'). Copy your picks into the chat instead.'}};
+sum();
+})();
+</script>
