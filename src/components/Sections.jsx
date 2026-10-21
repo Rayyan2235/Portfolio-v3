@@ -28,44 +28,58 @@ export function HeroText() {
   );
 }
 
-// A real painting set into the page. The aged silk is divided out (each pixel over a blurred
-// estimate of the background), so the paper goes white and multiplies away into the cream page,
-// leaving only the ink, the sun and the blossoms.
-function liftPaper(img, crop, width) {
-  const sx = 0, sy = Math.round(img.naturalHeight * crop[0]), sw = img.naturalWidth, sh = Math.round(img.naturalHeight * (crop[1] - crop[0]));
-  const w = width, h = Math.round(sh * width / sw);
-  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
-  const c = cv.getContext('2d', { willReadFrequently: true });
-  c.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
-  // background estimate: shrink a lot, then stretch back with smoothing
-  const small = document.createElement('canvas'); small.width = Math.max(4, Math.round(w / 28)); small.height = Math.max(4, Math.round(h / 28));
-  const s = small.getContext('2d'); s.imageSmoothingQuality = 'high'; s.drawImage(cv, 0, 0, small.width, small.height);
-  const bgc = document.createElement('canvas'); bgc.width = w; bgc.height = h;
-  const b = bgc.getContext('2d', { willReadFrequently: true }); b.imageSmoothingQuality = 'high'; b.filter = 'blur(6px)'; b.drawImage(small, 0, 0, w, h);
-  const px = c.getImageData(0, 0, w, h), bg = b.getImageData(0, 0, w, h).data, d = px.data;
-  for (let i = 0; i < d.length; i += 4) {
-    for (let k = 0; k < 3; k++) d[i + k] = 255 * Math.pow(Math.min(1, (d[i + k] / Math.max(40, bg[i + k])) * 1.03), 1.9);
-  }
-  c.putImageData(px, 0, 0);
-  return cv.toDataURL('image/png');
-}
+// Real paintings set into the page. The silk was lifted out ahead of time (public/art/*-ink.jpg),
+// so they multiply into the cream paper with no box around them.
 
-function Painting({ src, className, drift = 60, label, crop = [0, 1], width = 760 }) {
+// The crane glides across the statement as you scroll past it.
+function CraneGlide() {
   const ref = useRef(null);
-  const [lifted, setLifted] = useState('');
   const { motionOn } = usePrefs();
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
-  const y = useTransform(scrollYProgress, [0, 1], [drift, -drift]);
-  useEffect(() => {
-    let alive = true;
-    const img = new Image();
-    img.onload = () => { if (alive) setLifted(liftPaper(img, crop, width)); };
-    img.src = src;
-    return () => { alive = false; };
-  }, [src, crop[0], crop[1], width]);
+  const x = useTransform(scrollYProgress, [0, 1], ['38vw', '-46vw']);
+  const y = useTransform(scrollYProgress, [0, 0.5, 1], [60, -10, -70]);
+  const rotate = useTransform(scrollYProgress, [0, 1], [4, -6]);
   return (
-    <div ref={ref} className={`painting ${className}`} role="img" aria-label={label}>
-      {lifted && <motion.img src={lifted} alt="" style={motionOn ? { y } : undefined} />}
+    <div ref={ref} className="crane-sky" aria-hidden="true">
+      <motion.img className="crane-ink" src="/art/crane-ink.jpg" alt="" style={motionOn ? { x, y, rotate } : undefined} />
+    </div>
+  );
+}
+
+// The cherry branch hangs in from the corner, sways, and lets petals go.
+function BlossomBranch() {
+  const { motionOn } = usePrefs();
+  const cvRef = useRef(null), boxRef = useRef(null);
+  useEffect(() => {
+    if (!motionOn) return undefined;
+    const cv = cvRef.current, box = boxRef.current, c = cv.getContext('2d');
+    let W = 0, H = 0, raf = 0, vis = false;
+    const petals = [];
+    const size = () => { const d = Math.min(devicePixelRatio || 1, 2); W = box.clientWidth; H = box.clientHeight; cv.width = W * d; cv.height = H * d; c.setTransform(d, 0, 0, d, 0, 0); };
+    size(); const ro = new ResizeObserver(size); ro.observe(box);
+    const io = new IntersectionObserver(es => { vis = es[0].isIntersecting; }); io.observe(box);
+    // petals leave from where the blossoms are: the right half, upper two thirds
+    const spawn = () => ({ x: W * (0.55 + Math.random() * 0.45), y: H * (0.05 + Math.random() * 0.6), vx: -0.25 - Math.random() * 0.45, vy: 0.35 + Math.random() * 0.45, r: Math.random() * 6, s: 3 + Math.random() * 3.5, ph: Math.random() * 6, a: 0 });
+    const loop = () => {
+      raf = requestAnimationFrame(loop);
+      if (!vis) return;
+      if (petals.length < 26 && Math.random() < 0.08) petals.push(spawn());
+      c.clearRect(0, 0, W, H);
+      for (let i = petals.length - 1; i >= 0; i--) {
+        const p = petals[i]; p.ph += 0.03; p.x += p.vx + Math.sin(p.ph) * 0.35; p.y += p.vy; p.r += 0.02; p.a = Math.min(1, p.a + 0.03);
+        if (p.y > H + 10 || p.x < -10) { petals.splice(i, 1); continue; }
+        c.save(); c.globalAlpha = p.a * 0.85; c.translate(p.x, p.y); c.rotate(p.r); c.scale(1, Math.cos(p.ph * 1.4));
+        c.beginPath(); c.moveTo(0, -p.s * 0.55); c.lineTo(p.s * 0.22, -p.s); c.bezierCurveTo(p.s * 1.05, -p.s * 0.7, p.s * 0.65, p.s * 0.75, 0, p.s); c.bezierCurveTo(-p.s * 0.65, p.s * 0.75, -p.s * 1.05, -p.s * 0.7, -p.s * 0.22, -p.s); c.closePath();
+        c.fillStyle = i % 3 ? '#f2b8c6' : '#e9a3b4'; c.fill(); c.restore();
+      }
+    };
+    raf = requestAnimationFrame(loop);
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); };
+  }, [motionOn]);
+  return (
+    <div ref={boxRef} className="branch" aria-hidden="true">
+      <img className="branch-ink" src="/art/blossom-ink.jpg" alt="" />
+      <canvas ref={cvRef} className="branch-petals" />
     </div>
   );
 }
@@ -73,8 +87,7 @@ function Painting({ src, className, drift = 60, label, crop = [0, 1], width = 76
 export function Statement() {
   return (
     <section className="statement" aria-label="Summary">
-      <Painting src="/art/crane-chikanobu.jpg" className="crane" drift={70} crop={[0.03, 0.46]}
-        label="A crane flying under a red rising sun, after Kano Chikanobu" />
+      <CraneGlide />
       <div className="wrap">
         <motion.p {...head}>Software that listens first. <span>Then it does the work, and shows what it did.</span></motion.p>
       </div>
@@ -190,8 +203,7 @@ export function Work() {
 export function Experience() {
   return (
     <section className="exp" id="experience" aria-labelledby="exp-title">
-      <Painting src="/art/blossom-goshun.jpg" className="blossom" drift={50}
-        label="Ink cherry blossom branch, after Matsumura Goshun" />
+      <BlossomBranch />
       <div className="wrap">
       <motion.div className="head" {...head}><span className="label"><span className="jp" aria-hidden="true">葉</span> · Experience</span><h2 id="exp-title">Where I have worked</h2></motion.div>
       <ol className="rows">

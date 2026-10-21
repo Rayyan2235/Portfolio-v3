@@ -155,7 +155,9 @@ export default function GreatWaveHero({ children }) {
     const onLeave = () => { tmx = tmy = 0; };
     host.addEventListener('pointermove', onMove); host.addEventListener('pointerleave', onLeave);
     const io = new IntersectionObserver(es => { vis = es[0].isIntersecting; }); io.observe(host);
-    size(); addEventListener('resize', size);
+    size();
+    // the hero can grow inside the scroll-expand frame, so watch the element, not just the window
+    const ro = new ResizeObserver(() => { size(); if (ready) gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }); ro.observe(host);
 
     const makeBolt = () => {
       let x = W * (0.45 + Math.random() * 0.5), y = 0; const pts = [[x, y]];
@@ -221,7 +223,7 @@ export default function GreatWaveHero({ children }) {
     raf = requestAnimationFrame(loop);
     return () => {
       cancelled = true; gl.deleteProgram(pr);
-      cancelAnimationFrame(raf); io.disconnect(); removeEventListener('resize', size);
+      cancelAnimationFrame(raf); io.disconnect(); ro.disconnect();
       host.removeEventListener('pointermove', onMove); host.removeEventListener('pointerleave', onLeave);
     };
   }, [scrollYProgress]);

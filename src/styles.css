@@ -73,6 +73,22 @@ kbd { font: 400 11px/1 var(--mono); padding: 5px 8px; border: 1px solid var(--li
   .hero .corner, .credit { display: none; }
 }
 
+/* scroll-expand hero (adapted from 21st.dev): a hanging scroll that opens into the full hero */
+.sx { position: relative; height: 230vh; }
+.sx-sticky { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; overflow: hidden; background: var(--paper); }
+.sx-bg { position: absolute; inset: 0; background:
+  radial-gradient(60% 50% at 50% 55%, rgba(253, 231, 196, .9), rgba(253, 231, 196, 0) 70%),
+  url(/art/blossom-ink.jpg) right -4vw top -6vh / auto 118% no-repeat, var(--paper); background-blend-mode: normal, multiply, normal; }
+.sx-media { position: relative; overflow: hidden; z-index: 1; box-shadow: 0 30px 70px -30px rgba(29, 53, 87, .55); will-change: width, height; }
+.sx-media .hero { height: 100%; min-height: 0; }
+.sx-media .hero .ed, .sx-media .hero .corner, .sx-media .hero .idx, .sx-media .credit, .sx-media .hero .fade { opacity: var(--reveal, 1); }
+.sx-rod { position: absolute; left: -6px; right: -6px; height: 10px; background: linear-gradient(180deg, #5a3a22, #2e1d11); border-radius: 6px; z-index: 3; }
+.sx-rod.top { top: 0; } .sx-rod.bottom { bottom: 0; }
+.sx-title { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; pointer-events: none; mix-blend-mode: difference; color: #fff8ee; }
+.sx-word { font: 600 clamp(56px, 10vw, 150px)/.9 var(--display); font-variation-settings: "SOFT" 100; letter-spacing: -.035em; }
+.sx-kicker, .sx-hint { font: 400 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; padding: 10px 0; }
+.sx-off .hero { height: min(100svh, 940px); }
+
 /* buttons */
 .btns { display: flex; flex-wrap: wrap; gap: 10px; }
 .btns.center { justify-content: center; }
@@ -80,23 +96,25 @@ kbd { font: 400 11px/1 var(--mono); padding: 5px 8px; border: 1px solid var(--li
 .btn.solid { background: var(--sea); color: var(--cream); }
 .btn:hover { transform: translateY(-1px); }
 
-/* paintings set into the paper */
-/* No z-index or isolation on .painting, so the image can multiply into the page behind it. */
-.painting { position: absolute; pointer-events: none; overflow: hidden; }
-.painting img { display: block; width: 100%; height: auto; mix-blend-mode: multiply; }
-.painting.crane { right: max(-40px, calc((100vw - 1320px) / 2)); top: clamp(10px, 3vw, 40px); width: min(42vw, 580px); height: clamp(420px, 46vw, 640px); }
-.painting.crane img { -webkit-mask: radial-gradient(75% 70% at 55% 45%, #000 60%, transparent 100%); mask: radial-gradient(75% 70% at 55% 45%, #000 60%, transparent 100%); }
-.exp .rows p { max-width: 54ch; }
-.painting.blossom { right: 0; top: 0; width: min(30vw, 420px); height: clamp(520px, 56vw, 820px); }
-.painting.blossom img { -webkit-mask: linear-gradient(200deg, #000 35%, transparent 80%); mask: linear-gradient(200deg, #000 35%, transparent 80%); }
+/* paintings set into the paper (silk lifted out, multiplied into the cream) */
+.crane-sky { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.crane-ink { position: absolute; right: 2vw; top: 18%; width: clamp(300px, 36vw, 540px); height: auto; mix-blend-mode: multiply;
+  -webkit-mask: radial-gradient(closest-side, #000 72%, transparent 100%); mask: radial-gradient(closest-side, #000 72%, transparent 100%); }
+.branch { position: absolute; right: 0; top: 0; bottom: 0; width: min(46vw, 640px); pointer-events: none; overflow: hidden; }
+.branch-ink { position: absolute; right: -4vw; top: -2vw; width: 100%; height: auto; mix-blend-mode: multiply; transform-origin: 85% 0%;
+  animation: sway 9s ease-in-out infinite alternate;
+  -webkit-mask: radial-gradient(120% 95% at 92% 0%, #000 52%, transparent 88%); mask: radial-gradient(120% 95% at 92% 0%, #000 52%, transparent 88%); }
+.branch-petals { position: absolute; inset: 0; width: 100%; height: 100%; }
+@keyframes sway { from { transform: rotate(-1.3deg); } to { transform: rotate(1.1deg) translateX(-6px); } }
+html.still .branch-ink { animation: none; }
 .statement > .wrap, .exp > .wrap { position: relative; z-index: 1; }
 @media (max-width: 760px) {
-  .painting.crane { width: 70vw; height: 420px; top: -40px; opacity: .45; }
-  .painting.blossom { width: 60vw; opacity: .5; }
+  .crane-ink { width: 70vw; top: auto; bottom: 0; opacity: .7; }
+  .branch { width: 70vw; opacity: .55; }
 }
 
 /* statement */
-.statement { position: relative; padding-block: clamp(96px, 12vw, 160px) 0; min-height: clamp(420px, 46vw, 640px); }
+.statement { position: relative; overflow: hidden; padding-block: clamp(110px, 12vw, 170px) clamp(80px, 10vw, 140px); min-height: clamp(460px, 48vw, 680px); }
 .statement p { margin: 0; font: 500 clamp(32px, 4.6vw, 60px)/1.08 var(--display); font-variation-settings: "SOFT" 100; letter-spacing: -.02em; max-width: 20ch; }
 .statement p span { color: #6f685f; }
 
@@ -148,6 +166,7 @@ kbd { font: 400 11px/1 var(--mono); padding: 5px 8px; border: 1px solid var(--li
 .rows { list-style: none; margin: 0; padding: 0; }
 .rows li { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 8px 32px; padding: 24px 0; border-top: 1px solid var(--line); }
 .rows li:last-child { border-bottom: 1px solid var(--line); }
+.exp .rows p { max-width: 56ch; }
 .rows .when { font: 400 13px/1.6 var(--mono); color: var(--muted); }
 .rows h3 { font: 600 20px/1.3 var(--sans); margin-bottom: 6px; }
 .rows p { margin: 0; color: var(--soft); max-width: 62ch; }
@@ -169,10 +188,11 @@ kbd { font: 400 11px/1 var(--mono); padding: 5px 8px; border: 1px solid var(--li
 @media (max-width: 680px) { .mnote { margin-left: 0; } }
 
 /* 3D island */
-.island { position: relative; padding-block: clamp(100px, 10vw, 140px) 0; background: linear-gradient(180deg, var(--paper) 0%, #fbe3c7 100%); }
+.island { position: relative; padding-block: clamp(100px, 10vw, 140px) 0; background: linear-gradient(180deg, var(--paper) 0%, #fbe3c7 55%, #fbe3c7 100%); }
 .island-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
 .island-head .head { margin-bottom: 0; }
-.shrine3d { position: relative; height: clamp(420px, 60vw, 680px); cursor: grab; touch-action: pan-y; }
+.shrine3d { position: relative; height: clamp(460px, 62vw, 720px); cursor: grab; touch-action: pan-y; margin-top: -60px;
+  -webkit-mask: linear-gradient(180deg, transparent 0%, #000 16%, #000 84%, transparent 100%); mask: linear-gradient(180deg, transparent 0%, #000 16%, #000 84%, transparent 100%); }
 .shrine3d:active { cursor: grabbing; }
 .shrine3d canvas { display: block; width: 100% !important; height: 100% !important; }
 .shrine3d.no-3d { background: url(/art/crane-chikanobu.jpg) center 20% / cover; }

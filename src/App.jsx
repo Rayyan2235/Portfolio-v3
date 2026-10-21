@@ -3,6 +3,7 @@ import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import { PrefsProvider, usePrefs } from './prefs.jsx';
 import { TransitionProvider } from './components/Transitions.jsx';
 import GreatWaveHero from './components/GreatWaveHero.jsx';
+import ScrollExpandHero from './components/ScrollExpandHero.jsx';
 import Nav from './components/Nav.jsx';
 import CommandMenu from './components/CommandMenu.jsx';
 import Ambient from './components/Ambient.jsx';
@@ -25,7 +26,7 @@ function Page() {
       <Ambient />
       <Nav onOpenMenu={() => setMenu(true)} />
       <main>
-        <GreatWaveHero><HeroText /></GreatWaveHero>
+        <ScrollExpandHero><GreatWaveHero><HeroText /></GreatWaveHero></ScrollExpandHero>
         <Statement />
         <Work />
         <Experience />
