@@ -336,7 +336,7 @@ html.still .close .sea-s { animation: none; }
   background: repeating-conic-gradient(rgba(247, 178, 122, .35) 0 4deg, transparent 4deg 12deg);
   -webkit-mask-image: radial-gradient(circle, #000, transparent 45%); mask-image: radial-gradient(circle, #000, transparent 45%); animation: st-spin 80s linear infinite; }
 @keyframes st-spin { to { rotate: 360deg; } }
-.st-flash { position: fixed; inset: 0; background: var(--paper); pointer-events: none; }
+.st-flash { position: absolute; inset: 0; z-index: 5; background: var(--paper); pointer-events: none; }
 .st-enter .st-line { text-shadow: 0 0 10px rgba(255, 248, 238, .7); }
 
 .st-dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 12px;

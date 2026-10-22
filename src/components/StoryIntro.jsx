@@ -202,7 +202,6 @@ const Scenes = {
     const fill = useTransform(q, [0.2, 0.6], [C.ink, C.torii]);
     const scale = useTransform(q, [0.45, 1], [1, 4.6]);
     const gate = useTransform(q, [0.82, 0.98], [1, 0]);
-    const flash = useTransform(q, [0.78, 1], [0, 1]);
     const rays = useTransform(q, [0.15, 0.6], [0, 0.9]);
     return (
       <div className="st-art st-gate">
@@ -217,7 +216,6 @@ const Scenes = {
           <rect x="30" y="62" width="240" height="11" fill={C.ink} />
           <rect x="66" y="224" width="30" height="16" fill={C.ink} /><rect x="204" y="224" width="30" height="16" fill={C.ink} />
         </motion.svg>
-        <motion.span className="st-flash" style={{ opacity: flash }} />
       </div>
     );
   }
@@ -341,6 +339,8 @@ function Film() {
   const color = useTransform(g, TEXT_AT, TEXT);
   const night = useTransform(g, [0, 0.5, 0.6, 0.86, 0.94], [0, 0, 1, 1, 0]);
   const petals = useTransform(g, [0, 0.14, 0.22, 0.82, 0.88, 1], [1, 1, 0, 0, 1, 1]);
+  // walking through the torii ends in light; lives on the stage so it can never cover the page below
+  const flash = useTransform(g, [0.956, 1], [0, 1]);
 
   // Returning visitors land past the story, at the portfolio.
   useEffect(() => {
@@ -367,6 +367,7 @@ function Film() {
           return <Scene key={b.id} i={i} g={g}>{q => <Art q={q} />}</Scene>;
         })}
         <Petals strength={petals} wind={wind} live={inStory} />
+        <motion.span className="st-flash" style={{ opacity: flash }} aria-hidden="true" />
         <span className="st-grain" aria-hidden="true" />
       </motion.div>
       <AnimatePresence>{inStory && (
