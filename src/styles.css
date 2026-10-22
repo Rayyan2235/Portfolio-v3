@@ -136,7 +136,8 @@ html.still .branch-ink { animation: none; }
 .mtn-drift.slow { animation-duration: 40s; animation-direction: alternate-reverse; }
 @keyframes mtn-drift { from { transform: translateX(-40px); } to { transform: translateX(40px); } }
 html.still .mtn-drift { animation: none; }
-@media (max-width: 767px) { .mtn { height: 72svh; } }
+/* phones: the mountains get their own strip between the heading and the project card */
+@media (max-width: 767px) { .mtn { height: 620px; } .work .stage { margin-top: 300px; } }
 .stage { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
 @media (max-width: 880px) { .stage { grid-template-columns: 1fr; } }
 .stack-wrap { width: 100%; max-width: 500px; }
