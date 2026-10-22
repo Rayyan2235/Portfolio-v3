@@ -243,49 +243,102 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 html.still .btn, html.still .hx a, html.still .dots i { transition: none; }
 html.still .close .sea-s { animation: none; }
 
-/* story intro, rough art pass (phone first) */
-.st-root { position: relative; }
-/* sticky makes each stage its own stacking context, so the stage paints the paper itself
-   (that gives the crane's multiply something to blend with) and carries the grain */
-.st-stage { background: var(--paper); }
-.st-stage::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .55;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .4 0 0 0 0 .28 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-.st-beat { position: relative; height: 180svh; }
-.st-stage { position: sticky; top: 0; height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: 22px; overflow: hidden;
-  padding: calc(84px + env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) calc(110px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)); }
-.st-label { font: 400 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
-.st-line { margin: 0; max-width: 22ch; font: 600 clamp(30px, 7.4vw, 64px)/1.08 var(--display); font-variation-settings: "SOFT" 100; letter-spacing: -.02em; color: var(--ink); }
-.st-line { position: relative; z-index: 1; }
-.st-art { position: relative; width: 100%; max-width: 760px; height: clamp(220px, 40svh, 420px); flex: none; }
-svg.st-art { display: block; overflow: visible; }
-.st-map-label { font: 400 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; fill: var(--soft); }
-/* 03 sky: overflow clips (no mask) so the crane's multiply still reaches the paper */
-.st-sky { overflow: hidden; }
-.st-sky::before, .st-sky::after { content: ""; position: absolute; top: 0; bottom: 0; width: 14%; z-index: 2; pointer-events: none; }
-.st-sky::before { left: 0; background: linear-gradient(90deg, var(--paper), transparent); }
-.st-sky::after { right: 0; background: linear-gradient(270deg, var(--paper), transparent); }
-.st-cloud { position: absolute; height: 16px; border-radius: 999px; background: linear-gradient(90deg, #f1c98a, #f8e3bb 70%, #f1c98a); opacity: .85; }
-.st-cloud.c1 { top: 16%; left: 4%; width: 66%; }
-.st-cloud.c2 { top: 58%; left: 30%; width: 78%; height: 22px; }
-.st-cloud.c3 { top: 82%; left: -6%; width: 58%; height: 12px; }
-.st-crane { position: absolute; top: 6%; left: 100%; width: 58%; max-width: 440px; height: auto; mix-blend-mode: multiply; }
-/* 04 hanging scrolls */
-.st-hang { --kh: clamp(140px, 24svh, 250px); display: flex; justify-content: center; align-items: flex-start; gap: clamp(10px, 4vw, 44px); padding-top: 34px; }
+/* story intro: one pinned stage, five scenes cut like a film (phone first) */
+.st-root { position: relative; height: 1000svh; }
+.st-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; color: var(--ink); }
+.st-sky, .st-stars, .st-petals, .st-grain { position: absolute; inset: 0; pointer-events: none; }
+.st-petals { width: 100%; height: 100%; z-index: 3; }
+.st-grain { z-index: 4; opacity: .5; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .4 0 0 0 0 .28 0 0 0 .12 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.st-stars i { position: absolute; border-radius: 50%; background: #fff6e0; box-shadow: 0 0 6px rgba(255, 246, 224, .8); animation: st-twinkle 4s ease-in-out infinite; }
+@keyframes st-twinkle { 50% { opacity: .25; } }
+
+/* a scene: art centered in the upper part, caption centered below, clear of the dock */
+.st-scene { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(14px, 3svh, 28px);
+  padding: calc(76px + env(safe-area-inset-top, 0px)) var(--gr) calc(96px + env(safe-area-inset-bottom, 0px)) var(--gl); text-align: center; }
+.st-cap { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: min(100%, 860px); }
+.st-label { font: 400 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; opacity: .72; }
+.st-line { margin: 0; font: 600 clamp(22px, min(6.6vw, 5.4svh), 56px)/1.1 var(--display); font-variation-settings: "SOFT" 100; letter-spacing: -.02em; color: inherit; }
+.st-art { position: relative; width: min(100%, 760px); height: clamp(150px, 44svh, 460px); flex: none; }
+
+/* 01 dawn */
+.st-dawn { overflow: hidden; -webkit-mask-image: radial-gradient(ellipse 72% 80% at 50% 50%, #000 58%, transparent 100%); mask-image: radial-gradient(ellipse 72% 80% at 50% 50%, #000 58%, transparent 100%); }
+.st-sunwrap { position: absolute; left: 50%; top: 14%; width: min(46vw, 210px); aspect-ratio: 1; translate: -50% 0; }
+.st-sundisk, .st-sunglow { position: absolute; inset: 0; border-radius: 50%; }
+.st-sundisk { background: var(--sun); box-shadow: 1.5px 1px 0 rgba(27, 36, 51, .18); }
+.st-sunglow { inset: -45%; background: radial-gradient(circle, rgba(247, 178, 122, .7), rgba(247, 178, 122, 0) 65%); animation: st-breathe 5s ease-in-out infinite; }
+@keyframes st-breathe { 50% { transform: scale(1.08); opacity: .8; } }
+.st-mist { position: absolute; height: 10px; border-radius: 999px; background: var(--paper); opacity: .95; animation: st-drift 14s ease-in-out infinite alternate; }
+.st-mist.m1 { top: 34%; left: 12%; width: 48%; }
+.st-mist.m2 { top: 46%; left: 40%; width: 46%; height: 8px; animation-duration: 18s; animation-direction: alternate-reverse; }
+.st-mist.m3 { top: 56%; left: 22%; width: 34%; height: 6px; animation-duration: 11s; }
+@keyframes st-drift { from { transform: translateX(-8%); } to { transform: translateX(8%); } }
+.st-seaband { position: absolute; left: 0; right: 0; bottom: 0; height: 30%; background: linear-gradient(180deg, #e9eef0, #dfe7ea); border-top: 1.5px solid rgba(29, 53, 87, .35); }
+.st-seaband svg { display: block; }
+.st-sea-drift { animation: st-sea 9s linear infinite; }
+@keyframes st-sea { to { transform: translateX(-48px); } }
+.st-birds { position: absolute; inset: 0; color: var(--ink); }
+.st-birds svg { position: absolute; width: 22px; animation: st-fly 22s linear infinite; }
+.st-birds .b0 { top: 18%; } .st-birds .b1 { top: 24%; width: 16px; animation-delay: -1.2s; } .st-birds .b2 { top: 14%; width: 13px; animation-delay: -2.1s; }
+@keyframes st-fly { from { transform: translate(-30px, 0); left: 100%; } to { transform: translate(0, -18px); left: -10%; } }
+.st-swash { position: absolute; left: 50%; bottom: -2%; width: min(80%, 420px); translate: -50% 0; overflow: visible; }
+
+/* 02 bright sea, panning map */
+.st-voyage { overflow: hidden; border-radius: 18px; background: #f7efe0; box-shadow: inset 0 0 0 1.5px #e6cfae, 0 18px 40px rgba(29, 53, 87, .12); }
+.st-pan { position: absolute; inset: 0; width: 160%; }
+.st-pan svg { width: 100%; height: 100%; display: block; }
+.st-clouds-svg rect { fill: #f1c98a; opacity: .7; }
+.st-curl { animation: st-curl 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes st-curl { 50% { transform: translateY(-2px); } }
+.st-bob { animation: st-bob 3s ease-in-out infinite; }
+@keyframes st-bob { 50% { transform: translateY(2.5px) rotate(-2deg); } }
+.st-place { font: 400 15px var(--hand); fill: var(--ink); }
+
+/* 03 dusk */
+.st-duskart { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+.st-setsun { position: absolute; left: 50%; top: 16%; width: min(52vw, 240px); aspect-ratio: 1; translate: -50% 0; border-radius: 50%;
+  background: radial-gradient(circle, #d8452a 56%, rgba(216, 69, 42, 0) 72%); }
+.st-ridge { position: absolute; left: -10%; width: 120%; bottom: 0; }
+.st-ridge.far { height: 46%; fill: #8a4f6a; opacity: .75; }
+.st-ridge.near { height: 34%; fill: #3d2a45; }
+.st-mist.m4 { top: 58%; left: 10%; width: 70%; height: 12px; background: #f6c58e; opacity: .7; }
+.st-mist.m5 { top: 74%; left: 30%; width: 80%; height: 16px; background: #f3b47c; opacity: .55; animation: none; }
+.st-crane { position: absolute; top: 4%; left: 100%; width: 62%; max-width: 460px; height: auto; filter: drop-shadow(0 10px 12px rgba(40, 20, 40, .25)); }
+
+/* 04 lantern night */
+.st-moon { position: absolute; right: 6%; top: -6%; width: 64px; aspect-ratio: 1; border-radius: 50%; background: #fbf1d8; box-shadow: 0 0 40px 12px rgba(251, 241, 216, .25); }
+.st-lanterns { position: absolute; left: 0; right: 0; top: -60px; display: flex; justify-content: space-around; }
+.st-chochin { position: relative; width: 30px; height: 40px; margin-top: 46px; border-radius: 45%; transform-origin: 50% -46px;
+  background: repeating-linear-gradient(180deg, #e8603a 0 5px, #c8361f 5px 6px); box-shadow: 0 0 28px 10px rgba(247, 140, 80, .45);
+  animation: st-sway 4.5s ease-in-out infinite, st-flicker 2.3s steps(6) infinite; }
+.st-chochin::before { content: ""; position: absolute; left: 50%; bottom: 100%; width: 1px; height: 46px; background: rgba(255, 248, 238, .5); }
+.st-chochin i { position: absolute; left: 4px; right: 4px; top: -3px; bottom: -3px; border-block: 4px solid var(--ink); border-radius: 3px; }
+.st-chochin.l1 { animation-delay: -1.5s, -.7s; margin-top: 30px; } .st-chochin.l2 { animation-delay: -3s, -1.4s; }
+@keyframes st-sway { 50% { transform: rotate(5deg); } }
+@keyframes st-flicker { 30% { filter: brightness(1.12); } 60% { filter: brightness(.92); } }
+.st-fly { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #ffe7a3; box-shadow: 0 0 10px 3px rgba(255, 220, 130, .7); animation: st-firefly 8s ease-in-out infinite; }
+@keyframes st-firefly { 0%, 100% { transform: translate(0, 0); opacity: .2; } 30% { opacity: 1; } 50% { transform: translate(18px, -26px); } 75% { transform: translate(-12px, -10px); opacity: .5; } }
+.st-hang { --kh: clamp(140px, 24svh, 250px); position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: flex-start; gap: clamp(10px, 4vw, 44px); }
 .st-kake { position: relative; margin: 0; width: clamp(92px, 26vw, 180px); display: flex; flex-direction: column; align-items: center; }
-.st-kake .rod { display: block; width: 114%; height: 8px; border-radius: 4px; background: var(--ink); position: relative; z-index: 1; }
-.st-kake-body { width: 100%; overflow: hidden; background: var(--raised); border-inline: 6px solid #8a5a3c; box-shadow: 0 10px 24px rgba(27, 36, 51, .12); }
-.st-kake-in { height: var(--kh); display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 18px 8px 0; text-align: center; }
-.st-kake-in b { font: 600 clamp(15px, 3.6vw, 22px)/1.1 var(--display); color: var(--ink); }
+.st-kake .rod { display: block; width: 114%; height: 8px; border-radius: 4px; background: #e9d7b8; position: relative; z-index: 1; }
+.st-kake-body { width: 100%; overflow: hidden; background: var(--raised); border-inline: 6px solid #8a5a3c; box-shadow: 0 0 40px rgba(247, 178, 122, .35); }
+.st-kake-in { height: var(--kh); display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 18px 8px 0; color: var(--ink); }
+.st-kake-in b { font: 600 clamp(15px, 3.6vw, 22px)/1.1 var(--display); }
 .st-kake-in small { font: 400 10px/1.3 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .st-kake-in .seal { width: 14px; height: 14px; margin-top: auto; margin-bottom: 16px; background: var(--sun); border-radius: 2px; }
-.st-lantern { position: absolute; top: -40px; left: 50%; width: 150%; aspect-ratio: 1; translate: -50% 0; z-index: -1; pointer-events: none;
-  background: radial-gradient(circle, rgba(247, 178, 122, .5), rgba(247, 178, 122, 0) 64%); }
-/* 05 torii */
+
+/* 05 sunrise through the torii */
 .st-gate { display: grid; place-items: center; }
-.st-enter .st-line { text-shadow: 0 0 6px var(--paper), 0 0 18px var(--paper); }
 .st-gate svg { position: relative; width: min(78vw, 380px); height: auto; transform-origin: 50% 72%; }
-.st-gate-sun { position: absolute; left: 50%; top: 46%; translate: -50% -50%; width: min(46vw, 210px); aspect-ratio: 1; border-radius: 50%;
+.st-gate-sun { position: absolute; left: 50%; top: 30%; translate: -50% 0; width: min(44vw, 200px); aspect-ratio: 1; border-radius: 50%;
   background: radial-gradient(circle, var(--sun) 56%, rgba(228, 87, 46, 0) 72%); }
+.st-rays { position: absolute; left: 50%; top: 42%; width: 240vmax; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; pointer-events: none;
+  background: repeating-conic-gradient(rgba(247, 178, 122, .35) 0 4deg, transparent 4deg 12deg);
+  -webkit-mask-image: radial-gradient(circle, #000, transparent 45%); mask-image: radial-gradient(circle, #000, transparent 45%); animation: st-spin 80s linear infinite; }
+@keyframes st-spin { to { rotate: 360deg; } }
+.st-flash { position: fixed; inset: 0; background: var(--paper); pointer-events: none; }
+.st-enter .st-line { text-shadow: 0 0 10px rgba(255, 248, 238, .7); }
+
 .st-dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 12px;
   padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
   pointer-events: none; }
@@ -297,6 +350,5 @@ svg.st-art { display: block; overflow: visible; }
 .st-plain { max-width: 720px; margin: 0 auto; padding: 120px 20px 40px; display: flex; flex-direction: column; gap: 28px; }
 .st-plain p { margin: 0; display: flex; flex-direction: column; gap: 8px; font: 500 clamp(22px, 4vw, 32px)/1.2 var(--display); }
 @media (min-width: 900px) {
-  .st-stage { padding-inline: max(48px, calc((100vw - 1160px) / 2)); }
-  .st-beat { height: 200svh; }
+  .st-root { height: 1100svh; }
 }
