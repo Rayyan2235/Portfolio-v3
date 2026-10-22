@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useInView, useScroll, useTransform } from 'motion/react';
 import Stack from './reactbits/Stack/Stack.jsx';
+import MountainSky from './MountainSky.jsx';
 import { usePrefs } from '../prefs.jsx';
 import { featured, scraps, experience, EMAIL, GITHUB, LINKEDIN, RESUME } from '../data.js';
 
@@ -173,6 +174,7 @@ export function Work() {
   const p = featured[top];
   return (
     <section className="work" id="work" aria-labelledby="work-title">
+      <MountainSky />
       <div className="wrap">
         <motion.div className="head" {...head}><span className="label"><span className="jp" aria-hidden="true">波</span> · Work</span><h2 id="work-title">What I have built</h2></motion.div>
         <div className="stage">

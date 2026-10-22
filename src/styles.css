@@ -124,7 +124,19 @@ html.still .branch-ink { animation: none; }
 .head h2.h-sm { font-size: clamp(28px, 3vw, 36px); }
 
 /* work */
-.work { padding-block: clamp(110px, 10vw, 140px) clamp(80px, 10vw, 130px); }
+.work { position: relative; padding-block: clamp(110px, 10vw, 140px) clamp(80px, 10vw, 130px); }
+.work > .wrap { position: relative; z-index: 1; }
+/* rose dusk mountains behind Work (MountainSky.jsx); dissolves into paper at the base like mist */
+.mtn { position: absolute; left: 0; right: 0; top: 0; height: clamp(760px, 135svh, 1300px); overflow: hidden; pointer-events: none;
+  -webkit-mask-image: linear-gradient(#000 78%, transparent); mask-image: linear-gradient(#000 78%, transparent); }
+.mtn svg { display: block; width: 100%; height: 100%; }
+.st-kumo { fill: #fbe6df; stroke: #b98290; stroke-width: 2; }
+.st-kumo.front { fill: #fff2ec; }
+.mtn-drift { animation: mtn-drift 26s ease-in-out infinite alternate; }
+.mtn-drift.slow { animation-duration: 40s; animation-direction: alternate-reverse; }
+@keyframes mtn-drift { from { transform: translateX(-40px); } to { transform: translateX(40px); } }
+html.still .mtn-drift { animation: none; }
+@media (max-width: 767px) { .mtn { height: 72svh; } }
 .stage { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
 @media (max-width: 880px) { .stage { grid-template-columns: 1fr; } }
 .stack-wrap { width: 100%; max-width: 500px; }

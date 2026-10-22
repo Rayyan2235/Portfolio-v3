@@ -127,8 +127,7 @@ export default function GreatWaveHero({ children }) {
     let mx = 0, my = 0, tmx = 0, tmy = 0, flash = 0, nextBolt = performance.now() + 2500, bolt = null;
     const cur = {}; // smoothed palette
     const t0 = performance.now();
-    const drops = [], rain = [];
-    const emit = [[0.42, 0.2], [0.5, 0.24], [0.56, 0.3], [0.33, 0.25], [0.27, 0.33]];
+    const rain = [];
 
     const size = () => {
       // the print is soft anyway, so render at 1x: a full screen shader at 2x is what spins up laptop fans
@@ -137,7 +136,6 @@ export default function GreatWaveHero({ children }) {
       const A = W / H;
       if (A > IA) { cov = [1, IA / A]; off = [0, (0.46 - 0.5) * (1 - cov[1])]; } else { cov = [A / IA, 1]; off = [(0.42 - 0.5) * (1 - cov[0]), 0]; }
     };
-    const toScreen = (x, y) => [((x - 0.5 - off[0] - mx * 0.006) / cov[0] + 0.5) * W, ((y - 0.5 - off[1] - my * 0.004) / cov[1] + 0.5) * H];
 
     let cancelled = false;
     const img = new Image();
@@ -195,14 +193,10 @@ export default function GreatWaveHero({ children }) {
       gl.uniform3fv(U.skyTop, cur.top); gl.uniform3fv(U.skyBot, cur.bottom); gl.uniform3fv(U.glow, cur.glow); gl.uniform3fv(U.body, cur.body);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-      // overlay: spray, rain, bolt
+      // overlay: rain, bolt (the foam spray dots were removed; the print's own foam is enough)
       fc.clearRect(0, 0, W, H);
       if (!mo) return;
       const dt = 1 / 60;
-      if (Math.random() < 0.5 * cur.waves) { const e = emit[(Math.random() * emit.length) | 0]; drops.push({ x: e[0] + Math.random() * 0.03, y: e[1] + Math.random() * 0.03, vx: 0.03 + Math.random() * 0.05 * cur.waves, vy: -0.02 - Math.random() * 0.03, r: 0.6 + Math.random() * 1.8, l: 1 }); }
-      fc.fillStyle = cur.night > 0.5 ? '#c9d6ea' : '#fbf6ea';
-      for (let i = drops.length - 1; i >= 0; i--) { const q = drops[i]; q.x += q.vx * dt; q.y += q.vy * dt; q.vy += 0.06 * dt; q.l -= 0.35 * dt; if (q.l <= 0) { drops.splice(i, 1); continue; } const s = toScreen(q.x, q.y); fc.globalAlpha = Math.min(1, q.l * 1.5); fc.beginPath(); fc.arc(s[0], s[1], q.r, 0, 7); fc.fill(); }
-      fc.globalAlpha = 1;
       if (cur.storm > 0.3) {
         const n = Math.round(160 * cur.storm);
         while (rain.length < n) rain.push({ x: Math.random() * (W + 200) - 100, y: Math.random() * H, v: 900 + Math.random() * 500, l: 14 + Math.random() * 18 });
