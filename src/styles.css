@@ -332,7 +332,7 @@ html.still .close .sea-s { animation: none; }
 .st-gate svg { position: relative; width: min(78vw, 380px); height: auto; transform-origin: 50% 72%; }
 .st-gate-sun { position: absolute; left: 50%; top: 30%; translate: -50% 0; width: min(44vw, 200px); aspect-ratio: 1; border-radius: 50%;
   background: radial-gradient(circle, var(--sun) 56%, rgba(228, 87, 46, 0) 72%); }
-.st-rays { position: absolute; left: 50%; top: 42%; width: 240vmax; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; pointer-events: none;
+.st-rays { position: absolute; left: 50%; top: 42%; width: 150vmax; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; pointer-events: none;
   background: repeating-conic-gradient(rgba(247, 178, 122, .35) 0 4deg, transparent 4deg 12deg);
   -webkit-mask-image: radial-gradient(circle, #000, transparent 45%); mask-image: radial-gradient(circle, #000, transparent 45%); animation: st-spin 80s linear infinite; }
 @keyframes st-spin { to { rotate: 360deg; } }

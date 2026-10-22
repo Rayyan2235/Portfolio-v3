@@ -8,12 +8,10 @@ import StoryIntro from './components/StoryIntro.jsx';
 import Nav from './components/Nav.jsx';
 import CommandMenu from './components/CommandMenu.jsx';
 import Ambient from './components/Ambient.jsx';
-import { lazy, Suspense } from 'react';
-import { HeroText, Statement, Work, Experience, Lessons, Island, Contact, Footer } from './components/Sections.jsx';
+import { HeroText, Statement, Work, Experience, Lessons, Contact, Footer } from './components/Sections.jsx';
 
-// three.js loads only when this section is reached, so the first screen stays light.
-const Shrine3D = lazy(() => import('./components/Shrine3D.jsx'));
-const LazyShrine = () => <Suspense fallback={<div className="shrine3d" />}><Shrine3D /></Suspense>;
+// The 3D island (Shrine3D.jsx, Island in Sections.jsx) is hidden for now: too much GPU for visitors.
+// To bring it back: lazy import Shrine3D and render <Island Scene={...} /> after <Lessons />.
 
 function Page() {
   const [menu, setMenu] = useState(false);
@@ -33,7 +31,6 @@ function Page() {
         <Work />
         <Experience />
         <Lessons />
-        <Island Scene={LazyShrine} />
         <Contact toast={toast} />
       </main>
       <Footer />

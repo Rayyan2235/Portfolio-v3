@@ -21,8 +21,9 @@ export default function ScrollExpandHero({ children, first = 'Rayyan', rest = 'S
   const p = useSpring(scrollYProgress, { stiffness: 140, damping: 26, mass: 0.35 });
   const mobile = vp.w < 768;
   const w0 = mobile ? Math.min(240, vp.w * 0.62) : 300, h0 = mobile ? 340 : 420;
-  const width = useTransform(p, v => w0 + (vp.w - w0) * ease(v));
-  const height = useTransform(p, v => h0 + (vp.h - h0) * ease(v));
+  // read the live viewport: the size captured at load can be stale (or 0 in a background tab)
+  const width = useTransform(p, v => w0 + ((innerWidth || vp.w) - w0) * ease(v));
+  const height = useTransform(p, v => h0 + ((innerHeight || vp.h) - h0) * ease(v));
   const radius = useTransform(p, [0, 0.9, 1], [14, 6, 0]);
   const spread = useTransform(p, [0, 0.85], [0, mobile ? 70 : 48]);
   const left = useTransform(spread, s => `-${s}vw`), right = useTransform(spread, s => `${s}vw`);

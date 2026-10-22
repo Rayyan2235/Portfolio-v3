@@ -25,6 +25,9 @@ export default function Ambient() {
       const { motionOn: mo, mode } = live.current;
       c.clearRect(0, 0, W, H);
       if (!mo || mode === 'storm') { items = []; raf = requestAnimationFrame(loop); return; }
+      // the story intro has its own petals; stay idle while it is on screen
+      const story = document.querySelector('.st-root');
+      if (story && story.getBoundingClientRect().bottom > 0) { raf = requestAnimationFrame(loop); return; }
       if (mode !== lastMode) { lastMode = mode; items = Array.from({ length: mode === 'night' ? 22 : 12 }, () => spawn(mode, true)); }
       // fireflies belong to the night hero; fade them out once you scroll past it
       cv.style.opacity = mode === 'night' ? String(Math.max(0, 1 - scrollY / (innerHeight * 0.8))) : '1';

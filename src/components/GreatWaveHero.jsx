@@ -131,7 +131,8 @@ export default function GreatWaveHero({ children }) {
     const emit = [[0.42, 0.2], [0.5, 0.24], [0.56, 0.3], [0.33, 0.25], [0.27, 0.33]];
 
     const size = () => {
-      const d = Math.min(devicePixelRatio || 1, 2); W = host.clientWidth; H = host.clientHeight;
+      // the print is soft anyway, so render at 1x: a full screen shader at 2x is what spins up laptop fans
+      const d = 1; W = host.clientWidth; H = host.clientHeight;
       cv.width = W * d; cv.height = H * d; fx.width = W * d; fx.height = H * d; gl.viewport(0, 0, W * d, H * d); fc.setTransform(d, 0, 0, d, 0, 0);
       const A = W / H;
       if (A > IA) { cov = [1, IA / A]; off = [0, (0.46 - 0.5) * (1 - cov[1])]; } else { cov = [A / IA, 1]; off = [(0.42 - 0.5) * (1 - cov[0]), 0]; }

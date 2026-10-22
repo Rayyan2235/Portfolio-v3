@@ -247,7 +247,8 @@ function Petals({ strength, wind, live }) {
     if (!live) return;
     const c = ref.current, ctx = c.getContext('2d');
     const phone = innerWidth < 700, count = phone ? 12 : 40;
-    const LAYERS = [{ s: [6, 9], v: 0.4, a: 0.5 }, { s: [10, 14], v: 1, a: 0.85 }, { s: [22, 34], v: 1.8, a: 0.9, blur: 2.5 }];
+    // near layer is big and faint instead of blurred: canvas blur per petal is too heavy for phones
+    const LAYERS = [{ s: [6, 9], v: 0.4, a: 0.5 }, { s: [10, 14], v: 1, a: 0.85 }, { s: [22, 34], v: 1.8, a: 0.55 }];
     const TINTS = ['#f9c9a8', '#f7b27a', '#fde0c8', '#f4b49a'];
     let W = 0, H = 0, raf = 0, gust = 0, last = performance.now();
     const size = () => {
@@ -287,7 +288,6 @@ function Petals({ strength, wind, live }) {
           p.rot += p.spin * dt;
           if (p.y > H + 40 || p.x > W + 60 || p.x < -60) spawn(p, true);
           ctx.globalAlpha = L.a * k;
-          ctx.filter = L.blur ? `blur(${L.blur}px)` : 'none';
           draw(p);
         }
       }
