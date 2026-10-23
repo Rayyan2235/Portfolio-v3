@@ -375,25 +375,38 @@ html.still .close .sea-s { animation: none; }
   .st-root { height: 1100svh; }
 }
 
-/* story title card: a framed window onto the living valley, the name pulling up in the corner */
-.tc { padding: calc(10px + env(safe-area-inset-top, 0px)) 10px 10px; background: var(--paper); }
-.tc-frame { position: relative; height: calc(100svh - 20px); min-height: 520px; border-radius: clamp(18px, 2.4vw, 32px); overflow: hidden; background: #1d2a3f; isolation: isolate; }
-.tc .mtn { --mh: max(100%, 520px); top: 0; height: 100%; -webkit-mask-image: none; mask-image: none; }
-.tc .mtn-frame { width: max(100%, calc((100svh - 20px) * 2.3571)); }
-.tc-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(12, 18, 30, .25), transparent 30%, transparent 45%, rgba(12, 18, 30, .7)); }
-.tc-content { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; display: grid; grid-template-columns: minmax(0, 1fr); align-items: end; gap: 18px;
-  padding: 0 clamp(18px, 3vw, 44px) clamp(20px, 3vw, 40px); color: #fff3e2; }
-.tc h1 { margin: 0; font: 500 clamp(92px, 23vw, 340px)/.82 var(--display); font-variation-settings: "SOFT" 100; letter-spacing: -.06em; }
-.tc-name { display: inline-flex; overflow: hidden; padding-bottom: .04em; }
-.tc-name > span { display: inline-block; }
-.tc-name sup { font-size: .3em; line-height: 1; margin: .35em 0 0 .06em; color: var(--glow); display: inline-block; }
-.tc-side { display: flex; flex-direction: column; gap: 18px; max-width: 380px; }
-.tc-side p { margin: 0; font-size: clamp(15px, 1.3vw, 18px); line-height: 1.35; color: rgba(255, 243, 226, .85); }
-.tc-btns { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
-.tc-pill { display: inline-flex; align-items: center; gap: 10px; padding: 5px 5px 5px 20px; border: 0; border-radius: 999px; background: #fff3e2; color: var(--ink); font: 600 15px var(--sans); cursor: pointer; transition: gap .25s; }
-.tc-pill:hover { gap: 14px; }
-.tc-arrow { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--ink); color: #fff3e2; transition: transform .25s; }
-.tc-pill:hover .tc-arrow { transform: scale(1.08); }
-.tc-skip { border: 0; background: none; padding: 10px 4px; color: rgba(255, 243, 226, .85); font: 500 14px var(--sans); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
-.tc-pill:focus-visible, .tc-skip:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
-@media (min-width: 900px) { .tc-content { grid-template-columns: minmax(0, 1fr) 380px; } .tc-side { padding-bottom: clamp(14px, 2vw, 34px); } }
+/* story title card: no words, a lone figure on a cliff above the clouds, keyed to the visitor's sky */
+.tc { --sky-top: #f6c3a1; --sky-bot: #fde7c4; --orb: #e4572e; --glow: rgba(247, 178, 122, .6); --land: #1b2433; --bank: #fff1e2; --mist: rgba(255, 241, 226, .85);
+  padding: calc(10px + env(safe-area-inset-top, 0px)) 10px 10px; background: var(--paper); }
+.tc-day { --sky-top: #9fc7dc; --sky-bot: #f1ede0; --orb: #fff4d8; --glow: rgba(255, 244, 216, .7); --land: #22303b; --bank: #fbfaf4; --mist: rgba(250, 249, 242, .9); }
+.tc-dusk { --sky-top: #5d4170; --sky-bot: #f2a46b; --orb: #c8361f; --glow: rgba(228, 87, 46, .55); --land: #1c1424; --bank: #f6c9a8; --mist: rgba(246, 201, 168, .8); }
+.tc-night { --sky-top: #070d1a; --sky-bot: #22325a; --orb: #f8f3e3; --glow: rgba(220, 230, 255, .35); --land: #05080f; --bank: #3c4c78; --mist: rgba(60, 76, 120, .85); }
+.tc-storm { --sky-top: #3f4757; --sky-bot: #8a93a2; --orb: #c9ced8; --glow: rgba(200, 206, 216, .15); --land: #151a22; --bank: #a9b0bc; --mist: rgba(169, 176, 188, .9); }
+.tc-frame { position: relative; height: calc(100svh - 20px); min-height: 520px; border-radius: clamp(18px, 2.4vw, 32px); overflow: hidden; isolation: isolate;
+  background: linear-gradient(180deg, var(--sky-top), var(--sky-bot) 78%); transition: background 1.2s; }
+.tc-scene { position: absolute; inset: 0; width: 100%; height: 100%; transform-origin: 46% 74%; }
+.tc-glow-in { stop-color: var(--glow); } .tc-glow-out { stop-color: var(--glow); stop-opacity: 0; }
+.tc-orb { fill: var(--orb); transition: fill 1.2s; }
+.tc-storm .tc-orb { opacity: .25; }
+.tc-mist-top { stop-color: var(--mist); stop-opacity: 0; } .tc-mist-bot { stop-color: var(--mist); }
+.tc-bank { fill: var(--bank); }
+.tc-bank.far { opacity: .7; }
+.tc-cliff, .tc-pine, .tc-me, .tc-laptop { fill: var(--land); }
+.tc-arm { stroke: var(--land); }
+.tc-grass path { fill: none; stroke: var(--land); stroke-width: 2.2; stroke-linecap: round; transform-box: fill-box; transform-origin: 50% 100%; animation: tc-sway 3.4s ease-in-out infinite alternate; }
+@keyframes tc-sway { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
+.tc-screen-glow { animation: tc-screen 4s ease-in-out infinite alternate; }
+@keyframes tc-screen { to { opacity: .55; } }
+.tc-day .tc-screen-glow { opacity: .35; animation: none; }
+.tc-stars { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s; }
+.tc-night .tc-stars { opacity: 1; }
+.tc-stars i { position: absolute; border-radius: 50%; background: #fff6e0; box-shadow: 0 0 6px rgba(255, 246, 224, .8); animation: st-twinkle 4s ease-in-out infinite; }
+.tc-frame .mtn-birds { height: 45%; }
+.tc-day .mtn-bird, .tc-dawn .mtn-bird { color: #2b3446; } .tc-dusk .mtn-bird { color: #2a1b2c; }
+.tc-cue { position: absolute; left: 0; right: 0; bottom: clamp(16px, 3vw, 32px); z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.tc-scroll { width: 24px; height: 38px; border: 1.5px solid rgba(255, 248, 238, .85); border-radius: 14px; display: flex; justify-content: center; padding-top: 7px; }
+.tc-scroll i { width: 3px; height: 8px; border-radius: 2px; background: rgba(255, 248, 238, .9); animation: tc-wheel 1.8s ease-in-out infinite; }
+@keyframes tc-wheel { 0% { transform: translateY(0); opacity: 1; } 80% { transform: translateY(12px); opacity: 0; } 100% { opacity: 0; } }
+.tc-skip { border: 0; background: none; padding: 8px 4px; color: rgba(255, 248, 238, .9); font: 500 13px var(--sans); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; text-shadow: 0 1px 6px rgba(0, 0, 0, .35); }
+.tc-skip:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
+html.still .tc-grass path, html.still .tc-screen-glow, html.still .tc-scroll i, html.still .tc-stars i { animation: none; }

@@ -26,8 +26,7 @@ function Page() {
       <Nav onOpenMenu={() => setMenu(true)} />
       <main>
         <StoryIntro />
-        {/* the story's title card already says "Rayyan", so the opening scroll leads with the role */}
-        <ScrollExpandHero first="Software" rest="engineer" kicker="Rayyan Syed"><GreatWaveHero><HeroText /></GreatWaveHero></ScrollExpandHero>
+        <ScrollExpandHero><GreatWaveHero><HeroText /></GreatWaveHero></ScrollExpandHero>
         <Statement />
         <Work />
         <Experience />

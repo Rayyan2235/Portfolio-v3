@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useScroll, useTransform, useMotionValueEvent, useVelocity } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
 import { featured } from '../data.js';
-import MountainSky from './MountainSky.jsx';
+import { Birds as SkyBirds, Storm } from './MountainSky.jsx';
+import { resolveSky } from '../sky.js';
 
 // Story intro: one pinned stage, five scenes cut together like a film. The sky runs one long day
 // (dawn, bright sea, dusk, lantern night, sunrise through the torii) and the text flips light or dark with it.
@@ -307,55 +308,73 @@ function portfolioTop() {
   return el ? el.getBoundingClientRect().top + scrollY : 0;
 }
 
-// Letters rise into place one after another (after the "Prisma" hero on 21st.dev, ported to plain React + motion).
-function PullUp({ text }) {
-  const ref = useRef(null);
-  const { motionOn } = usePrefs();
-  const [shown, setShown] = useState(!motionOn);
-  useEffect(() => { if (motionOn) { const id = requestAnimationFrame(() => setShown(true)); return () => cancelAnimationFrame(id); } }, [motionOn]);
-  return (
-    <span ref={ref} className="tc-name" aria-label={text}>
-      {[...text].map((ch, i) => (
-        <motion.span key={i} aria-hidden="true" initial={false} animate={shown ? { y: '0%', opacity: 1 } : { y: '60%', opacity: 0 }}
-          transition={{ duration: 0.9, delay: 0.15 + i * 0.07, ease: [0.16, 1, 0.3, 1] }}>{ch}</motion.span>
-      ))}
-      <motion.sup aria-hidden="true" initial={false} animate={shown ? { opacity: 1, rotate: 0 } : { opacity: 0, rotate: -90 }}
-        transition={{ duration: 0.8, delay: 0.15 + text.length * 0.07 }}>*</motion.sup>
-    </span>
-  );
-}
+// The opening shot, no words: a lone figure (Rayyan) sits on a cliff edge above a sea of clouds, laptop glowing,
+// facing a low sun. It follows the visitor's sky like the hero (moon, stars and fireflies at night, rain and
+// lightning in a storm, birds by day), and the camera eases in as the story begins.
+const TC_STARS = Array.from({ length: 40 }, (_, i) => ({ x: (i * 37.3) % 100, y: (i * 23.1) % 46, d: (i * 0.41) % 4, s: i % 6 === 0 ? 2.6 : 1.4 }));
+const TC_FLIES = Array.from({ length: 8 }, (_, i) => ({ x: 38 + ((i * 13) % 26), y: 58 + ((i * 7) % 18), d: (i * 0.9) % 6, t: 6 + (i % 4) }));
 
-// The opening shot: a framed window onto the living valley (it follows the visitor's sky), the name pulling up
-// in the corner, one line and a way in or a way past.
 function TitleCard() {
-  const { motionOn } = usePrefs();
-  const begin = () => {
-    const r = document.querySelector('.st-root, .st-plain');
-    if (r) scrollTo({ top: r.getBoundingClientRect().top + scrollY, behavior: motionOn ? 'smooth' : 'instant' });
-  };
+  const ref = useRef(null);
+  const { motionOn, sky, sound } = usePrefs();
+  const mode = resolveSky(sky);
+  const { scrollYProgress: p } = useScroll({ target: ref, offset: ['start start', 'end start'] });
+  const scale = useTransform(p, [0, 1], [1, 1.14]);
+  const cue = useTransform(p, [0, 0.15], [1, 0]);
   const skip = () => {
     try { localStorage.setItem(SEEN_KEY, '1'); } catch { /* storage blocked */ }
     scrollTo({ top: portfolioTop(), behavior: motionOn ? 'smooth' : 'instant' });
   };
-  const rise = d => (motionOn ? { initial: { y: 20, opacity: 0 }, animate: { y: 0, opacity: 1 }, transition: { duration: 0.8, delay: d, ease: [0.16, 1, 0.3, 1] } } : {});
   return (
-    <section className="tc" aria-labelledby="tc-title">
+    <section ref={ref} className={`tc tc-${mode}`} aria-label="Rayyan, sitting on a cliff above the clouds with a laptop, watching the sun">
       <div className="tc-frame">
-        <MountainSky />
-        <span className="tc-shade" aria-hidden="true" />
-        <div className="tc-content">
-          <h1 id="tc-title"><PullUp text="Rayyan" /></h1>
-          <div className="tc-side">
-            <motion.p {...rise(0.6)}>CS at Penn State. I build AI you can talk to. Scroll, and I will tell you how I got here.</motion.p>
-            <motion.div className="tc-btns" {...rise(0.8)}>
-              <button type="button" className="tc-pill" onClick={begin}>
-                Begin the story
-                <span className="tc-arrow" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 3v10M4 9l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.6" /></svg></span>
-              </button>
-              <button type="button" className="tc-skip" onClick={skip}>Skip to portfolio</button>
-            </motion.div>
-          </div>
-        </div>
+        <motion.svg className="tc-scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" style={motionOn ? { scale } : undefined} aria-hidden="true">
+          <defs>
+            <radialGradient id="tc-sunglow"><stop offset="0" className="tc-glow-in" /><stop offset="1" className="tc-glow-out" /></radialGradient>
+            <radialGradient id="tc-screen"><stop offset="0" stopColor="#cfe3ff" stopOpacity=".9" /><stop offset="1" stopColor="#cfe3ff" stopOpacity="0" /></radialGradient>
+            <linearGradient id="tc-mist" x1="0" y1="0" x2="0" y2="1"><stop offset="0" className="tc-mist-top" /><stop offset="1" className="tc-mist-bot" /></linearGradient>
+          </defs>
+          <circle cx="960" cy="560" r="330" fill="url(#tc-sunglow)" />
+          <circle className="tc-orb" cx="960" cy="560" r="130" />
+
+          {/* sea of clouds below the cliff, three drifting banks */}
+          <g className="tc-bank far mtn-drift slow"><path d="M560 690 q60 -40 120 0 q50 -34 100 0 q70 -44 140 0 q60 -36 120 0 q70 -46 140 0 q60 -38 120 0 q70 -42 140 0 q60 -36 120 0 L1700 900 L560 900 Z" /></g>
+          <rect x="0" y="640" width="1600" height="260" fill="url(#tc-mist)" />
+          <g className="tc-bank near mtn-drift"><path d="M600 770 q80 -50 160 0 q70 -44 140 0 q90 -56 180 0 q80 -48 160 0 q90 -54 180 0 q80 -46 160 0 L1700 900 L600 900 Z" /></g>
+
+          {/* the cliff, a wind bent pine, grass along the edge */}
+          <path className="tc-cliff" d="M-20 900 L-20 690 C 160 650, 380 628, 600 640 C 680 645, 740 652, 790 668 C 800 700, 792 760, 770 820 C 760 860, 770 880, 780 900 Z" />
+          <g className="tc-pine">
+            <path d="M372 640 C 368 600, 380 560, 410 528 C 430 506, 470 494, 520 488 L 522 494 C 478 502, 442 516, 424 538 C 400 566, 388 600, 384 640 Z" />
+            <ellipse cx="540" cy="486" rx="70" ry="13" /><ellipse cx="498" cy="470" rx="48" ry="11" /><ellipse cx="452" cy="512" rx="44" ry="10" />
+            <ellipse cx="560" cy="466" rx="34" ry="9" /><ellipse cx="414" cy="548" rx="34" ry="8" />
+          </g>
+          <g className="tc-grass">
+            {[612, 640, 664, 700, 726, 752].map((x, i) => <path key={x} style={{ animationDelay: `${-i * 0.4}s` }} d={`M${x} ${646 + i * 3} q-3 -14 2 -24 M${x + 6} ${646 + i * 3} q4 -12 10 -18`} />)}
+          </g>
+
+          {/* Rayyan: sitting at the edge, knees up, laptop on his lap, facing the sun */}
+          <g transform="translate(736 662) scale(1.45)">
+            <circle cx="16" cy="-36" r="34" fill="url(#tc-screen)" className="tc-screen-glow" />
+            <g className="tc-me">
+              <circle cx="-4" cy="-62" r="9" />
+              <path d="M-12 -52 C -18 -38, -18 -24, -14 -10 L 6 -10 C 8 -24, 6 -40, 2 -52 Z" />
+              <path d="M-14 -12 L 20 -26 L 30 -2 L 21 -1 L 15 -16 L -8 -2 Z" />
+              <path d="M-2 -46 L 14 -30 L 22 -32" fill="none" strokeWidth="5" strokeLinecap="round" className="tc-arm" />
+            </g>
+            <path d="M10 -26 L 30 -40 L 33 -36 L 14 -24 Z" className="tc-laptop" />
+          </g>
+        </motion.svg>
+
+        <div className="tc-stars" aria-hidden="true">{TC_STARS.map((s, i) => <i key={i} style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.s, height: s.s, animationDelay: `${-s.d}s` }} />)}</div>
+        {mode === 'night' && motionOn && TC_FLIES.map((f, i) => <span key={i} className="st-fly" style={{ left: `${f.x}%`, top: `${f.y}%`, animationDelay: `${-f.d}s`, animationDuration: `${f.t}s` }} />)}
+        {motionOn && mode !== 'night' && mode !== 'storm' && <SkyBirds />}
+        {motionOn && mode === 'storm' && <Storm sound={sound} />}
+
+        <motion.div className="tc-cue" style={motionOn ? { opacity: cue } : undefined}>
+          <span className="tc-scroll" aria-hidden="true"><i /></span>
+          <button type="button" className="tc-skip" onClick={skip}>Skip to portfolio</button>
+        </motion.div>
       </div>
     </section>
   );

@@ -29,7 +29,7 @@ function Kumo({ x, y, w, flip }) {
 
 // Storm over the valley: slanted rain, and every few seconds a forked bolt with a white flash
 // (plus thunder if the visitor turned sound on). One 1x canvas, only runs while on screen.
-function Storm({ sound }) {
+export function Storm({ sound }) {
   const cv = useRef(null), flash = useRef(null), snd = useRef(sound);
   snd.current = sound;
   useEffect(() => {
@@ -77,7 +77,7 @@ function Storm({ sound }) {
 
 // A loose flock crossing the valley, wings flapping. CSS only.
 const BIRDS = [[18, 0, 34, 1], [22, -6, 34, 0.8], [15, -11, 34, 0.7], [30, -20, 46, 0.9], [27, -26, 46, 0.65], [40, -3, 58, 0.75]];
-function Birds() {
+export function Birds() {
   return (
     <div className="mtn-birds">
       {BIRDS.map(([top, delay, dur, s], i) => (
