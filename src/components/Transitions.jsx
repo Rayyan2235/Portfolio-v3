@@ -10,7 +10,7 @@ export const KINDS = {
   ink: { label: 'Sumi ink', inMs: 850, outMs: 900 },
   storm: { label: 'Lightning', inMs: 520, outMs: 1000 }
 };
-const MIXED = { top: 'petals', work: 'wave', experience: 'leaves', lessons: 'ink', contact: 'petals' };
+const MIXED = { top: 'petals', work: 'wave', experience: 'leaves', contact: 'petals' };
 
 const SEA = '#1d3557', MID = '#2a4a78', LIGHT = '#7fa3c9', CREAM = '#fff8ee', NIGHT = '#0f1729';
 const ease = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);

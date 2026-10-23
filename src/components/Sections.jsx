@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion, useInView, useScroll, useTransform } from 'motion/react';
-import Stack from './reactbits/Stack/Stack.jsx';
+import { AnimatePresence, motion, useInView, useScroll, useSpring, useTransform } from 'motion/react';
 import MountainSky from './MountainSky.jsx';
 import { usePrefs } from '../prefs.jsx';
 import { featured, scraps, experience, EMAIL, GITHUB, LINKEDIN, RESUME } from '../data.js';
@@ -96,17 +95,11 @@ export function Statement() {
   );
 }
 
-function Sheet({ p, i }) {
-  return (
-    <div className="sheet">
-      <span className="n" aria-hidden="true">0{i + 1}</span>
-      <span className="label">{p.meta}</span>
-      <h3>{p.name}</h3>
-      <p>{p.text}</p>
-      <span className="tags">{p.stack.map(s => <span key={s}>{s}</span>)}</span>
-    </div>
-  );
-}
+// Every project in one list: the featured three first, then the smaller builds.
+const projects = [
+  ...featured.map(f => ({ ...f, featured: true, blurb: f.text.split('. ')[0] + '.' })),
+  ...scraps.map(s => ({ name: s.name, meta: s.year, text: s.result, blurb: s.result, stack: [], spec: [], url: s.url }))
+];
 
 function Drawer({ p, i, onClose }) {
   const closeRef = useRef(null);
@@ -123,81 +116,68 @@ function Drawer({ p, i, onClose }) {
         </div>
         <h3 id="dr-title">{p.name}</h3>
         <p className="dr-text">{p.text}</p>
-        <div className="spec">
-          <div className="hd"><span>SPEC 0{i + 1}</span><span>REV 2026.10</span></div>
-          <dl>{p.spec.map(([k, v]) => <div className="row" key={k}><dt>{k}</dt><i aria-hidden="true" /><dd>{v}</dd></div>)}</dl>
-        </div>
-        <div className="tags">{p.stack.map(s => <span key={s}>{s}</span>)}</div>
-        <a className="btn solid" href={p.url}>Read the code on GitHub</a>
+        {p.spec.length > 0 && (
+          <div className="spec">
+            <div className="hd"><span>SPEC 0{i + 1}</span><span>REV 2026.10</span></div>
+            <dl>{p.spec.map(([k, v]) => <div className="row" key={k}><dt>{k}</dt><i aria-hidden="true" /><dd>{v}</dd></div>)}</dl>
+          </div>
+        )}
+        {p.stack.length > 0 && <div className="tags">{p.stack.map(s => <span key={s}>{s}</span>)}</div>}
+        {p.url && p.url !== '#' && <a className="btn solid" href={p.url}>Read the code on GitHub</a>}
       </motion.aside>
     </>
   );
 }
 
-function HoverIndex() {
+// A card in the project rail. Tilts toward the pointer (after React Bits' Tilted Card); opens the case drawer.
+function ProjectCard({ p, i, onOpen }) {
   const { motionOn } = usePrefs();
-  const pv = useRef(null), st = useRef({ x: 0, y: 0, tx: 0, ty: 0, on: false });
-  const loop = () => {
-    const s = st.current, k = motionOn ? 0.16 : 1;
-    s.x += (s.tx - s.x) * k; s.y += (s.ty - s.y) * k;
-    const r = motionOn ? Math.max(-8, Math.min(8, (s.tx - s.x) * 0.08)) : 0;
-    if (pv.current) pv.current.style.transform = `translate(${s.x + 28}px,${s.y - 80}px) rotate(${r}deg)`;
-    if (s.on) requestAnimationFrame(loop);
+  const rx = useSpring(0, { stiffness: 220, damping: 18 }), ry = useSpring(0, { stiffness: 220, damping: 18 });
+  const tilt = e => {
+    if (!motionOn || e.pointerType !== 'mouse') return;
+    const r = e.currentTarget.getBoundingClientRect();
+    ry.set(((e.clientX - r.left) / r.width - 0.5) * 12); rx.set(-((e.clientY - r.top) / r.height - 0.5) * 10);
   };
   return (
-    <>
-      <ol className="hx" onMouseMove={e => { st.current.tx = e.clientX; st.current.ty = e.clientY; }}>
-        {scraps.map((s, i) => (
-          <li key={s.name}>
-            <a href={s.url}
-              onMouseEnter={e => {
-                // Preview only shows once a project has a real screenshot (set `img` in data.js).
-                if (!s.img) return;
-                Object.assign(st.current, { x: e.clientX, y: e.clientY, tx: e.clientX, ty: e.clientY });
-                pv.current.style.backgroundImage = `url(${s.img})`; pv.current.classList.add('on');
-                if (!st.current.on) { st.current.on = true; loop(); }
-              }}
-              onMouseLeave={() => { pv.current.classList.remove('on'); st.current.on = false; }}>
-              <span className="n">0{i + 4}</span><span className="t">{s.name}</span><span className="r">{s.result}</span><span className="y">{s.year}</span>
-            </a>
-          </li>
-        ))}
-      </ol>
-      <div className="pv" ref={pv} aria-hidden="true" />
-    </>
+    <motion.button type="button" className={`pcard${p.featured ? ' feat' : ''}`} onClick={onOpen}
+      onPointerMove={tilt} onPointerLeave={() => { rx.set(0); ry.set(0); }} style={{ rotateX: rx, rotateY: ry }}
+      initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.6, delay: Math.min(i, 4) * 0.07, ease: [0.2, 0.8, 0.2, 1] }}>
+      <span className="pc-top"><span className="n">{String(i + 1).padStart(2, '0')}</span>{p.featured && <span className="pc-seal">Featured</span>}</span>
+      <span className="label">{p.meta}</span>
+      <b>{p.name}</b>
+      <span className="pc-blurb">{p.blurb}</span>
+      {p.stack.length > 0 && <span className="tags">{p.stack.slice(0, 3).map(s => <span key={s}>{s}</span>)}</span>}
+      <span className="pc-open">Open <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" strokeWidth="1.6" /></svg></span>
+    </motion.button>
   );
 }
 
+// Work: the valley painting gets the top of the section, every project sits in one sideways rail below it
+// (after 21st.dev's Apple Cards Carousel). Native scroll with snap, so phones swipe and the page never gets hijacked.
 export function Work() {
-  const [top, setTop] = useState(0);
-  const [open, setOpen] = useState(false);
-  const p = featured[top];
+  const [open, setOpen] = useState(-1);
+  const rail = useRef(null);
+  const page = dir => { const r = rail.current; r.scrollBy({ left: dir * r.clientWidth * 0.8, behavior: 'smooth' }); };
   return (
     <section className="work" id="work" aria-labelledby="work-title">
       <MountainSky />
       <div className="wrap">
         <motion.div className="head" {...head}><span className="label"><span className="jp" aria-hidden="true">波</span> · Work</span><h2 id="work-title">What I have built</h2></motion.div>
-        <div className="stage">
-          <div className="stack-wrap">
-            <Stack cards={featured.map((f, i) => <Sheet key={f.name} p={f} i={i} />)} layout="pile" spread={0.5} radius={10}
-              sendToBackOnClick onChange={setTop} />
-            <p className="hint">Drag or flick the top sheet. Arrow keys work too.</p>
-          </div>
-          <div className="detail" aria-live="polite">
-            <div className="dots" aria-hidden="true">{featured.map((f, i) => <i key={f.name} className={i === top ? 'on' : ''} />)}</div>
-            <span className="label">0{top + 1} of 03 · {p.meta}</span>
-            <h3>{p.name}</h3>
-            <p>{p.text.split('. ')[0]}.</p>
-            {p.note && <p className="note">{p.note}</p>}
-            <div className="btns"><button className="btn solid" type="button" onClick={() => setOpen(true)}>Open the case</button></div>
-          </div>
+      </div>
+      <div className="rail-wrap">
+        <div className="wrap rail-bar">
+          <span className="label">{projects.length} projects · swipe sideways</span>
+          <span className="rail-btns">
+            <button type="button" onClick={() => page(-1)} aria-label="Previous projects">‹</button>
+            <button type="button" onClick={() => page(1)} aria-label="Next projects">›</button>
+          </span>
         </div>
-        <div className="scraps">
-          <motion.div className="head" {...head}><span className="label">Scraps · smaller things</span><h2 className="h-sm">Also built</h2></motion.div>
-          <HoverIndex />
+        <div className="rail" ref={rail} role="list">
+          {projects.map((p, i) => <div role="listitem" key={p.name}><ProjectCard p={p} i={i} onOpen={() => setOpen(i)} /></div>)}
         </div>
       </div>
-      <AnimatePresence>{open && <Drawer p={p} i={top} onClose={() => setOpen(false)} />}</AnimatePresence>
+      <AnimatePresence>{open >= 0 && <Drawer p={projects[open]} i={open} onClose={() => setOpen(-1)} />}</AnimatePresence>
     </section>
   );
 }
@@ -213,24 +193,6 @@ export function Experience() {
           <li key={title}><span className="when">{when}</span><div><h3>{title}</h3><p>{body}</p></div></li>
         ))}
       </ol>
-      </div>
-    </section>
-  );
-}
-
-export function Lessons() {
-  return (
-    <section className="sea" id="lessons" aria-labelledby="lessons-title">
-      <svg className="crest" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0H1440V30C1320 62 1200 62 1080 34C960 6 840 6 720 34C600 62 480 62 360 34C240 6 120 6 0 30Z" fill="#fff8ee" /></svg>
-      <div className="pat" aria-hidden="true" />
-      <div className="wrap">
-        <motion.div className="head" {...head}><span className="label">Honest notes</span><h2 id="lessons-title">What went wrong</h2></motion.div>
-        <aside className="mnote"><svg viewBox="0 0 110 54" aria-hidden="true"><path d="M104 6 C 80 3, 48 9, 31 27 C 24 35, 20 41, 16 48 M16 48 L 28 44 M16 48 L 18 36" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" /></svg><span>[one honest aside in your own words]</span></aside>
-        <div className="stories">
-          {featured.map(f => (
-            <article className="story" key={f.name}><span className="label">{f.name}</span><b>[What broke]</b><span>[What you did about it, and what you would do differently.]</span></article>
-          ))}
-        </div>
       </div>
     </section>
   );

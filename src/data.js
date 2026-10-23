@@ -10,19 +10,19 @@ export const featured = [
     text: 'An operating system for yard exceptions. AI agents, robots and people share one channel, and every verified outcome is recorded. A Claude model chooses each tool call; a MongoDB flight recorder lets you replay any shift event for event.',
     note: 'Built at c0mpiled-15 for YC’s Fall 2026 Request for Startups. The yard is a simulated twin; the agent is real.',
     stack: ['TypeScript', 'Claude', 'MongoDB', 'pnpm'],
-    spec: [['Built at', 'c0mpiled-15, YC Fall 2026 RFS'], ['Role', '[YOUR ROLE]'], ['Model', 'Claude picks each tool call'], ['Record', 'MongoDB flight recorder'], ['Status', 'Simulated yard, real agent'], ['What went wrong', '[ONE HONEST SENTENCE]']]
+    spec: [['Built at', 'c0mpiled-15, YC Fall 2026 RFS'], ['Role', '[YOUR ROLE]'], ['Model', 'Claude picks each tool call'], ['Record', 'MongoDB flight recorder'], ['Status', 'Simulated yard, real agent']]
   },
   {
     name: 'Mashwara', meta: 'Health · HopHacks 26', url: 'https://github.com/Rayyan2235/Mashwara---HopHacks-26',
     text: 'A qualified pharmacist behind every counter. A patient speaks Urdu, a local volunteer bridges, a remote pharmacist authorizes each medicine, and the plan comes back in Urdu. Interaction flags come from a hand-curated, cited table, never from the model’s guess.',
     note: '', stack: ['Next.js', 'TypeScript', 'Gemini', 'ElevenLabs', 'Neon Postgres'],
-    spec: [['Built at', 'HopHacks 26'], ['Role', '[YOUR ROLE]'], ['Language', 'Urdu in, Urdu out'], ['Safety', 'Cited interaction table'], ['What went wrong', '[ONE HONEST SENTENCE]']]
+    spec: [['Built at', 'HopHacks 26'], ['Role', '[YOUR ROLE]'], ['Language', 'Urdu in, Urdu out'], ['Safety', 'Cited interaction table']]
   },
   {
     name: 'EmpathAI', meta: 'Voice AI', url: 'https://github.com/Rayyan2235/EmpathAI',
     text: 'A full-stack AI therapist with real-time voice sessions under 400ms latency and 95% crisis detection accuracy. LLaMA 3 runs locally through Ollama; Hugging Face models track emotion and sentiment; LiveKit carries the audio both ways.',
     note: '', stack: ['Python', 'FastAPI', 'React', 'Ollama', 'LiveKit'],
-    spec: [['Latency', 'Under 400ms voice'], ['Crisis detection', '95% accuracy'], ['Model', 'LLaMA 3 via Ollama'], ['Role', '[YOUR ROLE]'], ['What went wrong', '[ONE HONEST SENTENCE]']]
+    spec: [['Latency', 'Under 400ms voice'], ['Crisis detection', '95% accuracy'], ['Model', 'LLaMA 3 via Ollama'], ['Role', '[YOUR ROLE]']]
   }
 ];
 

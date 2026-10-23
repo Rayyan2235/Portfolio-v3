@@ -31,7 +31,7 @@ Most portfolios list skills. This one tries to feel like somewhere. It is built 
 | **The sky** | Hokusai's *Great Wave*, animated in WebGL. The sky follows your clock: dawn, day, dusk or a starry night. Pick **Storm** for rain, lightning and (if you turn it on) thunder. The sun rises as you scroll and the boats bob. | `GreatWaveHero.jsx`, `sky.js` |
 | **Moving around** | Click a section and a transition carries you there: a crashing wave, a storm of sakura petals, falling maple leaves, sumi ink or a lightning flash. | `Transitions.jsx` |
 | **The paper** | A crane glides across the page as you scroll. A cherry branch sways and lets its petals go. | `Sections.jsx` |
-| **Work** | Featured projects as a deck of cards you can drag and flick, each with a spec sheet. Smaller projects in an editorial index. | `Sections.jsx`, `reactbits/Stack` |
+| **Work** | An ink painted mountain valley that follows the sky (rain and lightning in a storm, birds by day), with every project in one sideways rail of tilting cards. Each opens a spec sheet. | `Sections.jsx`, `MountainSky.jsx` |
 | **A quiet place** | A small 3D island: torii gate, stone lantern, a cherry tree shedding petals, calm water, lit by the same sky. Drag to look around. | `Shrine3D.jsx` |
 | **Shortcuts** | `Ctrl K` opens a command menu: jump anywhere, copy my email, change the sky, pick a transition. | `CommandMenu.jsx` |
 
@@ -78,7 +78,6 @@ A few decisions worth knowing:
 
 * A short scroll story about me before the main page, designed for phones first
 * Real screenshots for each project
-* Write ups for what went wrong on each project
 
 ## Credits
 
