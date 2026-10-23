@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useScroll, useTransform, useMotionValueEvent, useVelocity } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
 import { featured } from '../data.js';
+import MountainSky from './MountainSky.jsx';
 
 // Story intro: one pinned stage, five scenes cut together like a film. The sky runs one long day
 // (dawn, bright sea, dusk, lantern night, sunrise through the torii) and the text flips light or dark with it.
@@ -306,17 +307,74 @@ function portfolioTop() {
   return el ? el.getBoundingClientRect().top + scrollY : 0;
 }
 
+// Letters rise into place one after another (after the "Prisma" hero on 21st.dev, ported to plain React + motion).
+function PullUp({ text }) {
+  const ref = useRef(null);
+  const { motionOn } = usePrefs();
+  const [shown, setShown] = useState(!motionOn);
+  useEffect(() => { if (motionOn) { const id = requestAnimationFrame(() => setShown(true)); return () => cancelAnimationFrame(id); } }, [motionOn]);
+  return (
+    <span ref={ref} className="tc-name" aria-label={text}>
+      {[...text].map((ch, i) => (
+        <motion.span key={i} aria-hidden="true" initial={false} animate={shown ? { y: '0%', opacity: 1 } : { y: '60%', opacity: 0 }}
+          transition={{ duration: 0.9, delay: 0.15 + i * 0.07, ease: [0.16, 1, 0.3, 1] }}>{ch}</motion.span>
+      ))}
+      <motion.sup aria-hidden="true" initial={false} animate={shown ? { opacity: 1, rotate: 0 } : { opacity: 0, rotate: -90 }}
+        transition={{ duration: 0.8, delay: 0.15 + text.length * 0.07 }}>*</motion.sup>
+    </span>
+  );
+}
+
+// The opening shot: a framed window onto the living valley (it follows the visitor's sky), the name pulling up
+// in the corner, one line and a way in or a way past.
+function TitleCard() {
+  const { motionOn } = usePrefs();
+  const begin = () => {
+    const r = document.querySelector('.st-root, .st-plain');
+    if (r) scrollTo({ top: r.getBoundingClientRect().top + scrollY, behavior: motionOn ? 'smooth' : 'instant' });
+  };
+  const skip = () => {
+    try { localStorage.setItem(SEEN_KEY, '1'); } catch { /* storage blocked */ }
+    scrollTo({ top: portfolioTop(), behavior: motionOn ? 'smooth' : 'instant' });
+  };
+  const rise = d => (motionOn ? { initial: { y: 20, opacity: 0 }, animate: { y: 0, opacity: 1 }, transition: { duration: 0.8, delay: d, ease: [0.16, 1, 0.3, 1] } } : {});
+  return (
+    <section className="tc" aria-labelledby="tc-title">
+      <div className="tc-frame">
+        <MountainSky />
+        <span className="tc-shade" aria-hidden="true" />
+        <div className="tc-content">
+          <h1 id="tc-title"><PullUp text="Rayyan" /></h1>
+          <div className="tc-side">
+            <motion.p {...rise(0.6)}>CS at Penn State. I build AI you can talk to. Scroll, and I will tell you how I got here.</motion.p>
+            <motion.div className="tc-btns" {...rise(0.8)}>
+              <button type="button" className="tc-pill" onClick={begin}>
+                Begin the story
+                <span className="tc-arrow" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 3v10M4 9l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.6" /></svg></span>
+              </button>
+              <button type="button" className="tc-skip" onClick={skip}>Skip to portfolio</button>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function StoryIntro() {
   const { motionOn } = usePrefs();
   if (!motionOn) {
-    // Motion off: the story as plain text, then the portfolio.
+    // Motion off: the title card, the story as plain text, then the portfolio.
     return (
-      <section className="st-plain" aria-label="About Rayyan">
-        {BEATS.map((b, i) => <p key={b.id}><span className="st-label">0{i + 1} · {b.label}</span>{b.line}</p>)}
-      </section>
+      <>
+        <TitleCard />
+        <section className="st-plain" aria-label="About Rayyan">
+          {BEATS.map((b, i) => <p key={b.id}><span className="st-label">0{i + 1} · {b.label}</span>{b.line}</p>)}
+        </section>
+      </>
     );
   }
-  return <Film />;
+  return <><TitleCard /><Film /></>;
 }
 
 function Film() {
@@ -329,7 +387,7 @@ function Film() {
   const wind = useVelocity(scrollY);
   useMotionValueEvent(g, 'change', v => {
     setActive(Math.min(N - 1, Math.floor(v * N)));
-    setInStory(v < 0.995);
+    setInStory(v > 0.002 && v < 0.995); // the title card has its own buttons, so the dock waits for the story
     if (v > 0.95) { try { localStorage.setItem(SEEN_KEY, '1'); } catch { /* storage blocked */ } }
   });
 
