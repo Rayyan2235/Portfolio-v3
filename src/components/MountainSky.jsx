@@ -75,14 +75,24 @@ export function Storm({ sound }) {
   return <><canvas ref={cv} className="mtn-rain" /><span ref={flash} className="mtn-flash" /></>;
 }
 
-// A loose flock crossing the valley, wings flapping. CSS only.
+// A loose flock crossing the valley, wings flapping. CSS only. `crane` swaps the gulls for red crowned cranes,
+// long neck forward and legs trailing, as in the Edo prints.
 const BIRDS = [[18, 0, 34, 1], [22, -6, 34, 0.8], [15, -11, 34, 0.7], [30, -20, 46, 0.9], [27, -26, 46, 0.65], [40, -3, 58, 0.75]];
-export function Birds() {
+export function Birds({ crane = false }) {
   return (
     <div className="mtn-birds">
-      {BIRDS.map(([top, delay, dur, s], i) => (
-        <span key={i} className="mtn-bird" style={{ top: `${top}%`, animationDuration: `${dur}s`, animationDelay: `${delay}s`, scale: s }}>
-          <svg viewBox="0 0 24 10" style={{ animationDelay: `${-i * 0.13}s` }}><path d="M1 6 Q6 0 12 6 Q18 0 23 6" /></svg>
+      {BIRDS.slice(0, crane ? 4 : 6).map(([top, delay, dur, s], i) => (
+        <span key={i} className={`mtn-bird${crane ? ' crane' : ''}`} style={{ top: `${top}%`, animationDuration: `${dur * (crane ? 1.4 : 1)}s`, animationDelay: `${delay}s`, scale: s }}>
+          {crane ? (
+            <svg viewBox="0 0 48 22" style={{ animationDelay: `${-i * 0.2}s` }}>
+              <path className="cr-body" d="M6 13 C 12 11, 18 11, 24 12 C 30 11, 36 11, 41 12 L 46 11 L 44 13 L 41 14 C 35 15, 29 15, 24 14 C 18 15, 12 15, 6 14 Z" />
+              <path className="cr-wing" d="M18 12 C 20 4, 26 1, 32 2 C 28 6, 27 9, 28 12 Z" />
+              <circle className="cr-crown" cx="44" cy="11.5" r="1.3" />
+              <path className="cr-legs" d="M6 13.5 L 0 14" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 10" style={{ animationDelay: `${-i * 0.13}s` }}><path d="M1 6 Q6 0 12 6 Q18 0 23 6" /></svg>
+          )}
         </span>
       ))}
     </div>

@@ -336,11 +336,30 @@ function TitleCard() {
           </defs>
           <circle cx="960" cy="560" r="330" fill="url(#tc-sunglow)" />
           <circle className="tc-orb" cx="960" cy="560" r="130" />
+          {/* a far peak with a snow cap, printed slightly off register */}
+          <path className="tc-peak" d="M1010 700 C 1110 640, 1200 560, 1262 486 L 1300 482 C 1360 556, 1460 640, 1620 700 Z" />
+          <path className="tc-snow" d="M1262 486 L1300 482 C 1318 504, 1336 526, 1352 548 L 1334 542 L 1318 558 L 1304 540 L 1288 556 L 1274 538 L 1256 552 L 1242 538 C 1248 520, 1254 502, 1262 486 Z" transform="translate(2 1)" />
+          {/* kasumi mist bands across the sun */}
+          <g className="tc-kasumi mtn-drift slow">
+            <rect x="760" y="520" width="300" height="12" rx="6" /><rect x="900" y="572" width="340" height="10" rx="5" /><rect x="820" y="616" width="220" height="8" rx="4" />
+          </g>
 
           {/* sea of clouds below the cliff, three drifting banks */}
-          <g className="tc-bank far mtn-drift slow"><path d="M560 690 q60 -40 120 0 q50 -34 100 0 q70 -44 140 0 q60 -36 120 0 q70 -46 140 0 q60 -38 120 0 q70 -42 140 0 q60 -36 120 0 L1700 900 L560 900 Z" /></g>
+          <pattern id="tc-sei" width="40" height="20" patternUnits="userSpaceOnUse">
+            <rect width="40" height="20" className="tc-sei-bg" />
+            <path d="M0 20a20 20 0 0 1 40 0M7 20a13 13 0 0 1 26 0M14 20a6 6 0 0 1 12 0M-20 10a20 20 0 0 1 40 0M20 10a20 20 0 0 1 40 0" className="tc-sei-line" />
+          </pattern>
+          <rect x="560" y="690" width="1100" height="220" fill="url(#tc-sei)" className="tc-sea" />
           <rect x="0" y="640" width="1600" height="260" fill="url(#tc-mist)" />
-          <g className="tc-bank near mtn-drift"><path d="M600 770 q80 -50 160 0 q70 -44 140 0 q90 -56 180 0 q80 -48 160 0 q90 -54 180 0 q80 -46 160 0 L1700 900 L600 900 Z" /></g>
+          {/* kumo: outlined cloud bands with curled ends, drifting over the sea of clouds */}
+          <g className="tc-kumo mtn-drift">
+            {[[820, 712, 360, 1], [1180, 760, 300, -1], [700, 812, 420, -1], [1260, 840, 320, 1]].map(([x, y, w, d]) => (
+              <g key={x + '-' + y}>
+                <rect x={x} y={y} width={w} height="24" rx="12" />
+                <g transform={`translate(${d > 0 ? x + w : x} ${y + 12}) scale(${d} 1)`}><circle r="19" /><path d="M0 -10 a10 10 0 1 1 -10 10 a6 6 0 1 1 6 -6" fill="none" /></g>
+              </g>
+            ))}
+          </g>
 
           {/* the cliff, a wind bent pine, grass along the edge */}
           <path className="tc-cliff" d="M-20 900 L-20 690 C 160 650, 380 628, 600 640 C 680 645, 740 652, 790 668 C 800 700, 792 760, 770 820 C 760 860, 770 880, 780 900 Z" />
@@ -348,6 +367,13 @@ function TitleCard() {
             <path d="M372 640 C 368 600, 380 560, 410 528 C 430 506, 470 494, 520 488 L 522 494 C 478 502, 442 516, 424 538 C 400 566, 388 600, 384 640 Z" />
             <ellipse cx="540" cy="486" rx="70" ry="13" /><ellipse cx="498" cy="470" rx="48" ry="11" /><ellipse cx="452" cy="512" rx="44" ry="10" />
             <ellipse cx="560" cy="466" rx="34" ry="9" /><ellipse cx="414" cy="548" rx="34" ry="8" />
+          </g>
+          {/* a small red torii on the cliff behind him */}
+          <g className="tc-torii" transform="translate(600 642)">
+            <path d="M-50 -112 Q0 -122 50 -112 L47 -104 Q0 -112 -47 -104 Z" />
+            <rect x="-44" y="-104" width="88" height="5" className="tc-torii-dark" />
+            <rect x="-40" y="-86" width="80" height="5" />
+            <rect x="-30" y="-104" width="6" height="104" /><rect x="24" y="-104" width="6" height="104" />
           </g>
           <g className="tc-grass">
             {[612, 640, 664, 700, 726, 752].map((x, i) => <path key={x} style={{ animationDelay: `${-i * 0.4}s` }} d={`M${x} ${646 + i * 3} q-3 -14 2 -24 M${x + 6} ${646 + i * 3} q4 -12 10 -18`} />)}
@@ -368,9 +394,14 @@ function TitleCard() {
 
         <div className="tc-stars" aria-hidden="true">{TC_STARS.map((s, i) => <i key={i} style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.s, height: s.s, animationDelay: `${-s.d}s` }} />)}</div>
         {mode === 'night' && motionOn && TC_FLIES.map((f, i) => <span key={i} className="st-fly" style={{ left: `${f.x}%`, top: `${f.y}%`, animationDelay: `${-f.d}s`, animationDuration: `${f.t}s` }} />)}
-        {motionOn && mode !== 'night' && mode !== 'storm' && <SkyBirds />}
+        {motionOn && mode !== 'night' && mode !== 'storm' && <SkyBirds crane />}
         {motionOn && mode === 'storm' && <Storm sound={sound} />}
 
+        {motionOn && mode !== 'night' && mode !== 'storm' && (
+          <div className="tc-petals" aria-hidden="true">{[0, 1, 2, 3, 4, 5, 6, 7].map(i => <i key={i} style={{ left: `${8 + i * 12}%`, animationDelay: `${-i * 1.7}s`, animationDuration: `${9 + (i % 3) * 3}s` }} />)}</div>
+        )}
+        <span className="tc-grain" aria-hidden="true" />
+        <span className="tc-seal" aria-hidden="true"><i /><i /><i /></span>
         <motion.div className="tc-cue" style={motionOn ? { opacity: cue } : undefined}>
           <span className="tc-scroll" aria-hidden="true"><i /></span>
           <button type="button" className="tc-skip" onClick={skip}>Skip to portfolio</button>
@@ -400,7 +431,7 @@ function Film() {
   const ref = useRef(null);
   const [seen] = useState(() => { try { return localStorage.getItem(SEEN_KEY) === '1'; } catch { return false; } });
   const [active, setActive] = useState(0);
-  const [inStory, setInStory] = useState(true);
+  const [inStory, setInStory] = useState(false);
   const { scrollYProgress: g } = useScroll({ target: ref, offset: ['start start', 'end end'] });
   const { scrollY } = useScroll();
   const wind = useVelocity(scrollY);
