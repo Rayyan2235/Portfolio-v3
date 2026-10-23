@@ -126,18 +126,38 @@ html.still .branch-ink { animation: none; }
 /* work */
 .work { position: relative; padding-block: clamp(110px, 10vw, 140px) clamp(80px, 10vw, 130px); }
 .work > .wrap { position: relative; z-index: 1; }
-/* rose dusk mountains behind Work (MountainSky.jsx); dissolves into paper at the base like mist */
-.mtn { position: absolute; left: 0; right: 0; top: 0; height: clamp(760px, 135svh, 1300px); overflow: hidden; pointer-events: none;
-  -webkit-mask-image: linear-gradient(#000 78%, transparent); mask-image: linear-gradient(#000 78%, transparent); }
-.mtn svg { display: block; width: 100%; height: 100%; }
-.st-kumo { fill: #fbe6df; stroke: #b98290; stroke-width: 2; }
-.st-kumo.front { fill: #fff2ec; }
+/* mountain valley behind Work (MountainSky.jsx): the painting follows the visitor's sky; it rises out of
+   paper under the heading and dissolves back into paper like mist at the base */
+.work .stage { margin-top: clamp(220px, 24vw, 380px); }
+.mtn { --mh: clamp(760px, 74vw, 1200px); position: absolute; left: 0; right: 0; top: 0; height: var(--mh); overflow: hidden; pointer-events: none;
+  -webkit-mask-image: linear-gradient(transparent 12%, #000 32%, #000 78%, transparent); mask-image: linear-gradient(transparent 12%, #000 32%, #000 78%, transparent); }
+.mtn-frame { position: absolute; left: 50%; top: 0; translate: -50% 0; width: max(100%, calc(var(--mh) * 2.3571)); aspect-ratio: 1584 / 672; }
+.mtn-art, .mtn-clouds, .mtn-tint, .mtn-stars { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mtn-art { display: block; object-fit: cover; }
+.mtn-kumo { fill: #f4f1ea; stroke: #6f8aa6; stroke-width: 2; opacity: .9; }
 .mtn-drift { animation: mtn-drift 26s ease-in-out infinite alternate; }
 .mtn-drift.slow { animation-duration: 40s; animation-direction: alternate-reverse; }
 @keyframes mtn-drift { from { transform: translateX(-40px); } to { transform: translateX(40px); } }
-html.still .mtn-drift { animation: none; }
-/* phones: the mountains get their own strip between the heading and the project card */
-@media (max-width: 767px) { .mtn { height: 620px; } .work .stage { margin-top: 300px; } }
+.mtn-tint { mix-blend-mode: multiply; transition: background 1.2s, opacity 1.2s; opacity: 0; }
+/* the painted moon sits at 77.5% / 13.7% of the art */
+.mtn-orb { position: absolute; left: 77.5%; top: 13.7%; width: 6.2%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; transition: background 1.2s, box-shadow 1.2s; }
+.mtn-stars { opacity: 0; transition: opacity 1.2s; }
+.mtn-stars i { position: absolute; border-radius: 50%; background: #fff6e0; box-shadow: 0 0 6px rgba(255, 246, 224, .8); animation: st-twinkle 4s ease-in-out infinite; }
+.mtn-dawn .mtn-tint { opacity: 1; background: linear-gradient(180deg, #ffd2b0, #ffe6cc 60%, #fff3e4); }
+.mtn-dawn .mtn-orb { background: #e4572e; box-shadow: 0 0 60px 24px rgba(247, 178, 122, .55); }
+.mtn-day .mtn-orb { background: #fff3d6; box-shadow: 0 0 70px 30px rgba(255, 240, 200, .6); }
+.mtn-dusk .mtn-tint { opacity: 1; background: linear-gradient(180deg, #f3a49a, #f6c1b6 55%, #fbe0d6); }
+.mtn-dusk .mtn-orb { background: #c8361f; box-shadow: 0 0 60px 24px rgba(228, 87, 46, .45); }
+.mtn-night .mtn-tint { opacity: 1; background: linear-gradient(180deg, #2a3866, #46578a 55%, #6d7ba6); }
+.mtn-night .mtn-orb { background: radial-gradient(circle, #fffaf0 55%, #e8eefc); box-shadow: 0 0 50px 22px rgba(220, 230, 255, .45); }
+.mtn-night .mtn-stars { opacity: 1; }
+.mtn-storm .mtn-tint { opacity: 1; background: linear-gradient(180deg, #8d96a6, #b5bcc7); }
+.mtn-storm .mtn-orb { opacity: 0; }
+html.still .mtn-drift, html.still .mtn-stars i { animation: none; }
+/* project text gets a sheet of paper so it reads over the painting */
+.work .detail { background: rgba(255, 248, 238, .9); border-radius: 16px; padding: clamp(18px, 3vw, 28px); box-shadow: 0 12px 30px rgba(27, 36, 51, .1); }
+/* phones: the valley gets its own strip between the heading and the project card */
+@media (max-width: 767px) { .mtn { --mh: 560px; top: 150px; } .work .stage { margin-top: 300px; } }
 .stage { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
 @media (max-width: 880px) { .stage { grid-template-columns: 1fr; } }
 .stack-wrap { width: 100%; max-width: 500px; }
