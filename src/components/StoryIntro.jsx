@@ -94,8 +94,31 @@ function Birds() {
   );
 }
 
+// The traveller: the same lone figure from the title card walks through every chapter, so the story has a
+// protagonist (the device the "Unifiers of Japan" parallax story uses for Nobunaga). Poses: sit, stand, walk.
+function Wanderer({ pose = 'stand', className = '', style }) {
+  return (
+    <motion.svg className={`st-me st-me-${pose} ${className}`} viewBox="-20 -70 40 72" style={style} aria-hidden="true">
+      <circle cx="0" cy="-60" r="7" />
+      {pose === 'sit' ? (
+        <>
+          <path d="M-7 -52 C -11 -40, -11 -28, -8 -16 L 6 -16 C 7 -28, 6 -42, 3 -52 Z" />
+          <path d="M-8 -18 L 16 -28 L 22 -4 L 15 -3 L 11 -18 L -4 -6 Z" />
+        </>
+      ) : (
+        <>
+          <path d="M-8 -52 C -11 -36, -10 -22, -9 -12 L 9 -12 C 9 -24, 8 -40, 5 -52 Z" />
+          <path className="leg l" d="M-6 -13 L -8 2 L -3 2 L -1 -13 Z" />
+          <path className="leg r" d="M1 -13 L 4 2 L 9 2 L 6 -13 Z" />
+        </>
+      )}
+    </motion.svg>
+  );
+}
+
 const Scenes = {
   // 01 dawn: the sun lifts out of a moving sea behind drifting mist, birds cross, a brush stroke is painted.
+  // The traveller sits on a rock at the water's edge, watching it rise.
   hello: function Hello({ q }) {
     const y = useTransform(q, [0, 0.55], ['62%', '4%']);
     const pathLength = useTransform(q, [0.3, 0.75], [0, 1]);
@@ -104,6 +127,8 @@ const Scenes = {
         <motion.div className="st-sunwrap" style={{ y }}><span className="st-sunglow" /><span className="st-sundisk" /></motion.div>
         <span className="st-mist m1" /><span className="st-mist m2" /><span className="st-mist m3" />
         <div className="st-seaband"><svg width="100%" height="100%"><rect width="200%" height="100%" fill="url(#st-sei)" className="st-sea-drift" /></svg></div>
+        <span className="st-shore" aria-hidden="true" />
+        <Wanderer pose="sit" className="in-hello" />
         <Birds />
         <svg className="st-swash" viewBox="0 0 400 40" aria-hidden="true">
           <motion.path d="M20 26 C 110 8, 230 38, 380 16" stroke="currentColor" strokeWidth="9" strokeLinecap="round" fill="none" filter="url(#st-ink)" style={{ pathLength }} />
@@ -112,12 +137,14 @@ const Scenes = {
     );
   },
 
-  // 02 bright day at sea: the camera pans across a woodblock map while the boat sails the brushed route.
+  // 02 bright day at sea: the camera pans across a woodblock map while the boat (with the traveller aboard) sails
+  // the brushed route. A foreground wave band moves faster than the map, so the scene has hand drawn depth.
   from: function Voyage({ q }) {
     const route = useRef(null);
     const boat = useRef(null);
     const pathLength = useTransform(q, [0.1, 0.85], [0, 1]);
     const x = useTransform(q, [0.05, 0.9], ['0%', '-37.5%']);
+    const front = useTransform(q, [0, 1], ['0%', '-30%']);
     const place = v => {
       const el = route.current;
       if (!el || !boat.current) return;
@@ -151,6 +178,7 @@ const Scenes = {
             <text x="580" y="178" className="st-place" textAnchor="middle">Penn State</text>
             <g ref={boat}>
               <g className="st-bob">
+                <circle cx="-8" cy="-10" r="3" fill={C.ink} /><path d="M-11 -7 L -5 -7 L -4 0 L -12 0 Z" fill={C.ink} />
                 <path d="M-15 0 L15 0 L9 8 L-9 8 Z" fill={C.ink} />
                 <path d="M-1 -2 L-1 -25 L13 -4 Z" fill={C.paper} stroke={C.ink} strokeWidth="1.3" />
                 <path d="M-24 10 q4 -3 8 0 M-34 12 q4 -3 8 0" fill="none" stroke={C.sea} strokeOpacity=".5" strokeWidth="1.4" />
@@ -158,28 +186,39 @@ const Scenes = {
             </g>
           </svg>
         </motion.div>
+        <motion.svg className="st-fgwave" viewBox="0 0 800 40" preserveAspectRatio="none" style={{ x: front }} aria-hidden="true">
+          <path d="M0 22 q25 -16 50 0 q25 -16 50 0 q25 -16 50 0 q25 -16 50 0 q25 -16 50 0 q25 -16 50 0 q25 -16 50 0 q25 -16 50 0 q25 -16 50 0 q25 -16 50 0 q25 -16 50 0 q25 -16 50 0 q25 -16 50 0 q25 -16 50 0 q25 -16 50 0 q25 -16 50 0 V40 H0 Z" />
+        </motion.svg>
       </div>
     );
   },
 
-  // 03 dusk: the sun sinks behind layered mountains while the crane flies across gold mist.
+  // 03 dusk: ink ridges brush in far to near (after 21st.dev's Ink Ridges), then the sun blooms and sinks while
+  // the crane flies across gold mist. The traveller stands on the near ridge, looking up.
   why: function Dusk({ q }) {
     const sunY = useTransform(q, [0, 1], ['-6%', '42%']);
+    const sunO = useTransform(q, [0.22, 0.42], [0, 1]);
+    const sunS = useTransform(q, [0.22, 0.42], [0.6, 1]);
     const far = useTransform(q, [0, 1], ['0%', '-6%']);
     const near = useTransform(q, [0, 1], ['2%', '-14%']);
+    const farClip = useTransform(q, [0.02, 0.28], ['inset(0% 100% 0% 0%)', 'inset(0% 0% 0% 0%)']);
+    const nearClip = useTransform(q, [0.1, 0.36], ['inset(0% 100% 0% 0%)', 'inset(0% 0% 0% 0%)']);
     const crane = useTransform(q, [0, 1], ['-5%', '-290%']);
     const craneY = useTransform(q, [0, 0.5, 1], [26, -6, 10]);
     const mist = useTransform(q, [0, 1], ['6%', '-30%']);
     return (
       <div className="st-art st-duskart">
-        <motion.span className="st-setsun" style={{ y: sunY }} />
-        <motion.svg className="st-ridge far" viewBox="0 0 400 100" preserveAspectRatio="none" style={{ x: far }} aria-hidden="true">
+        <motion.span className="st-setsun" style={{ y: sunY, opacity: sunO, scale: sunS }} />
+        <motion.svg className="st-ridge far" viewBox="0 0 400 100" preserveAspectRatio="none" style={{ x: far, clipPath: farClip }} aria-hidden="true">
           <path d="M0 70 L40 40 L70 58 L120 18 L170 56 L210 34 L260 62 L310 26 L360 54 L400 38 L400 100 L0 100 Z" />
         </motion.svg>
         <span className="st-mist m4" />
-        <motion.svg className="st-ridge near" viewBox="0 0 400 100" preserveAspectRatio="none" style={{ x: near }} aria-hidden="true">
-          <path d="M0 80 L60 52 L100 70 L150 44 L220 78 L280 50 L330 72 L400 56 L400 100 L0 100 Z" />
-        </motion.svg>
+        <motion.div className="st-nearband" style={{ x: near, clipPath: nearClip }}>
+          <svg className="st-ridge near" viewBox="0 0 400 100" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0 80 L60 52 L100 70 L150 44 L220 78 L280 50 L330 72 L400 56 L400 100 L0 100 Z" />
+          </svg>
+          <Wanderer pose="stand" className="in-why" />
+        </motion.div>
         <motion.span className="st-mist m5" style={{ x: mist }} />
         <motion.img className="st-crane" src="/art/crane-alpha.png" alt="" style={{ x: crane, y: craneY }} />
       </div>
@@ -194,6 +233,7 @@ const Scenes = {
         <div className="st-lanterns" aria-hidden="true">{[0, 1, 2].map(i => <span key={i} className={`st-chochin l${i}`}><i /></span>)}</div>
         {FLIES.map((f, i) => <span key={i} className="st-fly" style={{ left: `${f.x}%`, top: `${f.y}%`, animationDelay: `${-f.d}s`, animationDuration: `${f.t}s` }} />)}
         <div className="st-hang">{featured.map((f, i) => <Hang key={f.name} q={q} i={i} f={f} />)}</div>
+        <Wanderer pose="stand" className="in-build" />
       </div>
     );
   },
@@ -205,10 +245,15 @@ const Scenes = {
     const scale = useTransform(q, [0.45, 1], [1, 4.6]);
     const gate = useTransform(q, [0.82, 0.98], [1, 0]);
     const rays = useTransform(q, [0.15, 0.6], [0, 0.9]);
+    // the traveller walks up the path toward the gate, smaller as he goes, and is gone through it before the flash
+    const walkY = useTransform(q, [0.1, 0.8], ['0%', '-150%']);
+    const walkS = useTransform(q, [0.1, 0.8], [1, 0.45]);
+    const walkO = useTransform(q, [0.6, 0.8], [1, 0]);
     return (
       <div className="st-art st-gate">
         <motion.span className="st-rays" style={{ opacity: rays }} />
         <motion.span className="st-gate-sun" style={{ y: sunY }} />
+        <Wanderer pose="walk" className="in-enter" style={{ y: walkY, scale: walkS, opacity: walkO }} />
         <motion.svg viewBox="0 0 300 240" style={{ scale, opacity: gate }} aria-hidden="true">
           <motion.g style={{ fill }}>
             <path d="M6 44 Q150 18 294 44 L286 62 Q150 40 14 62 Z" />

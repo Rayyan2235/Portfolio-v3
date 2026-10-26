@@ -444,3 +444,18 @@ html.still .tc-grass path, html.still .tc-screen-glow, html.still .tc-scroll i, 
 .tc-seal i { background: #c8361f; border-radius: 1px; }
 .tc-seal i:nth-child(3) { grid-column: 1 / 3; height: 4px; align-self: end; }
 html.still .tc-petals { display: none; }
+
+/* story: the traveller in every chapter, ink ridges brushing in, a fast foreground wave */
+.st-me { position: absolute; height: clamp(40px, 8svh, 68px); width: auto; overflow: visible; fill: #1b2433; pointer-events: none; }
+.st-shore { position: absolute; left: 8%; bottom: 18%; width: 22%; height: 9%; background: #1b2433; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+.st-me.in-hello { left: 15%; bottom: 26%; }
+.st-nearband { position: absolute; left: -10%; width: 120%; bottom: 0; height: 34%; }
+.st-nearband .st-ridge.near { left: 0; width: 100%; height: 100%; }
+.st-me.in-why { left: 30%; bottom: 38%; height: clamp(32px, 7svh, 56px); fill: #24182a; }
+.st-me.in-build { left: 3%; bottom: 0; fill: #0b0f18; filter: drop-shadow(0 0 14px rgba(247, 178, 122, .65)); }
+.st-gate svg.st-me.in-enter { position: absolute; left: 50%; bottom: 0; width: auto; height: clamp(40px, 8svh, 68px); translate: -50% 0; transform-origin: 50% 100%; }
+.st-me-walk .leg { transform-box: fill-box; transform-origin: 50% 0; animation: st-step .7s ease-in-out infinite alternate; }
+.st-me-walk .leg.r { animation-direction: alternate-reverse; }
+@keyframes st-step { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
+.st-fgwave { position: absolute; left: 0; bottom: -2px; width: 160%; height: 16%; fill: var(--sea); opacity: .35; pointer-events: none; }
+html.still .st-me-walk .leg { animation: none; }
