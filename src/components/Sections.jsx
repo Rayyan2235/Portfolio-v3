@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion, useInView, useScroll, useSpring, useTransform } from 'motion/react';
+import { AnimatePresence, motion, useInView, useScroll, useTransform } from 'motion/react';
 import MountainSky from './MountainSky.jsx';
 import { usePrefs } from '../prefs.jsx';
 import { featured, scraps, experience, EMAIL, GITHUB, LINKEDIN, RESUME } from '../data.js';
@@ -129,54 +129,89 @@ function Drawer({ p, i, onClose }) {
   );
 }
 
-// A card in the project rail. Tilts toward the pointer (after React Bits' Tilted Card); opens the case drawer.
-function ProjectCard({ p, i, onOpen }) {
-  const { motionOn } = usePrefs();
-  const rx = useSpring(0, { stiffness: 220, damping: 18 }), ry = useSpring(0, { stiffness: 220, damping: 18 });
-  const tilt = e => {
-    if (!motionOn || e.pointerType !== 'mouse') return;
-    const r = e.currentTarget.getBoundingClientRect();
-    ry.set(((e.clientX - r.left) / r.width - 0.5) * 12); rx.set(-((e.clientY - r.top) / r.height - 0.5) * 10);
-  };
+// Work as a thrown deck (reverse engineered from fancy.design's benefits cards, smaller and ours): a sticky stage
+// in front of the valley painting. On desktop the row slides left as you scroll while every card drifts at its own
+// speed and tilt; on phones the cards stack, each sliding up over the last while the ones beneath shrink back.
+const DECK_INK = [
+  ['#1b2433', '#fff3e2'], ['#8a5a6a', '#fff3e2'], ['#1d3557', '#fff3e2'], ['#b2351f', '#fff3e2'],
+  ['#4f6b45', '#fff3e2'], ['#4a3550', '#fff3e2'], ['#f7b27a', '#1b2433'], ['#fff8ee', '#1b2433']
+];
+const DECK_MOVE = [[1.6, -6], [0.9, 5], [1.2, -4], [0.5, 3], [0.8, -3], [0.3, 2], [1, -5], [0.6, 4]];
+
+function useIsPhone() {
+  const q = '(max-width: 767px)';
+  const [phone, setPhone] = useState(() => typeof matchMedia === 'function' && matchMedia(q).matches);
+  useEffect(() => {
+    const m = matchMedia(q), on = () => setPhone(m.matches);
+    m.addEventListener('change', on); return () => m.removeEventListener('change', on);
+  }, []);
+  return phone;
+}
+
+function DeckCard({ p, i, n, prog, phone, onOpen }) {
+  const [bg, fg] = DECK_INK[i % DECK_INK.length];
+  const [speed, angle] = DECK_MOVE[i % DECK_MOVE.length];
+  // desktop: drift and tilt with the whole deck's progress
+  const x = useTransform(prog, v => (phone ? '0%' : `${-v * speed * 32}%`));
+  const rotate = useTransform(prog, v => (phone ? 0 : angle * v * 2));
+  // phones: card i rises over its slice of the scroll; every later card pushes it back a little
+  const y = useTransform(prog, v => {
+    if (!phone) return '0%';
+    const s = v * (n - 1) - (i - 1);
+    return i === 0 ? '0%' : `${Math.max(0, Math.min(1, 1 - s)) * 110}%`;
+  });
+  const scale = useTransform(prog, v => (phone ? 1 - 0.06 * Math.max(0, Math.min(n - 1 - i, v * (n - 1) - i)) : 1));
+  const github = p.url && p.url !== '#' && p.url.includes('github.com');
   return (
-    <motion.button type="button" className={`pcard${p.featured ? ' feat' : ''}`} onClick={onOpen}
-      onPointerMove={tilt} onPointerLeave={() => { rx.set(0); ry.set(0); }} style={{ rotateX: rx, rotateY: ry }}
-      initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.6, delay: Math.min(i, 4) * 0.07, ease: [0.2, 0.8, 0.2, 1] }}>
-      <span className="pc-top"><span className="n">{String(i + 1).padStart(2, '0')}</span>{p.featured && <span className="pc-seal">Featured</span>}</span>
-      <span className="label">{p.meta}</span>
-      <b>{p.name}</b>
-      <span className="pc-blurb">{p.blurb}</span>
-      {p.stack.length > 0 && <span className="tags">{p.stack.slice(0, 3).map(s => <span key={s}>{s}</span>)}</span>}
-      <span className="pc-open">Open <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" strokeWidth="1.6" /></svg></span>
-    </motion.button>
+    <motion.li className="dcard" style={{ x, rotate, y, scale, '--bg': bg, '--fg': fg, zIndex: i + 1 }}>
+      <div className="dc-inner">
+        <div className="dc-shot">
+          {p.img ? <img src={p.img} alt={`${p.name} screenshot`} loading="lazy" /> : <span className="dc-mono" aria-hidden="true">{p.name.slice(0, 1)}</span>}
+          {p.featured && <span className="dc-seal">Featured</span>}
+        </div>
+        <span className="dc-meta">{String(i + 1).padStart(2, '0')} · {p.meta}</span>
+        <h3>{p.name}</h3>
+        <p>{p.blurb}</p>
+        {p.stack.length > 0 && <span className="dc-tags">{p.stack.slice(0, 3).map(s => <span key={s}>{s}</span>)}</span>}
+        <span className="dc-btns">
+          {github && <a className="dc-gh" href={p.url} target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>}
+          <button type="button" className="dc-open" onClick={onOpen}>Details <span aria-hidden="true">→</span></button>
+        </span>
+      </div>
+    </motion.li>
   );
 }
 
-// Work: the valley painting gets the top of the section, every project sits in one sideways rail below it
-// (after 21st.dev's Apple Cards Carousel). Native scroll with snap, so phones swipe and the page never gets hijacked.
 export function Work() {
   const [open, setOpen] = useState(-1);
-  const rail = useRef(null);
-  const page = dir => { const r = rail.current; r.scrollBy({ left: dir * r.clientWidth * 0.8, behavior: 'smooth' }); };
+  const ref = useRef(null);
+  const phone = useIsPhone();
+  const { motionOn } = usePrefs();
+  const { scrollYProgress: prog } = useScroll({ target: ref, offset: ['start start', 'end end'] });
+  // the whole row: starts with the first card right of center, ends with the last card near the middle
+  const listX = useTransform(prog, v => (phone ? '0px' : `calc(${56 - 6 * v}vw - ${v * 100}%)`));
+  const hint = useTransform(prog, [0, 0.08], [1, 0]);
+  const n = projects.length;
   return (
     <section className="work" id="work" aria-labelledby="work-title">
-      <MountainSky />
       <div className="wrap">
         <motion.div className="head" {...head}><span className="label"><span className="jp" aria-hidden="true">波</span> · Work</span><h2 id="work-title">What I have built</h2></motion.div>
       </div>
-      <div className="rail-wrap">
-        <div className="wrap rail-bar">
-          <span className="label">{projects.length} projects · swipe sideways</span>
-          <span className="rail-btns">
-            <button type="button" onClick={() => page(-1)} aria-label="Previous projects">‹</button>
-            <button type="button" onClick={() => page(1)} aria-label="Next projects">›</button>
-          </span>
+      {motionOn ? (
+        <div className="deck" ref={ref} style={{ '--n': n }}>
+          <div className="deck-stage">
+            <MountainSky />
+            <motion.ul className="deck-list" style={{ x: listX }} aria-label={`${n} projects`}>
+              {projects.map((p, i) => <DeckCard key={p.name} p={p} i={i} n={n} prog={prog} phone={phone} onOpen={() => setOpen(i)} />)}
+            </motion.ul>
+            <motion.span className="deck-hint" style={{ opacity: hint }}>{n} projects · keep scrolling</motion.span>
+          </div>
         </div>
-        <div className="rail" ref={rail} role="list">
-          {projects.map((p, i) => <div role="listitem" key={p.name}><ProjectCard p={p} i={i} onOpen={() => setOpen(i)} /></div>)}
-        </div>
-      </div>
+      ) : (
+        <ul className="deck-still wrap">
+          {projects.map((p, i) => <DeckCard key={p.name} p={p} i={i} n={n} prog={prog} phone={false} onOpen={() => setOpen(i)} />)}
+        </ul>
+      )}
       <AnimatePresence>{open >= 0 && <Drawer p={projects[open]} i={open} onClose={() => setOpen(-1)} />}</AnimatePresence>
     </section>
   );
