@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useScroll, useTransform, useMotionValueEvent, useVelocity } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
 import { featured } from '../data.js';
-import { Birds as SkyBirds, Storm } from './MountainSky.jsx';
+import { Storm } from './MountainSky.jsx';
 import { resolveSky } from '../sky.js';
 
 // Story intro: one pinned stage, five scenes cut together like a film. The sky runs one long day
@@ -148,11 +148,11 @@ const Scenes = {
     );
   },
 
-  // 03 what drives me: Hiroshige's Driving Rain at Shono. Travellers bent into the storm, faces hidden under hats
-  // and straw capes; a rain layer slides over the print so the storm keeps falling.
+  // 03 what drives me: Kawase Hasui's Shin Ohashi (1926). Night rain on an iron bridge, lamps burning, one rickshaw
+  // still out in it; a rain layer slides over the print so the storm keeps falling.
   why: function Drive({ q }) {
     return (
-      <Painting q={q} src="/art/story/shono.jpg" pos="45% 55%" origin="40% 60%" zoom={[1.04, 1.18]}>
+      <Painting q={q} src="/art/story/shin-ohashi.jpg" pos="45% 58%" origin="50% 55%" zoom={[1.04, 1.18]}>
         <span className="st-rain" />
       </Painting>
     );
@@ -173,14 +173,10 @@ const Scenes = {
     );
   },
 
-  // 05 come in: Hiroshige's Night Snow at Kanbara. Travellers under umbrellas walk toward the lit village; the camera
-  // follows them in, snow keeps falling, and the light takes over and hands off to the portfolio.
-  enter: function Village({ q }) {
-    return (
-      <Painting q={q} src="/art/story/kanbara.jpg" pos="60% 60%" origin="62% 62%" zoom={[1, 1.6]}>
-        <span className="st-snow" />
-      </Painting>
-    );
+  // 05 come in: Kawase Hasui's Ioridani Pass (1923). Dusk over the valley, the river silver, the village windows lit;
+  // the camera sinks toward the lights until the flash hands off to the portfolio.
+  enter: function Valley({ q }) {
+    return <Painting q={q} src="/art/story/ioridani.jpg" pos="50% 52%" origin="50% 62%" zoom={[1, 1.5]} />;
   }
 };
 
@@ -272,8 +268,6 @@ function portfolioTop() {
 // The opening shot, no words: a lone figure (Rayyan) sits on a cliff edge above a sea of clouds, laptop glowing,
 // facing a low sun. It follows the visitor's sky like the hero (moon, stars and fireflies at night, rain and
 // lightning in a storm, birds by day), and the camera eases in as the story begins.
-const TC_STARS = Array.from({ length: 40 }, (_, i) => ({ x: (i * 37.3) % 100, y: (i * 23.1) % 46, d: (i * 0.41) % 4, s: i % 6 === 0 ? 2.6 : 1.4 }));
-const TC_FLIES = Array.from({ length: 8 }, (_, i) => ({ x: 38 + ((i * 13) % 26), y: 58 + ((i * 7) % 18), d: (i * 0.9) % 6, t: 6 + (i % 4) }));
 
 function TitleCard() {
   const ref = useRef(null);
@@ -287,23 +281,19 @@ function TitleCard() {
     scrollTo({ top: portfolioTop(), behavior: motionOn ? 'smooth' : 'instant' });
   };
   return (
-    <section ref={ref} className={`tc tc-${mode}`} aria-label="A lone fisherman on a rock above crashing waves, Mount Fuji in the distance (Hokusai)">
+    <section ref={ref} className={`tc tc-${mode}`} aria-labelledby="tc-name">
       <div className="tc-frame">
-        {/* Hokusai, Kajikazawa in Kai Province: a lone fisherman on a rock over the surf, Fuji beyond */}
-        <motion.img className="tc-paint" src="/art/story/kajikazawa.jpg" alt="" draggable={false} style={motionOn ? { scale } : undefined} />
+        {/* Kawase Hasui, Evening Snow at Terashima Village (1920): one walker under an umbrella, going on alone */}
+        <motion.img className="tc-paint" src="/art/story/terashima.jpg" alt="" draggable={false} style={motionOn ? { scale } : undefined} />
         <span className="tc-grade" aria-hidden="true" />
-        <span className="tc-mist m1" aria-hidden="true" /><span className="tc-mist m2" aria-hidden="true" />
-
-        <div className="tc-stars" aria-hidden="true">{TC_STARS.map((s, i) => <i key={i} style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.s, height: s.s, animationDelay: `${-s.d}s` }} />)}</div>
-        {mode === 'night' && motionOn && TC_FLIES.map((f, i) => <span key={i} className="st-fly" style={{ left: `${f.x}%`, top: `${f.y}%`, animationDelay: `${-f.d}s`, animationDuration: `${f.t}s` }} />)}
-        {motionOn && mode !== 'night' && mode !== 'storm' && <SkyBirds crane />}
-        {motionOn && mode === 'storm' && <Storm sound={sound} />}
-
-        {motionOn && mode !== 'night' && mode !== 'storm' && (
-          <div className="tc-petals" aria-hidden="true">{[0, 1, 2, 3, 4, 5, 6, 7].map(i => <i key={i} style={{ left: `${8 + i * 12}%`, animationDelay: `${-i * 1.7}s`, animationDuration: `${9 + (i % 3) * 3}s` }} />)}</div>
-        )}
+        {motionOn && (mode === 'storm' ? <Storm sound={sound} /> : <span className="st-snow tc-snow" aria-hidden="true" />)}
         <span className="tc-grain" aria-hidden="true" />
-        <span className="tc-seal" aria-hidden="true"><i /><i /><i /></span>
+        <div className="tc-aura">
+          <p className="tc-kicker">Quiet steps. Loud ideas.</p>
+          <h1 className="tc-name" id="tc-name" aria-label="Rayyan Syed">
+            {[...'Rayyan Syed'].map((ch, i) => <span key={i} aria-hidden="true" style={{ animationDelay: `${0.25 + i * 0.06}s` }}>{ch === ' ' ? ' ' : ch}</span>)}
+          </h1>
+        </div>
         <motion.div className="tc-cue" style={motionOn ? { opacity: cue } : undefined}>
           <span className="tc-scroll" aria-hidden="true"><i /></span>
           <button type="button" className="tc-skip" onClick={skip}>Skip to portfolio</button>

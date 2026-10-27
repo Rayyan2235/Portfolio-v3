@@ -258,5 +258,5 @@ function SeaBand() {
 }
 
 export function Footer() {
-  return <footer><div className="wrap"><span>Rayyan Syed, 2026. Drawn with the Daybreak design system.</span><span>Art after Katsushika Hokusai, Utagawa Hiroshige and Kano Chikanobu: public domain prints from The Met, the Cleveland Museum of Art, the MFA Boston and the Musée Guimet, via Wikimedia Commons.</span></div></footer>;
+  return <footer><div className="wrap"><span>Rayyan Syed, 2026. Drawn with the Daybreak design system.</span><span>Art after Kawase Hasui, Katsushika Hokusai, Utagawa Hiroshige and Kano Chikanobu: public domain prints via Wikimedia Commons and The Met.</span></div></footer>;
 }

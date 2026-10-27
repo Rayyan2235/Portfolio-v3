@@ -85,8 +85,9 @@ A few decisions worth knowing:
 * Kano Chikanobu, *Crane, Tortoise, Pine, and Bamboo under a Rising Sun*. The Met, object 45728, public domain.
 * Matsumura Goshun, *Cherry Blossoms*. The Met, object 49049, public domain.
 * Story chapters and section backdrops (`public/art/story`), all public domain or CC0 via Wikimedia Commons:
-  * Katsushika Hokusai, *Kajikazawa in Kai Province* and *Fine Wind, Clear Morning* (Red Fuji).
-  * Utagawa Hiroshige, *The Whirlpools of Awa* (The Met DP146864), *Driving Rain at Shōno* (Cleveland Museum of Art 1948.306), *Fireworks at Ryōgoku* (Musée Guimet EO1841), *Night Snow at Kanbara* (Museum of Fine Arts, Boston), *Evening Cherry Blossoms at Gotenyama* (The Met DP123249).
+  * Kawase Hasui, *Evening Snow at Terashima Village* (1920), *Shin Ōhashi* (1926) and *Ioridani Pass* (1923). Public domain in Japan (artist died 1957) and in the US (published before 1931).
+  * Katsushika Hokusai, *Fine Wind, Clear Morning* (Red Fuji).
+  * Utagawa Hiroshige, *The Whirlpools of Awa* (The Met DP146864), *Fireworks at Ryōgoku* (Musée Guimet EO1841), *Evening Cherry Blossoms at Gotenyama* (The Met DP123249).
 * `src/components/reactbits/Stack` from [React Bits](https://reactbits.dev) by David Haz, MIT + Commons Clause. Free to use here; the component itself may not be resold.
 * The opening is adapted from 21st.dev's scroll expansion hero.
 * Fonts: Fraunces, Figtree, Geist Mono and Caveat, SIL Open Font License 1.1.
