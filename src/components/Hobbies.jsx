@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
-import { siu } from '../audio.js';
+import { siu as playSiu } from '../audio.js';
 
 // Off the clock: the things outside code, written on ema, the wooden wish plaques that hang at Japanese shrines.
 // Behind them, the red sky and plum branches of Hiroshige's Plum Garden at Kameido (red, like Old Trafford).
@@ -43,7 +43,7 @@ function Ema({ e, i }) {
       <span className="ema-cord" aria-hidden="true" />
       <div className="ema-board" onPointerMove={tilt} onPointerLeave={ev => ev.currentTarget.style.setProperty('--tx', '0deg')}
         {...(isBall ? { role: 'button', tabIndex: 0, 'aria-label': 'Football: Manchester United. GOAT: Ronaldo. Press for his celebration, with sound.',
-          onClick: () => { setSiu(n => n + 1); siu(); }, onKeyDown: ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); setSiu(n => n + 1); siu(); } } } : {})}>
+          onClick: () => { setSiu(n => n + 1); playSiu(); }, onKeyDown: ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); setSiu(n => n + 1); playSiu(); } } } : {})}>
         <span className="ema-hole" aria-hidden="true" />
         <span className="ema-icon"><e.Icon /></span>
         <h3>{e.title}</h3>
