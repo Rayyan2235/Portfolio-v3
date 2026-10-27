@@ -41,7 +41,7 @@ function CraneGlide() {
   const rotate = useTransform(scrollYProgress, [0, 1], [4, -6]);
   return (
     <div ref={ref} className="crane-sky" aria-hidden="true">
-      <motion.img className="crane-ink" src="/art/crane-ink.jpg" alt="" style={motionOn ? { x, y, rotate } : undefined} />
+      <motion.img className="crane-ink" src="/art/crane-alpha.png" alt="" style={motionOn ? { x, y, rotate } : undefined} />
     </div>
   );
 }
@@ -258,5 +258,5 @@ function SeaBand() {
 }
 
 export function Footer() {
-  return <footer><div className="wrap"><span>Rayyan Syed, 2026. Drawn with the Daybreak design system.</span><span>Art after Katsushika Hokusai, Utagawa Hiroshige and Kano Chikanobu: public domain prints from The Met, the Art Institute of Chicago and the Musée Guimet, via Wikimedia Commons.</span></div></footer>;
+  return <footer><div className="wrap"><span>Rayyan Syed, 2026. Drawn with the Daybreak design system.</span><span>Art after Katsushika Hokusai, Utagawa Hiroshige and Kano Chikanobu: public domain prints from The Met, the Cleveland Museum of Art, the MFA Boston and the Musée Guimet, via Wikimedia Commons.</span></div></footer>;
 }

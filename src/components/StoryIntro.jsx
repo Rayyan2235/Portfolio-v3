@@ -10,22 +10,16 @@ import { resolveSky } from '../sky.js';
 // SVG + CSS + canvas + motion only. Lines are placeholders until Rayyan writes them (ADR 0014).
 // Research: vault reference/story-components, docs/story-handoff.md.
 export const BEATS = [
-  { id: 'hello', label: 'Hello', line: '[YOUR LINE: greeting, e.g. who you are in one breath]' },
-  { id: 'from', label: 'Where from', line: '[YOUR LINE: where you come from and where you are now]' },
-  { id: 'why', label: 'What drives me', line: '[YOUR LINE: what pulls you toward building things]' },
-  { id: 'build', label: 'What I build', line: '[YOUR LINE: what you make and for whom]' },
-  { id: 'enter', label: 'Come in', line: '[YOUR LINE: the invitation into the portfolio]' }
+  { id: 'hello', label: 'Hello', line: 'Hi, I am Rayyan. I build AI you can talk to.' },
+  { id: 'from', label: 'Where from', line: 'From Dubai to State College, one long voyage.' },
+  { id: 'why', label: 'What drives me', line: 'I build through the storm, and I ship when it clears.' },
+  { id: 'build', label: 'What I build', line: 'Agents for warehouse yards, a pharmacist for every counter, a voice that listens.' },
+  { id: 'enter', label: 'Come in', line: 'The lights are on. Come in.' }
 ];
 const N = BEATS.length;
 const SEEN_KEY = 'v3-story-seen';
 const C = { sun: '#e4572e', torii: '#c8361f', ink: '#1b2433', sea: '#1d3557', paper: '#fff8ee', glow: '#f7b27a', peach: '#fde7c4' };
 
-// The day, keyed to whole-story progress g (scene i spans i/5 .. (i+1)/5).
-const SKY_AT = [0, 0.16, 0.26, 0.38, 0.47, 0.56, 0.64, 0.8, 0.87, 0.95, 1];
-const SKY_TOP = ['#fde2bd', '#fde7c4', '#cfe5ec', '#d6e6e6', '#f2a46b', '#7d4a6e', '#101a2e', '#0b1424', '#2a2346', '#f7b27a', '#fff3e2'];
-const SKY_BOT = ['#fff8ee', '#fff8ee', '#fff8ee', '#f6eedf', '#f9cf9e', '#e7926a', '#1d3557', '#16294a', '#6a4a62', '#fde7c4', '#fff8ee'];
-const TEXT_AT = [0, 0.5, 0.57, 0.88, 0.94, 1];
-const TEXT = [C.ink, C.ink, C.paper, C.paper, C.ink, C.ink];
 
 function Words({ text, progress, range = [0.08, 0.5] }) {
   // reveals the line word by word, each word sharpening out of a blur
@@ -41,9 +35,8 @@ function Words({ text, progress, range = [0.08, 0.5] }) {
 }
 function Word({ progress, from, to, children }) {
   const opacity = useTransform(progress, [from, to], [0.12, 1]);
-  const filter = useTransform(progress, [from, to], ['blur(6px)', 'blur(0px)']);
   const y = useTransform(progress, [from, to], [10, 0]);
-  return <motion.span style={{ opacity, filter, y, display: 'inline-block' }}>{children}&nbsp;</motion.span>;
+  return <motion.span style={{ opacity, y, display: 'inline-block' }}>{children}&nbsp;</motion.span>;
 }
 
 // A scene fades and pushes in as the previous one pushes past the camera.
@@ -80,9 +73,6 @@ function InkDefs() {
   );
 }
 
-// Fixed pseudo random so stars and fireflies sit in the same place every render.
-const STARS = Array.from({ length: 70 }, (_, i) => ({ x: (i * 37.7) % 100, y: (i * 53.3) % 64, s: i % 9 === 0 ? 2.6 : 1.3, d: (i * 0.37) % 4 }));
-const FLIES = Array.from({ length: 12 }, (_, i) => ({ x: 8 + ((i * 29) % 84), y: 30 + ((i * 41) % 55), d: (i * 0.7) % 6, t: 7 + (i % 5) }));
 
 function Birds() {
   return (
@@ -120,19 +110,50 @@ const Scenes = {
     );
   },
 
-  // 02 the voyage: Hiroshige's Whirlpools of Awa, a triptych wide enough for the camera to sail across it.
+  // 02 the voyage: Hiroshige's Whirlpools of Awa, a triptych wide enough for the camera to sail across it, with
+  // the route from Dubai to State College inked over it and a small boat sailing the line as it draws.
   from: function Voyage({ q }) {
-    return <Painting q={q} src="/art/story/naruto.jpg" wide pan={['0%', '-33%']} zoom={[1.06, 1.1]} origin="0% 50%" />;
+    const route = useRef(null);
+    const boat = useRef(null);
+    const pathLength = useTransform(q, [0.08, 0.8], [0, 1]);
+    const place = v => {
+      const el = route.current;
+      if (!el || !boat.current) return;
+      const L = el.getTotalLength();
+      const a = el.getPointAtLength(v * L), b = el.getPointAtLength(Math.min(L, v * L + 2));
+      const tilt = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
+      boat.current.setAttribute('transform', `translate(${a.x} ${a.y}) rotate(${tilt * 0.3})`);
+    };
+    useMotionValueEvent(pathLength, 'change', place);
+    useEffect(() => place(pathLength.get()), []); // eslint-disable-line react-hooks/exhaustive-deps
+    const d = 'M110 330 C 270 120, 470 380, 640 220 S 850 140, 890 250';
+    return (
+      <Painting q={q} src="/art/story/naruto.jpg" wide pan={['0%', '-33%']} zoom={[1.06, 1.1]} origin="0% 50%">
+        <svg className="st-route" viewBox="0 0 1000 480" preserveAspectRatio="xMidYMid meet">
+          <path d={d} className="st-route-guide" />
+          <motion.path d={d} className="st-route-halo" style={{ pathLength }} />
+          <motion.path ref={route} d={d} className="st-route-ink" style={{ pathLength }} />
+          <circle cx="110" cy="330" r="10" className="st-pin a" />
+          <circle cx="890" cy="250" r="10" className="st-pin b" />
+          <g className="st-tag" transform="translate(110 380)"><rect x="-62" y="-24" width="124" height="40" rx="20" /><text textAnchor="middle" y="6">Dubai</text></g>
+          <g className="st-tag" transform="translate(890 300)"><rect x="-92" y="-24" width="184" height="40" rx="20" /><text textAnchor="middle" y="6">State College</text></g>
+          <g ref={boat}>
+            <g className="st-bob">
+              <path d="M-24 0 L24 0 L15 13 L-15 13 Z" className="hull" />
+              <path d="M-2 -3 L-2 -40 L21 -6 Z" className="sail" />
+            </g>
+          </g>
+        </svg>
+      </Painting>
+    );
   },
 
-  // 03 what drives me: Hokusai's Fuji with lightning below the summit. The painted bolt flashes, the crane crosses.
+  // 03 what drives me: Hiroshige's Driving Rain at Shono. Travellers bent into the storm, faces hidden under hats
+  // and straw capes; a rain layer slides over the print so the storm keeps falling.
   why: function Drive({ q }) {
-    const crane = useTransform(q, [0, 1], ['-5%', '-290%']);
-    const craneY = useTransform(q, [0, 0.5, 1], [26, -6, 10]);
     return (
-      <Painting q={q} src="/art/story/thunder-fuji.jpg" pos="64% 50%" origin="62% 30%" zoom={[1.05, 1.22]} grade="g-dusk">
-        <span className="st-bolt" />
-        <div className="st-skyband"><motion.img className="st-crane" src="/art/crane-alpha.png" alt="" style={{ x: crane, y: craneY }} /></div>
+      <Painting q={q} src="/art/story/shono.jpg" pos="45% 55%" origin="40% 60%" zoom={[1.04, 1.18]}>
+        <span className="st-rain" />
       </Painting>
     );
   },
@@ -152,10 +173,14 @@ const Scenes = {
     );
   },
 
-  // 05 come in: Hokusai's travellers on the pine road at Hodogaya. The camera walks with them toward Fuji,
-  // closer and closer, until the light takes over and hands off to the portfolio.
-  enter: function Road({ q }) {
-    return <Painting q={q} src="/art/story/hodogaya.jpg" pos="40% 50%" origin="40% 45%" zoom={[1, 1.7]} grade="g-sunrise" />;
+  // 05 come in: Hiroshige's Night Snow at Kanbara. Travellers under umbrellas walk toward the lit village; the camera
+  // follows them in, snow keeps falling, and the light takes over and hands off to the portfolio.
+  enter: function Village({ q }) {
+    return (
+      <Painting q={q} src="/art/story/kanbara.jpg" pos="60% 60%" origin="62% 62%" zoom={[1, 1.6]}>
+        <span className="st-snow" />
+      </Painting>
+    );
   }
 };
 
@@ -318,12 +343,7 @@ function Film() {
     if (v > 0.95) { try { localStorage.setItem(SEEN_KEY, '1'); } catch { /* storage blocked */ } }
   });
 
-  const top = useTransform(g, SKY_AT, SKY_TOP);
-  const bot = useTransform(g, SKY_AT, SKY_BOT);
-  const background = useTransform([top, bot], ([t, b]) => `linear-gradient(180deg, ${t} 0%, ${b} 100%)`);
-  const color = useTransform(g, TEXT_AT, TEXT);
-  const night = useTransform(g, [0, 0.5, 0.6, 0.86, 0.94], [0, 0, 1, 1, 0]);
-  const petals = useTransform(g, [0, 0.14, 0.22, 0.82, 0.88, 1], [1, 1, 0, 0, 1, 1]);
+  const petals = useTransform(g, [0, 0.14, 0.22], [1, 1, 0]); // dawn only; the last chapter has its own snow
   // walking through the torii ends in light; lives on the stage so it can never cover the page below
   const flash = useTransform(g, [0.956, 1], [0, 1]);
 
@@ -342,19 +362,14 @@ function Film() {
   return (
     <div ref={ref} className="st-root" aria-label="A short story about Rayyan">
       <InkDefs />
-      <motion.div className="st-stage" style={{ color }}>
-        <motion.div className="st-sky" style={{ background }} />
-        <motion.div className="st-stars" style={{ opacity: night }} aria-hidden="true">
-          {STARS.map((s, i) => <i key={i} style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.s, height: s.s, animationDelay: `${-s.d}s` }} />)}
-        </motion.div>
+      <div className="st-stage">
         {BEATS.map((b, i) => {
           const Art = Scenes[b.id];
           return <Scene key={b.id} i={i} g={g}>{q => <Art q={q} />}</Scene>;
         })}
         <Petals strength={petals} wind={wind} live={inStory} />
         <motion.span className="st-flash" style={{ opacity: flash }} aria-hidden="true" />
-        <span className="st-grain" aria-hidden="true" />
-      </motion.div>
+      </div>
       <AnimatePresence>{inStory && (
       <motion.div className="st-dock" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}>
         <div className="st-dots" aria-hidden="true">{BEATS.map((b, i) => <i key={b.id} className={i <= active ? 'on' : ''} />)}</div>

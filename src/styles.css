@@ -515,3 +515,42 @@ html.still .st-bolt, html.still .st-burst { animation: none; }
 .cherry-fall { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
 .cherry-fall i { position: absolute; top: -20px; width: 11px; height: 8px; border-radius: 70% 0 70% 0; background: #f7c3c9; box-shadow: 0 0 1px rgba(150, 60, 80, .3); animation: tc-fall linear infinite; }
 html.still .cherry-fall { display: none; }
+
+/* smooth scrolling: nothing blends over a moving painting (mix-blend-mode on top of a layer that moves every frame
+   forces a full repaint each tick). Grades are plain translucent overlays, moving art is its own GPU layer. */
+.st-paint > img, .tc-paint { will-change: transform; backface-visibility: hidden; }
+.st-grade { mix-blend-mode: normal; }
+.g-dawn .st-grade { background: linear-gradient(180deg, rgba(255, 196, 150, .22), rgba(255, 230, 200, .08)); }
+.st-burst { mix-blend-mode: normal; will-change: transform, opacity; }
+.tc-grade { mix-blend-mode: normal; }
+.tc-dawn .tc-grade { opacity: .28; } .tc-dusk .tc-grade { opacity: .42; } .tc-night .tc-grade { opacity: .7; } .tc-storm .tc-grade { opacity: .5; }
+.tc-grain { mix-blend-mode: normal; opacity: .22; }
+.mtn-tint { mix-blend-mode: normal; }
+.mtn-dawn .mtn-tint { opacity: .3; } .mtn-dusk .mtn-tint { opacity: .4; } .mtn-night .mtn-tint { opacity: .68; } .mtn-storm .mtn-tint { opacity: .5; }
+.mtn-clouds { animation: mtn-drift 34s ease-in-out infinite alternate; will-change: transform; }
+.mtn-clouds .mtn-drift { animation: none; }
+.cherry-wash { mix-blend-mode: normal; background: linear-gradient(180deg, rgba(246, 201, 207, .35), rgba(251, 227, 227, .18) 60%, rgba(243, 208, 214, .3)); }
+
+/* 02 the route from Dubai to State College, inked over the whirlpools */
+.st-route { position: absolute; left: 4%; right: 4%; top: 10%; height: 56%; width: 92%; z-index: 1; overflow: visible; }
+.st-route-guide { fill: none; stroke: #fff8ee; stroke-opacity: .55; stroke-width: 3; stroke-dasharray: 4 12; stroke-linecap: round; }
+.st-route-halo { fill: none; stroke: #fff8ee; stroke-width: 14; stroke-linecap: round; opacity: .7; }
+.st-route-ink { fill: none; stroke: #1b2433; stroke-width: 6; stroke-linecap: round; }
+.st-pin.a { fill: #e4572e; stroke: #fff8ee; stroke-width: 4; } .st-pin.b { fill: #1d3557; stroke: #fff8ee; stroke-width: 4; }
+.st-tag rect { fill: #fff8ee; } .st-tag text { font: 600 26px Caveat, "Comic Sans MS", cursive; fill: #1b2433; }
+.st-route .hull { fill: #1b2433; } .st-route .sail { fill: #fff8ee; stroke: #1b2433; stroke-width: 2; }
+
+/* 03 rain over Shono, 05 snow over Kanbara: tiled layers that slide on the GPU */
+.st-rain, .st-snow { position: absolute; left: 0; right: 0; top: -40%; height: 180%; z-index: 1; pointer-events: none; will-change: transform; }
+.st-rain { background-image: repeating-linear-gradient(104deg, transparent 0 22px, rgba(225, 232, 240, .32) 22px 23.5px, transparent 23.5px 47px);
+  background-size: 100% 180px; animation: st-rainfall .45s linear infinite; }
+@keyframes st-rainfall { to { transform: translate3d(-12px, 180px, 0); } }
+.st-snow { background-image: radial-gradient(2.4px 2.4px at 20px 30px, #fff 99%, transparent), radial-gradient(1.8px 1.8px at 90px 80px, #fff 99%, transparent),
+  radial-gradient(2.8px 2.8px at 150px 20px, #fff 99%, transparent), radial-gradient(1.6px 1.6px at 60px 140px, #fff 99%, transparent), radial-gradient(2.2px 2.2px at 170px 120px, #fff 99%, transparent);
+  background-size: 200px 160px; opacity: .85; animation: st-snowfall 7s linear infinite; }
+@keyframes st-snowfall { to { transform: translate3d(30px, 160px, 0); } }
+html.still .st-rain, html.still .st-snow { animation: none; }
+@media (max-width: 767px) { .st-route { top: 14%; height: 44%; } .st-tag text { font-size: 34px; } }
+
+/* the gliding crane is a transparent PNG now, so it moves without blending */
+.crane-ink { mix-blend-mode: normal; will-change: transform; }
