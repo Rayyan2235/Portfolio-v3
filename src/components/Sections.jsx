@@ -46,44 +46,6 @@ function CraneGlide() {
   );
 }
 
-// The cherry branch hangs in from the corner, sways, and lets petals go.
-function BlossomBranch() {
-  const { motionOn } = usePrefs();
-  const cvRef = useRef(null), boxRef = useRef(null);
-  useEffect(() => {
-    if (!motionOn) return undefined;
-    const cv = cvRef.current, box = boxRef.current, c = cv.getContext('2d');
-    let W = 0, H = 0, raf = 0, vis = false;
-    const petals = [];
-    const size = () => { const d = Math.min(devicePixelRatio || 1, 2); W = box.clientWidth; H = box.clientHeight; cv.width = W * d; cv.height = H * d; c.setTransform(d, 0, 0, d, 0, 0); };
-    size(); const ro = new ResizeObserver(size); ro.observe(box);
-    const io = new IntersectionObserver(es => { vis = es[0].isIntersecting; }); io.observe(box);
-    // petals leave from where the blossoms are: the right half, upper two thirds
-    const spawn = () => ({ x: W * (0.55 + Math.random() * 0.45), y: H * (0.05 + Math.random() * 0.6), vx: -0.25 - Math.random() * 0.45, vy: 0.35 + Math.random() * 0.45, r: Math.random() * 6, s: 3 + Math.random() * 3.5, ph: Math.random() * 6, a: 0 });
-    const loop = () => {
-      raf = requestAnimationFrame(loop);
-      if (!vis) return;
-      if (petals.length < 26 && Math.random() < 0.08) petals.push(spawn());
-      c.clearRect(0, 0, W, H);
-      for (let i = petals.length - 1; i >= 0; i--) {
-        const p = petals[i]; p.ph += 0.03; p.x += p.vx + Math.sin(p.ph) * 0.35; p.y += p.vy; p.r += 0.02; p.a = Math.min(1, p.a + 0.03);
-        if (p.y > H + 10 || p.x < -10) { petals.splice(i, 1); continue; }
-        c.save(); c.globalAlpha = p.a * 0.85; c.translate(p.x, p.y); c.rotate(p.r); c.scale(1, Math.cos(p.ph * 1.4));
-        c.beginPath(); c.moveTo(0, -p.s * 0.55); c.lineTo(p.s * 0.22, -p.s); c.bezierCurveTo(p.s * 1.05, -p.s * 0.7, p.s * 0.65, p.s * 0.75, 0, p.s); c.bezierCurveTo(-p.s * 0.65, p.s * 0.75, -p.s * 1.05, -p.s * 0.7, -p.s * 0.22, -p.s); c.closePath();
-        c.fillStyle = i % 3 ? '#f2b8c6' : '#e9a3b4'; c.fill(); c.restore();
-      }
-    };
-    raf = requestAnimationFrame(loop);
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); };
-  }, [motionOn]);
-  return (
-    <div ref={boxRef} className="branch" aria-hidden="true">
-      <img className="branch-ink" src="/art/blossom-ink.jpg" alt="" />
-      <canvas ref={cvRef} className="branch-petals" />
-    </div>
-  );
-}
-
 export function Statement() {
   return (
     <section className="statement" aria-label="Summary">
@@ -126,6 +88,18 @@ function Drawer({ p, i, onClose }) {
         {p.url && p.url !== '#' && <a className="btn solid" href={p.url}>Read the code on GitHub</a>}
       </motion.aside>
     </>
+  );
+}
+
+// Behind the deck: Hiroshige's Evening Cherry Blossoms at Gotenyama, washed pink, with blossoms drifting across it.
+function CherryBackdrop() {
+  const { motionOn } = usePrefs();
+  return (
+    <div className="cherry" aria-hidden="true">
+      <img src="/art/story/gotenyama.jpg" alt="" draggable={false} />
+      <span className="cherry-wash" />
+      {motionOn && <div className="cherry-fall">{Array.from({ length: 18 }, (_, i) => <i key={i} style={{ left: `${(i * 37) % 100}%`, animationDelay: `${-i * 1.3}s`, animationDuration: `${9 + (i % 5) * 2}s` }} />)}</div>}
+    </div>
   );
 }
 
@@ -200,7 +174,7 @@ export function Work() {
       {motionOn ? (
         <div className="deck" ref={ref} style={{ '--n': n }}>
           <div className="deck-stage">
-            <MountainSky />
+            <CherryBackdrop />
             <motion.ul className="deck-list" style={{ x: listX }} aria-label={`${n} projects`}>
               {projects.map((p, i) => <DeckCard key={p.name} p={p} i={i} n={n} prog={prog} phone={phone} onOpen={() => setOpen(i)} />)}
             </motion.ul>
@@ -220,7 +194,7 @@ export function Work() {
 export function Experience() {
   return (
     <section className="exp" id="experience" aria-labelledby="exp-title">
-      <BlossomBranch />
+      <MountainSky />
       <div className="wrap">
       <motion.div className="head" {...head}><span className="label"><span className="jp" aria-hidden="true">葉</span> · Experience</span><h2 id="exp-title">Where I have worked</h2></motion.div>
       <ol className="rows">
@@ -284,5 +258,5 @@ function SeaBand() {
 }
 
 export function Footer() {
-  return <footer><div className="wrap"><span>Rayyan Syed, 2026. Drawn with the Daybreak design system.</span><span>Art after Hokusai, Kano Chikanobu and Matsumura Goshun. The Met, public domain.</span></div></footer>;
+  return <footer><div className="wrap"><span>Rayyan Syed, 2026. Drawn with the Daybreak design system.</span><span>Art after Katsushika Hokusai, Utagawa Hiroshige and Kano Chikanobu: public domain prints from The Met, the Art Institute of Chicago and the Musée Guimet, via Wikimedia Commons.</span></div></footer>;
 }

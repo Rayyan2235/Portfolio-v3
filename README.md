@@ -84,6 +84,9 @@ A few decisions worth knowing:
 * Katsushika Hokusai, *Under the Wave off Kanagawa*, ca. 1830 to 32. The Met, object 45434, public domain.
 * Kano Chikanobu, *Crane, Tortoise, Pine, and Bamboo under a Rising Sun*. The Met, object 45728, public domain.
 * Matsumura Goshun, *Cherry Blossoms*. The Met, object 49049, public domain.
+* Story chapters and section backdrops (`public/art/story`), all public domain or CC0 via Wikimedia Commons:
+  * Katsushika Hokusai, *Kajikazawa in Kai Province*, *Fine Wind, Clear Morning* (Red Fuji), *Shower Below the Summit*, *Hodogaya on the Tōkaidō* (The Met DP141068), *Tago Bay near Ejiri* (The Met DP141000).
+  * Utagawa Hiroshige, *The Whirlpools of Awa* (The Met DP146864), *Fireworks at Ryōgoku* (Musée Guimet EO1841), *Evening Cherry Blossoms at Gotenyama* (The Met DP123249).
 * `src/components/reactbits/Stack` from [React Bits](https://reactbits.dev) by David Haz, MIT + Commons Clause. Free to use here; the component itself may not be resold.
 * The opening is adapted from 21st.dev's scroll expansion hero.
 * Fonts: Fraunces, Figtree, Geist Mono and Caveat, SIL Open Font License 1.1.

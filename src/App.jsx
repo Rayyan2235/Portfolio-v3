@@ -28,8 +28,8 @@ function Page() {
         <StoryIntro />
         <ScrollExpandHero><GreatWaveHero><HeroText /></GreatWaveHero></ScrollExpandHero>
         <Statement />
-        <Work />
         <Experience />
+        <Work />
         <Contact toast={toast} />
       </main>
       <Footer />

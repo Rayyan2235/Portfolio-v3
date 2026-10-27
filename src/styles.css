@@ -459,3 +459,59 @@ html.still .tc-petals { display: none; }
 @keyframes st-step { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
 .st-fgwave { position: absolute; left: 0; bottom: -2px; width: 160%; height: 16%; fill: var(--sea); opacity: .35; pointer-events: none; }
 html.still .st-me-walk .leg { animation: none; }
+
+/* story chapters as full bleed paintings (public domain prints in public/art/story) */
+.st-scene { justify-content: flex-end; padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
+.st-scene .st-cap { color: #fff8ee; text-shadow: 0 2px 18px rgba(8, 10, 18, .55); }
+.st-art { z-index: 1; }
+.st-paint { position: absolute; inset: 0; z-index: 0; overflow: hidden; background: #1b2433; }
+.st-paint > img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; user-select: none; }
+.st-paint.wide > img { width: 150%; }
+.st-grade, .st-shade { position: absolute; inset: 0; pointer-events: none; }
+.st-grade { mix-blend-mode: multiply; }
+.g-dawn .st-grade { background: linear-gradient(180deg, #ffd9b8, #fff1e2); }
+.g-dusk .st-grade { background: linear-gradient(180deg, #c98a92, #f0b08c); }
+.g-sunrise .st-grade { background: linear-gradient(180deg, #ffd3a8, #fff6ea); }
+.st-shade { background: linear-gradient(180deg, rgba(10, 12, 20, .38), transparent 20%, transparent 48%, rgba(10, 12, 20, .82)); }
+.st-paint .st-mist { z-index: 1; opacity: .7; }
+.st-paint .st-birds { z-index: 1; color: #1b2433; }
+.st-bolt { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen; opacity: 0;
+  background: radial-gradient(ellipse 60% 50% at 80% 82%, rgba(255, 236, 214, .95), transparent 70%); animation: st-bolt 6.5s infinite; }
+@keyframes st-bolt { 0%, 86%, 100% { opacity: 0; } 88% { opacity: .9; } 90% { opacity: .15; } 92% { opacity: .75; } 95% { opacity: 0; } }
+.st-skyband { position: absolute; left: 0; right: 0; top: 8%; height: 40%; overflow: hidden; }
+.st-skyband .st-crane { top: 0; }
+.st-burst { position: absolute; width: clamp(110px, 16vw, 220px); aspect-ratio: 1; border-radius: 50%; opacity: 0; pointer-events: none; mix-blend-mode: screen;
+  background: repeating-conic-gradient(rgba(255, 214, 150, .95) 0 2.5deg, transparent 2.5deg 14deg);
+  -webkit-mask-image: radial-gradient(circle, transparent 18%, #000 30%, #000 46%, transparent 52%); mask-image: radial-gradient(circle, transparent 18%, #000 30%, #000 46%, transparent 52%);
+  animation: st-burst 4.2s ease-out infinite; }
+.st-burst.b0 { left: 12%; top: 8%; } .st-burst.b1 { left: 58%; top: 14%; animation-delay: -1.1s; width: clamp(80px, 11vw, 160px); }
+.st-burst.b2 { left: 30%; top: 26%; animation-delay: -2.3s; } .st-burst.b3 { left: 76%; top: 4%; animation-delay: -3.2s; width: clamp(90px, 12vw, 170px); }
+@keyframes st-burst { 0% { transform: scale(.2); opacity: 0; } 10% { opacity: 1; } 70% { opacity: .6; } 100% { transform: scale(1.15); opacity: 0; } }
+.st-nightart { height: clamp(150px, 34svh, 360px); }
+html.still .st-bolt, html.still .st-burst { animation: none; }
+
+/* title card: Kajikazawa, graded to the visitor's sky */
+.tc-paint { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 55% 50%; transform-origin: 55% 42%; user-select: none; }
+.tc-grade { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; opacity: 0; transition: opacity 1.2s;
+  background: linear-gradient(180deg, var(--sky-top), var(--sky-bot)); }
+.tc-dawn .tc-grade { opacity: .55; } .tc-dusk .tc-grade { opacity: .75; } .tc-night .tc-grade { opacity: .95; } .tc-storm .tc-grade { opacity: .85; }
+.tc-mist { position: absolute; height: 12px; border-radius: 999px; background: #fff8ee; opacity: .55; pointer-events: none; animation: mtn-drift 22s ease-in-out infinite alternate; }
+.tc-mist.m1 { top: 30%; left: 6%; width: 42%; } .tc-mist.m2 { top: 40%; left: 48%; width: 36%; height: 9px; animation-duration: 30s; animation-direction: alternate-reverse; }
+.tc-night .tc-mist { opacity: .12; }
+.tc-frame::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(10, 12, 20, .25), transparent 22%, transparent 70%, rgba(10, 12, 20, .45)); }
+
+/* experience on the mountain painting; the rows sit on paper so they never blend into the art */
+.exp .mtn { --mh: 1300px; top: 0; height: 100%; -webkit-mask-image: linear-gradient(transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(transparent, #000 8%, #000 92%, transparent); }
+.exp > .wrap { position: relative; z-index: 1; }
+.exp .head { display: inline-flex; flex-direction: column; gap: 6px; padding: 16px 22px; border-radius: 18px; background: rgba(255, 248, 238, .92); }
+.exp .rows { display: grid; gap: 14px; }
+.exp .rows li, .exp .rows li:last-child { border: 0; padding: 22px 24px; border-radius: 18px; background: rgba(255, 248, 238, .94); box-shadow: 0 14px 30px -18px rgba(10, 14, 24, .45); }
+
+/* projects on Hiroshige's evening cherry blossoms */
+.cherry { position: absolute; inset: 0; overflow: hidden; }
+.cherry > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 78%; }
+.cherry-wash { position: absolute; inset: 0; mix-blend-mode: multiply; background: linear-gradient(180deg, #f6c9cf, #fbe3e3 60%, #f3d0d6); }
+.cherry::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255, 248, 238, .5), transparent 14%, transparent 86%, rgba(255, 248, 238, .6)); }
+.cherry-fall { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.cherry-fall i { position: absolute; top: -20px; width: 11px; height: 8px; border-radius: 70% 0 70% 0; background: #f7c3c9; box-shadow: 0 0 1px rgba(150, 60, 80, .3); animation: tc-fall linear infinite; }
+html.still .cherry-fall { display: none; }
