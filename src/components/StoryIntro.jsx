@@ -10,11 +10,11 @@ import { resolveSky } from '../sky.js';
 // SVG + CSS + canvas + motion only. Lines are placeholders until Rayyan writes them (ADR 0014).
 // Research: vault reference/story-components, docs/story-handoff.md.
 export const BEATS = [
-  { id: 'hello', label: 'Hello', line: 'Hi, I am Rayyan. I want to leave things better than I found them.' },
-  { id: 'from', label: 'Where from', line: 'From Dubai to State College, one long voyage.' },
-  { id: 'why', label: 'What drives me', line: 'I build through the storm, and I ship when it clears.' },
-  { id: 'build', label: 'What I build', line: 'Agents for warehouse yards, a pharmacist for every counter, a companion for hard days.' },
-  { id: 'enter', label: 'Come in', line: 'The lights are on. Come in.' }
+  { id: 'hello', label: 'Hello', line: 'I am Rayyan. I walk toward the mountain and leave the path wider than I found it.' },
+  { id: 'from', label: 'Where from', line: 'From the sands of Dubai to the snows of State College, I crossed the water.' },
+  { id: 'why', label: 'What drives me', line: 'Rain does not stop the work. It only shows who keeps walking.' },
+  { id: 'build', label: 'What I build', line: 'Agents for the yard, a pharmacist for every counter, a companion for the long night.' },
+  { id: 'enter', label: 'Come in', line: 'The lanterns are lit. Step inside.' }
 ];
 const N = BEATS.length;
 const SEEN_KEY = 'v3-story-seen';
@@ -289,7 +289,7 @@ function TitleCard() {
         {motionOn && (mode === 'storm' ? <Storm sound={sound} /> : <span className="st-snow tc-snow" aria-hidden="true" />)}
         <span className="tc-grain" aria-hidden="true" />
         <div className="tc-aura">
-          <p className="tc-kicker">Quiet steps. Loud ideas.</p>
+          <p className="tc-kicker">Walk quietly. Leave a mark.</p>
           <h1 className="tc-name" id="tc-name" aria-label="Rayyan Syed">
             {[...'Rayyan Syed'].map((ch, i) => <span key={i} aria-hidden="true" style={{ animationDelay: `${0.25 + i * 0.06}s` }}>{ch === ' ' ? ' ' : ch}</span>)}
           </h1>

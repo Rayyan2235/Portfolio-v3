@@ -62,7 +62,7 @@ export default function Hobbies() {
       <div className="wrap hobby-wrap">
         <div className="hobby-head">
           <span className="label">Off the clock</span>
-          <h2 id="hobby-title">When the laptop closes</h2>
+          <h2 id="hobby-title">When the brush is set down</h2>
         </div>
         <ul className="ema-rail">{EMA.map((e, i) => <Ema key={e.id} e={e} i={i} />)}</ul>
         <p className="hobby-hint" aria-hidden="true">Tap the football one.</p>
