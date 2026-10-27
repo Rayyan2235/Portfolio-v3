@@ -36,7 +36,7 @@ export default function Nav({ onOpenMenu }) {
       <a className="l" href="#work" data-go="work">Work</a>
       <a className="l opt" href="#experience" data-go="experience">Experience</a>
       <a className="l" href={RESUME}>Resume</a>
-      <a className="cta" href="#contact" data-go="contact">Email</a>
+      <a className="cta" href="#contact" data-go="contact" data-magnet>Email</a>
       <button ref={btnRef} type="button" className="l sky-btn" aria-expanded={open} aria-haspopup="true" onClick={() => setOpen(o => !o)}>
         <span className={`sky-dot sky-dot-${now}`} aria-hidden="true" />{SKIES[now].label}
       </button>

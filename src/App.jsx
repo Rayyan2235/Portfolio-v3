@@ -8,6 +8,7 @@ import StoryIntro from './components/StoryIntro.jsx';
 import Nav from './components/Nav.jsx';
 import CommandMenu from './components/CommandMenu.jsx';
 import Ambient from './components/Ambient.jsx';
+import { Preloader, InkCursor, SmoothScroll, ToolWave } from './components/Flourish.jsx';
 import { HeroText, Statement, Work, Experience, Contact, Footer } from './components/Sections.jsx';
 
 // The 3D island (Shrine3D.jsx, Island in Sections.jsx) is hidden for now: too much GPU for visitors.
@@ -22,6 +23,9 @@ function Page() {
   return (
     <MotionConfig reducedMotion={motionOn ? 'never' : 'always'}>
     <TransitionProvider>
+      <Preloader />
+      <SmoothScroll />
+      <InkCursor />
       <Ambient />
       <Nav onOpenMenu={() => setMenu(true)} />
       <main>
@@ -29,6 +33,7 @@ function Page() {
         <ScrollExpandHero><GreatWaveHero><HeroText /></GreatWaveHero></ScrollExpandHero>
         <Statement />
         <Experience />
+        <ToolWave />
         <Work />
         <Contact toast={toast} />
       </main>

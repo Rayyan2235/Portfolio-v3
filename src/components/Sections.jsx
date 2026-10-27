@@ -142,7 +142,8 @@ function DeckCard({ p, i, n, prog, phone, onOpen }) {
   const github = p.url && p.url !== '#' && p.url.includes('github.com');
   return (
     <motion.li className="dcard" style={{ x, rotate, y, scale, '--bg': bg, '--fg': fg, zIndex: i + 1 }}>
-      <div className="dc-inner">
+      {/* a soft light follows the pointer across the card (after React Bits' Spotlight Card) */}
+      <div className="dc-inner" onPointerMove={e => { const r = e.currentTarget.getBoundingClientRect(); e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`); e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`); }}>
         <div className="dc-shot">
           {p.img ? <img src={p.img} alt={`${p.name} screenshot`} loading="lazy" /> : <span className="dc-mono" aria-hidden="true">{p.name.slice(0, 1)}</span>}
           {p.featured && <span className="dc-seal">Featured</span>}
@@ -239,8 +240,8 @@ export function Contact({ toast }) {
         <span className="label"><span className="jp" aria-hidden="true">日</span> · Contact</span>
         <h2 id="contact-title">Let's build something people can talk to.</h2>
         <p>Open to software and AI engineering internships and new grad roles. Email is fastest.</p>
-        <div className="mail"><code>{EMAIL}</code><button className="btn solid" type="button" onClick={copy}>Copy email</button></div>
-        <div className="btns center"><a className="btn" href={GITHUB}>GitHub</a><a className="btn" href={LINKEDIN}>LinkedIn</a><a className="btn" href={RESUME}>Resume</a></div>
+        <div className="mail"><code>{EMAIL}</code><button className="btn solid" type="button" onClick={copy} data-magnet>Copy email</button></div>
+        <div className="btns center"><a className="btn" href={GITHUB} data-magnet>GitHub</a><a className="btn" href={LINKEDIN} data-magnet>LinkedIn</a><a className="btn" href={RESUME} data-magnet>Resume</a></div>
       </div>
       <SeaBand />
     </section>
