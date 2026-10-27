@@ -652,7 +652,7 @@ html.still .nav a.cta::before, html.still .sky-dot { animation: none; }
 .hobby-head { align-self: flex-start; display: flex; flex-direction: column; gap: 6px; padding: 16px 22px; border-radius: 18px; background: rgba(255, 248, 238, .92); color: var(--ink); }
 .hobby-head h2 { margin: 0; }
 .ema-rail { list-style: none; margin: 0; padding: 26px 0 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(14px, 2.5vw, 34px);
-  border-top: 6px solid #2a1b22; border-radius: 3px; }
+  border-top: 6px solid #2a1b22; }
 .ema { position: relative; display: flex; flex-direction: column; align-items: center; }
 .ema-cord { width: 2px; height: 34px; margin-top: -26px; background: #c8361f; box-shadow: 4px 0 0 #c8361f; }
 .ema-board { --tx: 0deg; position: relative; width: 100%; max-width: 260px; min-height: 270px; padding: 46px 18px 22px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px;
