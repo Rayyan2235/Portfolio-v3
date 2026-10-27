@@ -566,3 +566,12 @@ html.still .st-rain, html.still .st-snow { animation: none; }
 @keyframes tc-fade { to { opacity: .85; } }
 .tc-frame::after { background: linear-gradient(180deg, rgba(10, 12, 20, .3), transparent 24%, transparent 48%, rgba(10, 12, 20, .72)); }
 html.still .tc-name span, html.still .tc-kicker { animation: none; opacity: 1; transform: none; }
+
+/* text motion (TextMotion.jsx): rotating hero phrase, counting numbers */
+.rt { display: inline; }
+.rt-phrase { display: inline; }
+.rt-ch { display: inline-block; will-change: transform; }
+.hero h1 .rt-hero { color: var(--sun); }
+.hero.sky-night h1 .rt-hero, .hero.sky-storm h1 .rt-hero { color: #f7b27a; }
+.cu-n { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }

@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useInView, useScroll, useTransform } from 'motion/react';
 import MountainSky from './MountainSky.jsx';
+import { RotatingText, Counted } from './TextMotion.jsx';
 import { usePrefs } from '../prefs.jsx';
 import { featured, scraps, experience, EMAIL, GITHUB, LINKEDIN, RESUME } from '../data.js';
 
 const head = { initial: { opacity: 0, y: 16 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-80px' }, transition: { duration: 0.6, ease: [0.2, 0.8, 0.2, 1] } };
+
+// The hero line keeps "I build" and turns over what comes next; every phrase is something on this site.
+const HERO_PHRASES = ['AI you can talk to.', 'voice tutors.', 'a therapy companion.', 'agents for warehouse yards.'];
 
 export function HeroText() {
   const [time, setTime] = useState('');
@@ -16,7 +20,7 @@ export function HeroText() {
     <>
       <p className="corner">Rayyan Syed<br />CS at Penn State, May 2027<br />University Park, {time}</p>
       <div className="ed">
-        <h1 id="hero-title">I build AI you can <em>talk to</em>.</h1>
+        <h1 id="hero-title" aria-label="I build AI you can talk to."><span aria-hidden="true">I build </span><RotatingText className="rt-hero" phrases={HERO_PHRASES} /></h1>
         <p>Voice tutors, a therapy companion, and agents that run real warehouse yards.</p>
       </div>
       <nav className="idx" aria-label="Sections">
@@ -199,7 +203,7 @@ export function Experience() {
       <motion.div className="head" {...head}><span className="label"><span className="jp" aria-hidden="true">葉</span> · Experience</span><h2 id="exp-title">Where I have worked</h2></motion.div>
       <ol className="rows">
         {experience.map(([when, title, body]) => (
-          <li key={title}><span className="when">{when}</span><div><h3>{title}</h3><p>{body}</p></div></li>
+          <li key={title}><span className="when">{when}</span><div><h3>{title}</h3><p><Counted text={body} /></p></div></li>
         ))}
       </ol>
       </div>
