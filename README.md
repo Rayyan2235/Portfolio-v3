@@ -90,7 +90,7 @@ A few decisions worth knowing:
   * Utagawa Hiroshige, *The Whirlpools of Awa* (The Met DP146864), *Fireworks at Ryōgoku* (Musée Guimet EO1841), *Evening Cherry Blossoms at Gotenyama* (The Met DP123249, cropped to the sky and blossoms) and *Plum Garden at Kameido* (Rijksmuseum RP-P-1956-743, cropped to the red sky and branches).
 * `src/components/reactbits/Stack` from [React Bits](https://reactbits.dev) by David Haz, MIT + Commons Clause. Free to use here; the component itself may not be resold.
 * The opening is adapted from 21st.dev's scroll expansion hero.
-* Fonts: Fraunces, Figtree, Geist Mono and Caveat, SIL Open Font License 1.1.
+* Fonts: Shippori Mincho B1, Yuji Boku, Zen Kaku Gothic New and Geist Mono, SIL Open Font License 1.1.
 
 ---
 
