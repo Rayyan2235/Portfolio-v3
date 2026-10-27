@@ -8,9 +8,11 @@ export const KINDS = {
   petals: { label: 'Sakura petals', inMs: 950, outMs: 1100 },
   leaves: { label: 'Maple leaves', inMs: 1000, outMs: 1100 },
   ink: { label: 'Sumi ink', inMs: 850, outMs: 900 },
-  storm: { label: 'Lightning', inMs: 520, outMs: 1000 }
+  storm: { label: 'Lightning', inMs: 520, outMs: 1000 },
+  water: { label: 'Water slash', inMs: 900, outMs: 900 },
+  thunder: { label: 'Thunder slash', inMs: 650, outMs: 900 }
 };
-const MIXED = { top: 'petals', work: 'wave', experience: 'leaves', contact: 'petals' };
+const MIXED = { top: 'petals', work: 'water', experience: 'leaves', hobbies: 'thunder', contact: 'petals' };
 
 const SEA = '#1d3557', MID = '#2a4a78', LIGHT = '#7fa3c9', CREAM = '#fff8ee', NIGHT = '#0f1729';
 const ease = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -127,9 +129,75 @@ function drawStorm(c, W, H, p, phase, parts) {
   c.stroke();
 }
 
+// Sword slashes, in the spirit of the breathing styles: an original effect, no characters or anime art.
+// Water: one blade stroke cuts the screen on a diagonal, then a wave floods out from the cut and covers it;
+// on the way out the water drains back into the cut.
+function drawWaterSlash(c, W, H, p, phase, parts) {
+  const ax = -W * 0.1, ay = H * 0.86, bx = W * 1.1, by = H * 0.14, len = Math.hypot(bx - ax, by - ay);
+  const ux = (bx - ax) / len, uy = (by - ay) / len, nx = -uy, ny = ux, D = Math.hypot(W, H);
+  const cut = (t, w, col, glow) => { c.save(); c.strokeStyle = col; c.lineWidth = w; c.lineCap = 'round'; c.shadowColor = glow; c.shadowBlur = 24; c.beginPath(); c.moveTo(ax, ay); c.lineTo(ax + (bx - ax) * t, ay + (by - ay) * t); c.stroke(); c.restore(); };
+  const ribbon = (h, wob) => {
+    // a band around the cut, its two edges rolling like water
+    const steps = 40, edge = s => { const pts = []; for (let i = 0; i <= steps; i++) { const t = i / steps, x = ax + (bx - ax) * t, y = ay + (by - ay) * t, o = h + Math.sin(t * 14 + wob) * h * 0.08 + Math.sin(t * 31 - wob) * 10; pts.push([x + nx * o * s, y + ny * o * s]); } return pts; };
+    const top = edge(1), bot = edge(-1).reverse();
+    c.beginPath(); [...top, ...bot].forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); c.closePath();
+    const g = c.createLinearGradient(ax + nx * h, ay + ny * h, ax - nx * h, ay - ny * h); g.addColorStop(0, SEA); g.addColorStop(0.5, MID); g.addColorStop(1, SEA); c.fillStyle = g; c.fill();
+    c.strokeStyle = 'rgba(255,248,238,.85)'; c.lineWidth = 5;
+    [top, bot].forEach(e => { c.beginPath(); e.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); c.stroke(); });
+    c.strokeStyle = 'rgba(159,211,255,.35)'; c.lineWidth = 2;
+    for (let k = 1; k < 5; k++) { const o = h * (k / 5); c.beginPath(); c.moveTo(ax + nx * o, ay + ny * o); c.lineTo(bx + nx * o, by + ny * o); c.moveTo(ax - nx * o, ay - ny * o); c.lineTo(bx - nx * o, by - ny * o); c.stroke(); }
+  };
+  if (phase === 0) {
+    const t1 = Math.min(1, p / 0.28), t2 = Math.max(0, (p - 0.22) / 0.78);
+    if (t2 > 0) ribbon(ease(t2) * D * 0.72, p * 9);
+    cut(easeIn(t1) * 0.4 + t1 * 0.6, 4, '#ffffff', '#9fd3ff');
+    if (t1 < 1 || Math.random() < 0.6) for (let i = 0; i < 4; i++) { const t = Math.random() * t1; parts.push({ x: ax + (bx - ax) * t, y: ay + (by - ay) * t, vx: rnd(-3, 3) + nx * rnd(-4, 4), vy: rnd(-3, 3) + ny * rnd(-4, 4), l: 1 }); }
+  } else {
+    const h = (1 - ease(p)) * D * 0.72;
+    if (h > 12) ribbon(h, 9 + p * 9);
+    if (p < 0.98) cut(1, 4 * (1 - p), `rgba(255,255,255,${1 - p})`, '#9fd3ff');
+  }
+  c.fillStyle = CREAM;
+  for (let n = parts.length - 1; n >= 0; n--) { const q = parts[n]; q.x += q.vx; q.y += q.vy; q.l -= 0.03; if (q.l <= 0) { parts.splice(n, 1); continue; } c.globalAlpha = q.l; c.beginPath(); c.arc(q.x, q.y, 2.5, 0, 7); c.fill(); }
+  c.globalAlpha = 1;
+}
+
+// Thunder: the screen dims, a gold bolt tears across it left to right with a white hot core and sparks, a flash,
+// then the dark lifts with the bolt's afterimage fading.
+function drawThunderSlash(c, W, H, p, phase, parts) {
+  if (!parts.length) {
+    const pts = []; let x = -40, y = H * rnd(0.42, 0.58);
+    while (x < W + 40) { x += rnd(40, 90); y = Math.max(H * 0.25, Math.min(H * 0.75, y + rnd(-70, 70))); pts.push([x, y]); }
+    parts.push({ pts: [[-40, pts[0][1]], ...pts] });
+  }
+  const pts = parts[0].pts;
+  const bolt = (t, a) => {
+    const n = Math.max(2, Math.ceil(pts.length * t));
+    c.save(); c.lineJoin = 'miter'; c.lineCap = 'round'; c.globalAlpha = a;
+    c.shadowColor = '#ffd23f'; c.shadowBlur = 30; c.strokeStyle = '#ffc61a'; c.lineWidth = 12;
+    c.beginPath(); pts.slice(0, n).forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); c.stroke();
+    c.shadowBlur = 0; c.strokeStyle = '#fffbe6'; c.lineWidth = 4; c.stroke(); c.restore();
+  };
+  if (phase === 0) {
+    c.fillStyle = '#120d1f'; c.globalAlpha = Math.min(1, p * 2.4); c.fillRect(0, 0, W, H); c.globalAlpha = 1;
+    const t = Math.min(1, p / 0.45);
+    bolt(t, 1);
+    if (t < 1) { const [hx, hy] = pts[Math.min(pts.length - 1, Math.ceil(pts.length * t) - 1)]; for (let i = 0; i < 5; i++) parts.push({ x: hx, y: hy, vx: rnd(-6, 2), vy: rnd(-6, 6), l: 1 }); }
+    if (p > 0.5 && p < 0.7) { c.fillStyle = `rgba(255,236,170,${0.8 * (1 - Math.abs(p - 0.6) / 0.1)})`; c.fillRect(0, 0, W, H); }
+  } else {
+    c.fillStyle = '#120d1f'; c.globalAlpha = 1 - ease(p); c.fillRect(0, 0, W, H); c.globalAlpha = 1;
+    bolt(1, 1 - p);
+  }
+  c.fillStyle = '#ffe27a';
+  for (let n = parts.length - 1; n >= 1; n--) { const q = parts[n]; q.x += q.vx; q.y += q.vy; q.vy += 0.3; q.l -= 0.04; if (q.l <= 0) { parts.splice(n, 1); continue; } c.globalAlpha = q.l; c.fillRect(q.x, q.y, 3, 3); }
+  c.globalAlpha = 1;
+}
+
 // One frame of a transition, used by the provider and handy for checking a single frame in tests.
 export function renderTransitionFrame(kind, c, W, H, p, phase, parts, tile, from = { x: 0.5, y: 0.5 }) {
   if (kind === 'wave') drawWave(c, W, H, p, phase, parts, tile || seigaiha());
+  else if (kind === 'water') drawWaterSlash(c, W, H, p, phase, parts);
+  else if (kind === 'thunder') drawThunderSlash(c, W, H, p, phase, parts);
   else if (kind === 'ink') drawInk(c, W, H, p, phase, parts, from);
   else if (kind === 'storm') drawStorm(c, W, H, p, phase, parts);
   else drawFall(kind, c, W, H, p, phase, parts);
@@ -164,7 +232,7 @@ export function TransitionProvider({ children }) {
     const spec = KINDS[kind];
     const cv = ref.current, c = cv.getContext('2d'), W = innerWidth, H = innerHeight;
     busy.current = true; cv.classList.add('on');
-    if (kind === 'storm' && snd) setTimeout(() => thunder(0.9), 250);
+    if ((kind === 'storm' || kind === 'thunder') && snd) setTimeout(() => thunder(0.9), kind === 'thunder' ? 120 : 250);
     const t0 = performance.now(); let jumped = false; const parts = [];
     const step = now => {
       const t = now - t0; c.clearRect(0, 0, W, H);

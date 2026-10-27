@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useInView, useScroll, useTransform } from 'mot
 import MountainSky from './MountainSky.jsx';
 import { RotatingText, Counted } from './TextMotion.jsx';
 import { usePrefs } from '../prefs.jsx';
+import { resolveSky } from '../sky.js';
 import { featured, scraps, experience, EMAIL, GITHUB, LINKEDIN, RESUME } from '../data.js';
 
 const head = { initial: { opacity: 0, y: 16 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-80px' }, transition: { duration: 0.6, ease: [0.2, 0.8, 0.2, 1] } };
@@ -95,14 +96,17 @@ function Drawer({ p, i, onClose }) {
   );
 }
 
-// Behind the deck: Hiroshige's Evening Cherry Blossoms at Gotenyama, washed pink, with blossoms drifting across it.
+// Behind the deck: the sky and blossoms of Hiroshige's Evening Cherry Blossoms at Gotenyama (cropped above the
+// figures), washed to the visitor's sky. Blossoms drift in fair weather; in a storm it rains instead.
 function CherryBackdrop() {
-  const { motionOn } = usePrefs();
+  const { motionOn, sky } = usePrefs();
+  const mode = resolveSky(sky);
   return (
-    <div className="cherry" aria-hidden="true">
+    <div className={`cherry cherry-${mode}`} aria-hidden="true">
       <img src="/art/story/gotenyama.jpg" alt="" draggable={false} />
       <span className="cherry-wash" />
-      {motionOn && <div className="cherry-fall">{Array.from({ length: 18 }, (_, i) => <i key={i} style={{ left: `${(i * 37) % 100}%`, animationDelay: `${-i * 1.3}s`, animationDuration: `${9 + (i % 5) * 2}s` }} />)}</div>}
+      {motionOn && mode === 'storm' && <span className="st-rain cherry-rain" />}
+      {motionOn && mode !== 'storm' && <div className="cherry-fall">{Array.from({ length: 18 }, (_, i) => <i key={i} style={{ left: `${(i * 37) % 100}%`, animationDelay: `${-i * 1.3}s`, animationDuration: `${9 + (i % 5) * 2}s` }} />)}</div>}
     </div>
   );
 }

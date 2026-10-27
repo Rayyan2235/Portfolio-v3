@@ -10,8 +10,17 @@ export default function Nav({ onOpenMenu }) {
   const { motionOn, setMotionOn, sky, setSky, transition, setTransition, sound, setSound } = usePrefs();
   const [hidden, setHidden] = useState(false);
   const [open, setOpen] = useState(false);
-  const { scrollY } = useScroll();
+  const { scrollY, scrollYProgress } = useScroll();
   const panelRef = useRef(null), btnRef = useRef(null);
+  const [here, setHere] = useState('');
+
+  // which section is under the middle of the screen, so its link wears the ink underline
+  useEffect(() => {
+    const ids = ['experience', 'work', 'hobbies', 'contact'];
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) setHere(e.target.id); }), { rootMargin: '-45% 0px -45% 0px' });
+    ids.forEach(id => { const el = document.getElementById(id); if (el) io.observe(el); });
+    return () => io.disconnect();
+  }, []);
 
   useMotionValueEvent(scrollY, 'change', y => {
     const prev = scrollY.getPrevious() ?? 0;
@@ -32,15 +41,18 @@ export default function Nav({ onOpenMenu }) {
   return (
     <motion.nav className="nav" aria-label="Main" initial={false}
       animate={{ y: hidden && !open ? -90 : 0 }} transition={{ type: 'spring', stiffness: 380, damping: 36 }}>
-      <a className="who" href="#top" data-go="top">Rayyan Syed</a>
-      <a className="l" href="#work" data-go="work">Work</a>
-      <a className="l opt" href="#experience" data-go="experience">Experience</a>
+      <a className="who" href="#top" data-go="top"><span className="who-seal" aria-hidden="true">R</span>Rayyan Syed</a>
+      <a className={`l${here === 'experience' ? ' on' : ''} opt`} href="#experience" data-go="experience">Experience</a>
+      <a className={`l${here === 'work' ? ' on' : ''}`} href="#work" data-go="work">Work</a>
+      <a className={`l${here === 'hobbies' ? ' on' : ''} opt`} href="#hobbies" data-go="hobbies">Off the clock</a>
       <a className="l" href={RESUME}>Resume</a>
       <a className="cta" href="#contact" data-go="contact" data-magnet>Email</a>
       <button ref={btnRef} type="button" className="l sky-btn" aria-expanded={open} aria-haspopup="true" onClick={() => setOpen(o => !o)}>
         <span className={`sky-dot sky-dot-${now}`} aria-hidden="true" />{SKIES[now].label}
       </button>
       <button type="button" className="kbtn" onClick={onOpenMenu} aria-haspopup="dialog">Jump <kbd>Ctrl K</kbd></button>
+      {/* how far down the page you are, as a brush stroke along the bottom of the pill */}
+      <motion.span className="nav-ink" style={{ scaleX: scrollYProgress }} aria-hidden="true" />
 
       <AnimatePresence>
         {open && (

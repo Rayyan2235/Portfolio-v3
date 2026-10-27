@@ -8,6 +8,7 @@ import StoryIntro from './components/StoryIntro.jsx';
 import Nav from './components/Nav.jsx';
 import CommandMenu from './components/CommandMenu.jsx';
 import Ambient from './components/Ambient.jsx';
+import Hobbies from './components/Hobbies.jsx';
 import { Preloader, InkCursor, SmoothScroll, ToolWave } from './components/Flourish.jsx';
 import { HeroText, Statement, Work, Experience, Contact, Footer } from './components/Sections.jsx';
 
@@ -35,6 +36,7 @@ function Page() {
         <Experience />
         <ToolWave />
         <Work />
+        <Hobbies />
         <Contact toast={toast} />
       </main>
       <Footer />

@@ -15,6 +15,7 @@ export default function CommandMenu({ open, setOpen, toast }) {
   const cmds = useMemo(() => [
     ['Work', 'Section', () => go('work')],
     ['Experience', 'Section', () => go('experience')],
+    ['Off the clock', 'Section', () => go('hobbies')],
     ['Contact', 'Section', () => go('contact')],
     ['Copy email address', EMAIL, () => (navigator.clipboard ? navigator.clipboard.writeText(EMAIL) : Promise.reject()).then(() => toast('Email copied'), () => toast(EMAIL))],
     ['Open GitHub', 'github.com/Rayyan2235', () => { location.href = GITHUB; }],
