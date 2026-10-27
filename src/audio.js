@@ -70,3 +70,36 @@ export function setRain(on) {
     setTimeout(() => r.src.stop(), 700);
   }
 }
+
+// A stadium roar for the Siuuu: pink-ish noise through a band pass that swells and fades, about two seconds.
+export function crowdRoar() {
+  const c = audioContext();
+  if (!c) return;
+  const buf = c.createBuffer(1, c.sampleRate * 2.4, c.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  const src = c.createBufferSource(); src.buffer = buf;
+  const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 900; bp.Q.value = 0.6;
+  const g = c.createGain(); const t = c.currentTime;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.35); g.gain.exponentialRampToValueAtTime(0.0001, t + 2.3);
+  src.connect(bp).connect(g).connect(c.destination); src.start(t); src.stop(t + 2.4);
+}
+
+// "Siuuu": plays public/audio/siu.mp3 if one has been added; otherwise the browser's own voice calls it over the roar.
+// Only ever runs from a click, so browsers allow the sound.
+let siuClip = null;
+export function siu() {
+  const say = () => {
+    crowdRoar();
+    const s = window.speechSynthesis;
+    if (!s) return;
+    s.cancel();
+    const u = new SpeechSynthesisUtterance('Siiiuuuuu!');
+    u.rate = 0.62; u.pitch = 1.35; u.volume = 1;
+    s.speak(u);
+  };
+  if (siuClip === false) return say();
+  if (!siuClip) siuClip = new Audio('/audio/siu.mp3');
+  siuClip.currentTime = 0;
+  siuClip.play().catch(() => { siuClip = false; say(); });
+}
