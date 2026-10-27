@@ -10,10 +10,10 @@ import { resolveSky } from '../sky.js';
 // SVG + CSS + canvas + motion only. Lines are placeholders until Rayyan writes them (ADR 0014).
 // Research: vault reference/story-components, docs/story-handoff.md.
 export const BEATS = [
-  { id: 'hello', label: 'Hello', line: 'Hi, I am Rayyan. I build AI you can talk to.' },
+  { id: 'hello', label: 'Hello', line: 'Hi, I am Rayyan. I want to leave things better than I found them.' },
   { id: 'from', label: 'Where from', line: 'From Dubai to State College, one long voyage.' },
   { id: 'why', label: 'What drives me', line: 'I build through the storm, and I ship when it clears.' },
-  { id: 'build', label: 'What I build', line: 'Agents for warehouse yards, a pharmacist for every counter, a voice that listens.' },
+  { id: 'build', label: 'What I build', line: 'Agents for warehouse yards, a pharmacist for every counter, a companion for hard days.' },
   { id: 'enter', label: 'Come in', line: 'The lights are on. Come in.' }
 ];
 const N = BEATS.length;

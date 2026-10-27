@@ -5,7 +5,7 @@
 <h1 align="center">Rayyan Syed · Portfolio v3</h1>
 
 <p align="center">
-  <b>I build AI you can talk to.</b><br>
+  <b>I build things that make a difference.</b><br>
   A portfolio that opens like a hanging scroll, follows your local sky, and lets a Hokusai wave carry you between sections.
 </p>
 

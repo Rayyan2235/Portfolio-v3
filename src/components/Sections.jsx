@@ -9,7 +9,7 @@ import { featured, scraps, experience, EMAIL, GITHUB, LINKEDIN, RESUME } from '.
 const head = { initial: { opacity: 0, y: 16 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-80px' }, transition: { duration: 0.6, ease: [0.2, 0.8, 0.2, 1] } };
 
 // The hero line keeps "I build" and turns over what comes next; every phrase is something on this site.
-const HERO_PHRASES = ['AI you can talk to.', 'voice tutors.', 'a therapy companion.', 'agents for warehouse yards.'];
+const HERO_PHRASES = ['things that make a difference.', 'tools for real problems.', 'help where it is missing.', 'agents that run real yards.'];
 
 export function HeroText() {
   const [time, setTime] = useState('');
@@ -21,8 +21,8 @@ export function HeroText() {
     <>
       <p className="corner">Rayyan Syed<br />CS at Penn State, May 2027<br />University Park, {time}</p>
       <div className="ed">
-        <h1 id="hero-title" aria-label="I build AI you can talk to."><span aria-hidden="true">I build </span><RotatingText className="rt-hero" phrases={HERO_PHRASES} /></h1>
-        <p>Voice tutors, a therapy companion, and agents that run real warehouse yards.</p>
+        <h1 id="hero-title" aria-label="I build things that make a difference."><span aria-hidden="true">I build </span><RotatingText className="rt-hero" phrases={HERO_PHRASES} /></h1>
+        <p>Agents for warehouse yards, pharmacy help in Urdu, a companion for hard days.</p>
       </div>
       <nav className="idx" aria-label="Sections">
         <a href="#work" data-go="work"><span>01</span>Work</a>
@@ -56,7 +56,7 @@ export function Statement() {
     <section className="statement" aria-label="Summary">
       <CraneGlide />
       <div className="wrap">
-        <motion.p {...head}>Software that listens first. <span>Then it does the work, and shows what it did.</span></motion.p>
+        <motion.p {...head}>Start with who it helps. <span>Then build it well enough to matter.</span></motion.p>
       </div>
     </section>
   );
@@ -242,7 +242,7 @@ export function Contact({ toast }) {
       <div className="sunwrap" aria-hidden="true"><motion.div className="sun" style={motionOn ? { y: sunY, opacity: sunOpacity } : undefined} /></div>
       <div className="wrap">
         <span className="label"><span className="jp" aria-hidden="true">日</span> · Contact</span>
-        <h2 id="contact-title">Let's build something people can talk to.</h2>
+        <h2 id="contact-title">Got a problem worth solving? Let's build.</h2>
         <p>Open to software and AI engineering internships and new grad roles. Email is fastest.</p>
         <div className="mail"><code>{EMAIL}</code><button className="btn solid" type="button" onClick={copy} data-magnet>Copy email</button></div>
         <div className="btns center"><a className="btn" href={GITHUB} data-magnet>GitHub</a><a className="btn" href={LINKEDIN} data-magnet>LinkedIn</a><a className="btn" href={RESUME} data-magnet>Resume</a></div>
