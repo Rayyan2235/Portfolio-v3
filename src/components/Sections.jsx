@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useInView, useScroll, useTransform } from 'mot
 import MountainSky from './MountainSky.jsx';
 import { RotatingText, Counted } from './TextMotion.jsx';
 import { Hanko } from './Charms.jsx';
+import { Currents } from './Flow.jsx';
 import { Storm, Birds as SkyFlock } from './MountainSky.jsx';
 import { usePrefs } from '../prefs.jsx';
 import { resolveSky } from '../sky.js';
@@ -56,6 +57,7 @@ function CraneGlide() {
 export function Statement() {
   return (
     <section className="statement" aria-label="Summary">
+      <Currents />
       <CraneGlide />
       <div className="wrap">
         <motion.p {...head}>Like water, begin where people need it most. <span>Then wear down the stone, one drop at a time.</span></motion.p>
@@ -277,11 +279,14 @@ export function Contact({ toast }) {
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end end'] });
   const sunY = useTransform(scrollYProgress, [0, 1], [140, 0]);
   const sunOpacity = useTransform(scrollYProgress, [0, 1], [0.35, 1]);
+  // after Dennis Snellenberg's rounded section edges: the sky arrives as a dome that flattens as it fills the screen
+  const dome = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
   const { sky, sound } = usePrefs();
   const mode = resolveSky(sky);
   const copy = () => (navigator.clipboard ? navigator.clipboard.writeText(EMAIL) : Promise.reject()).then(() => toast('Email copied'), () => toast(EMAIL));
   return (
     <section className={`close close-${mode}`} id="contact" ref={ref} aria-labelledby="contact-title">
+      {motionOn && <motion.i className="close-dome" style={{ scaleY: dome }} aria-hidden="true" />}
       <ContactSky mode={mode} motionOn={motionOn} sound={sound} />
       <div className="sunwrap" aria-hidden="true"><motion.div className="sun" style={motionOn ? { y: sunY, opacity: mode === 'storm' ? 0.2 : sunOpacity } : undefined} /></div>
       <div className="wrap">

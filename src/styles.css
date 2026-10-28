@@ -820,3 +820,39 @@ html.still .csky-mist i, html.still .csky-stars { animation: none; }
 .exp { overflow: clip; }
 .exp .mtn { inset: 0; height: auto; overflow: clip; }
 .exp .mtn-frame { position: sticky; top: -120px; left: auto; margin-left: 50%; height: calc(100svh + 240px); width: max(100%, calc((100svh + 240px) * 2.3571)); aspect-ratio: auto; }
+
+/* currents (after wodniack.dev): ink lines behind the statement */
+.statement .currents { position: absolute; inset: 0; width: 100%; height: 100%; color: rgba(29, 53, 87, .14); pointer-events: none; }
+.statement > .wrap { position: relative; z-index: 1; }
+
+/* contact dome (after dennissnellenberg.com): the top sky color bulges up and flattens as the section arrives */
+.close { overflow-x: clip; overflow-y: visible; --skytop: #f7b27a; }
+.close-day { --skytop: #8fc3e6; } .close-dusk { --skytop: #3f3563; } .close-night { --skytop: #050b1c; } .close-storm { --skytop: #12161d; }
+.close-dome { position: absolute; left: -10%; right: -10%; bottom: 100%; height: clamp(60px, 9vw, 150px); z-index: 2; pointer-events: none;
+  background: var(--skytop); border-radius: 50% 50% 0 0 / 100% 100% 0 0; transform-origin: 50% 100%; will-change: transform; margin-bottom: -1px; }
+
+/* the rolling name (after dennissnellenberg.com) */
+.roll { overflow: hidden; background: var(--sea); color: #fff8ee; padding-block: clamp(18px, 3vw, 34px) 4px; }
+.roll-track { display: flex; width: max-content; animation: roll 36s linear infinite; will-change: transform; }
+.roll-track span { display: flex; align-items: center; gap: .4em; padding-right: .4em; white-space: nowrap; font: 700 clamp(48px, 9vw, 150px)/1 var(--display); letter-spacing: -.02em; }
+.roll-track i { display: inline-block; width: .32em; height: .32em; border-radius: 50%; background: #c8361f; margin-inline: .2em; }
+@keyframes roll { to { transform: translateX(-50%); } }
+html.still .roll-track { animation: none; }
+
+/* bracket buttons (after elliott.mangham.dev): four corner marks, like corner quote brackets, close into a frame on hover */
+@property --k { syntax: '<length-percentage>'; inherits: false; initial-value: 9px; }
+.btn { position: relative; border-radius: 3px; border-color: transparent; }
+.btn.solid { border-color: var(--sea); }
+.btn::before { content: ""; position: absolute; inset: -1.5px; pointer-events: none; --k: 9px; transition: --k .35s cubic-bezier(.39, .575, .565, 1);
+  background:
+    linear-gradient(currentColor, currentColor) left top / var(--k) 1.5px no-repeat, linear-gradient(currentColor, currentColor) left top / 1.5px var(--k) no-repeat,
+    linear-gradient(currentColor, currentColor) right top / var(--k) 1.5px no-repeat, linear-gradient(currentColor, currentColor) right top / 1.5px var(--k) no-repeat,
+    linear-gradient(currentColor, currentColor) left bottom / var(--k) 1.5px no-repeat, linear-gradient(currentColor, currentColor) left bottom / 1.5px var(--k) no-repeat,
+    linear-gradient(currentColor, currentColor) right bottom / var(--k) 1.5px no-repeat, linear-gradient(currentColor, currentColor) right bottom / 1.5px var(--k) no-repeat; }
+.btn.solid::before { display: none; }
+.btn:hover::before, .btn:focus-visible::before { --k: 51%; }
+
+/* experience hover (after brittanychiang.com): the scroll you point at stays bright, the rest step back */
+.xp-card { transition: opacity .3s; }
+@media (hover: hover) and (pointer: fine) { .xp-list:hover .xp-item:not(:hover) .xp-card { opacity: .55; } }
+.close .btn:not(.solid) { border-color: transparent; }
