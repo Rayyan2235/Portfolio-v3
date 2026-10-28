@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useInView, useScroll, useTransform } from 'motion/react';
 import MountainSky from './MountainSky.jsx';
 import { RotatingText, Counted } from './TextMotion.jsx';
-import { Hanko, Omikuji } from './Charms.jsx';
+import { Hanko } from './Charms.jsx';
+import { Storm, Birds as SkyFlock } from './MountainSky.jsx';
 import { usePrefs } from '../prefs.jsx';
 import { resolveSky } from '../sky.js';
 import { featured, scraps, experience, EMAIL, GITHUB, LINKEDIN, RESUME } from '../data.js';
@@ -237,20 +238,41 @@ export function Contact({ toast }) {
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end end'] });
   const sunY = useTransform(scrollYProgress, [0, 1], [140, 0]);
   const sunOpacity = useTransform(scrollYProgress, [0, 1], [0.35, 1]);
+  const { sky, sound } = usePrefs();
+  const mode = resolveSky(sky);
   const copy = () => (navigator.clipboard ? navigator.clipboard.writeText(EMAIL) : Promise.reject()).then(() => toast('Email copied'), () => toast(EMAIL));
   return (
-    <section className="close" id="contact" ref={ref} aria-labelledby="contact-title">
-      <div className="sunwrap" aria-hidden="true"><motion.div className="sun" style={motionOn ? { y: sunY, opacity: sunOpacity } : undefined} /></div>
+    <section className={`close close-${mode}`} id="contact" ref={ref} aria-labelledby="contact-title">
+      <ContactSky mode={mode} motionOn={motionOn} sound={sound} />
+      <div className="sunwrap" aria-hidden="true"><motion.div className="sun" style={motionOn ? { y: sunY, opacity: mode === 'storm' ? 0.2 : sunOpacity } : undefined} /></div>
       <div className="wrap">
         <span className="label"><Hanko n="04" />Contact</span>
         <h2 id="contact-title">The tea is warm. Bring me a problem worth solving.</h2>
         <p>Open to software and AI engineering internships and new grad roles. Email is fastest.</p>
         <div className="mail"><code>{EMAIL}</code><button className="btn solid" type="button" onClick={copy} data-magnet>Copy email</button></div>
         <div className="btns center"><a className="btn" href={GITHUB} data-magnet>GitHub</a><a className="btn" href={LINKEDIN} data-magnet>LinkedIn</a><a className="btn" href={RESUME} data-magnet>Resume</a></div>
-        <Omikuji />
       </div>
       <SeaBand />
     </section>
+  );
+}
+
+// The last view, painted like a print: the sky of the moment, the sun (or the moon) rising over Fuji, mist bands
+// drifting across the ridges; stars at night, rain and lightning in a storm, birds by day.
+function ContactSky({ mode, motionOn, sound }) {
+  return (
+    <div className="csky" aria-hidden="true">
+      {mode === 'night' && <span className="csky-stars" />}
+      {motionOn && mode === 'storm' && <div className="csky-storm"><Storm sound={sound} /></div>}
+      {motionOn && (mode === 'dawn' || mode === 'day' || mode === 'dusk') && <SkyFlock crane={mode !== 'day'} />}
+      <div className="csky-mist">{[0, 1, 2, 3, 4].map(i => <i key={i} className={`m${i}`} />)}</div>
+      <svg className="csky-land" viewBox="0 0 1600 400" preserveAspectRatio="xMidYMax slice">
+        <path className="far" d="M380 400 C 590 330, 720 210, 772 118 L 828 118 C 880 210, 1010 330, 1220 400 Z" />
+        <path className="snow" d="M772 118 L 828 118 C 842 142, 856 166, 872 190 L 852 180 L 834 200 L 816 178 L 798 198 L 780 176 L 760 192 L 744 186 C 752 166, 762 142, 772 118 Z" />
+        <path className="mid" d="M0 400 L0 300 Q 150 250 300 290 T 600 285 T 900 312 T 1250 272 T 1600 300 L1600 400Z" />
+        <path className="near" d="M0 400 L0 352 Q 200 318 400 344 T 800 338 T 1200 356 T 1600 334 L1600 400Z" />
+      </svg>
+    </div>
   );
 }
 

@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useScroll, useTransform } from 'motion/react';
 import { useTransition } from './Transitions.jsx';
 
-// Small charms in the spirit of the prints: a seal stamped on each heading, a family crest that carries you
-// home, and a fortune slip to draw at the end. SVG + transforms only.
+// Small charms in the spirit of the prints: a seal stamped on each heading and a family crest that carries you
+// home. SVG + transforms only.
 
 // A red seal pressed onto a section heading the first time it scrolls into view.
 export function Hanko({ n }) {
@@ -25,7 +25,7 @@ export function KamonTop() {
   const [show, setShow] = useState(false);
   useEffect(() => scrollY.on('change', v => {
     const top = document.getElementById('top');
-    setShow(!!top && v > top.offsetTop + innerHeight * 0.8);
+    setShow(!!top && top.getBoundingClientRect().top < -innerHeight * 0.8);
   }), [scrollY]);
   const ring = useTransform(scrollYProgress, [0.35, 1], [0, 1]);
   return (
@@ -45,47 +45,5 @@ export function KamonTop() {
         </svg>
       </motion.button>
     )}</AnimatePresence>
-  );
-}
-
-// Omikuji: shake the box, a slip rises with a fortune and an old proverb.
-const FORTUNES = [
-  ['Great blessing', 'Fall seven times, stand up eight.'],
-  ['Blessing', 'After the rain, the earth hardens.'],
-  ['Great blessing', 'Even dust, piled up, becomes a mountain.'],
-  ['Small blessing', 'When in a hurry, take the long way round.'],
-  ['Blessing', 'One meeting, one chance. Make it count.'],
-  ['Middle blessing', 'Sit on a cold stone for three years and it grows warm.'],
-  ['Future blessing', 'The frog in the well knows nothing of the sea. Go see the sea.']
-];
-export function Omikuji() {
-  const [draw, setDraw] = useState(-1);
-  const [shake, setShake] = useState(0);
-  const pull = () => {
-    setShake(s => s + 1);
-    setDraw(-1);
-    setTimeout(() => setDraw(d => {
-      let k = Math.floor(Math.random() * FORTUNES.length);
-      if (k === d) k = (k + 1) % FORTUNES.length;
-      return k;
-    }), 650);
-  };
-  const f = FORTUNES[draw];
-  return (
-    <div className="omikuji">
-      <motion.button type="button" className="omi-box" onClick={pull} data-magnet
-        key={shake} animate={shake ? { rotate: [0, -14, 12, -10, 8, -4, 0] } : {}} transition={{ duration: 0.6 }}>
-        <svg viewBox="0 0 40 64" aria-hidden="true"><rect x="4" y="10" width="32" height="50" rx="3" /><rect x="17" y="2" width="6" height="12" rx="1" className="stick" /><path d="M4 22h32M4 48h32" /></svg>
-        <span>{draw < 0 && !shake ? 'Draw a fortune' : 'Draw again'}</span>
-      </motion.button>
-      <div className="omi-slot" aria-live="polite">
-        <AnimatePresence mode="wait">{f && (
-          <motion.div key={draw} className="omi-slip" initial={{ opacity: 0, y: 30, scaleY: 0.2 }} animate={{ opacity: 1, y: 0, scaleY: 1 }} exit={{ opacity: 0, y: -16 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 24 }}>
-            <b>{f[0]}</b><p>{f[1]}</p>
-          </motion.div>
-        )}</AnimatePresence>
-      </div>
-    </div>
   );
 }

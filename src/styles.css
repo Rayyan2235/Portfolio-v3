@@ -715,7 +715,7 @@ html.still .ema-board { animation: none; }
 .st-gate-lanterns .st-chochin { box-shadow: none; animation: st-sway 4.5s ease-in-out infinite; }
 .st-gate-lanterns .st-chochin.g1 { animation-delay: -1.2s; } .st-gate-lanterns .st-chochin.g3 { animation-delay: -2.6s; }
 
-/* charms: hanko seal on headings, kamon back to top, omikuji fortune */
+/* charms: hanko seal on headings, kamon back to top */
 .label .hanko { display: inline-block; width: 34px; height: 34px; margin-right: 10px; vertical-align: middle; }
 .hanko svg { display: block; width: 100%; height: 100%; }
 .hanko rect { fill: #c8361f; } .hanko rect.in { fill: none; stroke: #fff8ee; stroke-width: 1.4; opacity: .8; }
@@ -728,14 +728,49 @@ html.still .ema-board { animation: none; }
 .kamon .fill { fill: none; stroke: #c8361f; stroke-width: 3; stroke-linecap: round; }
 .kamon .waves path { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
 .kamon:focus-visible { outline: 2px solid #c8361f; outline-offset: 3px; }
-.omikuji { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 34px; min-height: 96px; flex-wrap: wrap; }
-.omi-box { display: inline-flex; align-items: center; gap: 10px; padding: 8px 16px 8px 10px; border: 1px solid currentColor; border-radius: 999px;
-  background: transparent; color: inherit; font: 500 14px var(--sans); cursor: pointer; transform-origin: 50% 90%; }
-.omi-box svg { width: 22px; height: 34px; }
-.omi-box rect { fill: #8a5a32; } .omi-box rect.stick { fill: #e8d3a8; } .omi-box path { stroke: #e8b04a; stroke-width: 2; }
-.omi-slot { min-width: min(320px, 100%); min-height: 96px; display: grid; place-items: center; }
-.omi-slip { transform-origin: 50% 0; max-width: 320px; padding: 14px 18px; text-align: left; background: #fff8ee; color: #1b2433;
-  border-top: 4px solid #c8361f; box-shadow: 0 8px 24px rgba(10, 12, 20, .25); }
-.omi-slip b { display: block; font: 400 20px/1.1 var(--brush); color: #c8361f; margin-bottom: 6px; }
-.omi-slip p { margin: 0; font: 500 16px/1.4 var(--display); }
 @media (max-width: 640px) { .kamon { width: 46px; height: 46px; } }
+
+/* contact: a sky-aware print. The section's mode class sets the palette for every layer */
+.close { --sky: linear-gradient(180deg, #f7b27a 0%, #fde7c4 55%, #fff1de 100%); --far: #8d9dbd; --mid: #57718f; --near: #2a4466; --snow: #fff8ee;
+  --mist: rgba(255, 244, 228, .75); --sunc: #e4572e; --halo: 247, 178, 122; --txt: #1b2433; --txt2: #3a4252; background: var(--sky); color: var(--txt); }
+.close-day { --sky: linear-gradient(180deg, #8fc3e6 0%, #cfe6f1 55%, #f3f0e6 100%); --far: #93afcc; --mid: #5d86a6; --near: #2b5277;
+  --mist: rgba(255, 255, 255, .78); --sunc: #fff0bf; --halo: 255, 240, 190; }
+.close-dusk { --sky: linear-gradient(180deg, #3f3563 0%, #b65f7c 48%, #f4a067 100%); --far: #8a5f86; --mid: #5b3f66; --near: #2d2440; --snow: #f6dccf;
+  --mist: rgba(255, 196, 170, .42); --sunc: #f0602f; --halo: 244, 140, 90; --txt: #fff8ee; --txt2: #f6e6da; }
+.close-night { --sky: linear-gradient(180deg, #050b1c 0%, #101d3c 55%, #1c2c52 100%); --far: #23365c; --mid: #172748; --near: #0c1631; --snow: #c9d3e8;
+  --mist: rgba(150, 170, 220, .16); --sunc: #f4efe0; --halo: 200, 210, 240; --txt: #f4efe4; --txt2: #c9d0de; }
+.close-storm { --sky: linear-gradient(180deg, #12161d 0%, #262d37 55%, #3a424e 100%); --far: #4a525e; --mid: #353c47; --near: #20252d; --snow: #9aa3ad;
+  --mist: rgba(150, 160, 172, .3); --sunc: #9aa3ad; --halo: 150, 160, 172; --txt: #f4efe4; --txt2: #c9cfd8; }
+.close h2 { color: var(--txt); } .close p { color: var(--txt2); }
+.close .label { color: var(--txt2); }
+.close .btn:not(.solid) { color: var(--txt); border-color: currentColor; }
+.close .sun { background: var(--sunc); box-shadow: 0 0 0 24px rgba(var(--halo), .32), 0 0 0 56px rgba(var(--halo), .16), 0 0 120px 40px rgba(var(--halo), .35); }
+.close-day .sunwrap { top: clamp(30px, 4vw, 56px); }
+.close-dusk .sunwrap { width: clamp(150px, 19vw, 250px); }
+.close-night .sun { box-shadow: 0 0 0 18px rgba(var(--halo), .08), 0 0 90px 20px rgba(var(--halo), .25); }
+.close .wrap, .close svg.waves { position: relative; z-index: 1; }
+.csky { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.csky-land { position: absolute; left: 0; right: 0; bottom: clamp(150px, 19vw, 270px); width: 100%; height: clamp(150px, 22vw, 340px); }
+.csky-land .far { fill: var(--far); } .csky-land .snow { fill: var(--snow); } .csky-land .mid { fill: var(--mid); } .csky-land .near { fill: var(--near); }
+.csky-mist i { position: absolute; height: clamp(14px, 1.6vw, 22px); border-radius: 999px; background: var(--mist); will-change: transform; animation: csky-drift 38s ease-in-out infinite alternate; }
+.csky-mist .m0 { left: -6%; top: 22%; width: 38%; } .csky-mist .m1 { right: -8%; top: 30%; width: 34%; animation-duration: 46s; animation-direction: alternate-reverse; }
+.csky-mist .m2 { left: 8%; bottom: calc(clamp(150px, 19vw, 270px) + clamp(90px, 12vw, 200px)); width: 30%; animation-duration: 52s; }
+.csky-mist .m3 { right: 4%; bottom: calc(clamp(150px, 19vw, 270px) + clamp(60px, 9vw, 150px)); width: 36%; animation-duration: 42s; animation-direction: alternate-reverse; }
+.csky-mist .m4 { left: 30%; bottom: calc(clamp(150px, 19vw, 270px) + clamp(20px, 4vw, 70px)); width: 44%; animation-duration: 58s; }
+@keyframes csky-drift { to { transform: translateX(9vw); } }
+.csky-stars { position: absolute; inset: 0 0 40% 0; opacity: .85;
+  background-image: radial-gradient(1.4px 1.4px at 12% 18%, #fff 99%, transparent), radial-gradient(1px 1px at 27% 8%, #fff 99%, transparent),
+    radial-gradient(1.6px 1.6px at 41% 26%, #fff 99%, transparent), radial-gradient(1px 1px at 63% 12%, #fff 99%, transparent),
+    radial-gradient(1.3px 1.3px at 78% 30%, #fff 99%, transparent), radial-gradient(1px 1px at 88% 9%, #fff 99%, transparent),
+    radial-gradient(1.2px 1.2px at 6% 40%, #fff 99%, transparent), radial-gradient(1px 1px at 53% 44%, #fff 99%, transparent),
+    radial-gradient(1.5px 1.5px at 94% 46%, #fff 99%, transparent), radial-gradient(1px 1px at 34% 52%, #fff 99%, transparent);
+  animation: csky-twinkle 5s ease-in-out infinite alternate; }
+@keyframes csky-twinkle { to { opacity: .45; } }
+.csky-storm { position: absolute; inset: 0; } .csky-storm canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.csky .mtn-birds { position: absolute; inset: 6% 0 50% 0; }
+html.still .csky-mist i, html.still .csky-stars { animation: none; }
+@media (max-width: 640px) { .csky-mist .m0, .csky-mist .m1 { width: 60%; } }
+.close .mail code { color: #1b2433; }
+.close svg.waves { margin-top: clamp(170px, 20vw, 300px); }
+.csky-land { bottom: clamp(100px, 12.5vw, 180px); height: clamp(190px, 24vw, 360px); }
+.csky-mist .m2, .csky-mist .m3, .csky-mist .m4 { display: none; }

@@ -265,7 +265,7 @@ const Scenes = {
   enter: function Gate({ q }) {
     const glow = useTransform(q, [0.3, 0.85], [0, 1]);
     return (
-      <Painting q={q} src="/art/story/kinryuzan.jpg" pos="50% 62%" origin="62% 76%" zoom={[1, 1.7]} dims={[1254, 1200]}
+      <Painting q={q} src="/art/story/kinryuzan.jpg" pos="50% 55%" origin="62% 76%" zoom={[1, 1.12]} dims={[1254, 1200]}
         overlay={cover => {
           const [gx, gy] = cover.at(770, 900);
           return (
