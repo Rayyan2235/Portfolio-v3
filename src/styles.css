@@ -774,3 +774,5 @@ html.still .csky-mist i, html.still .csky-stars { animation: none; }
 .close svg.waves { margin-top: clamp(170px, 20vw, 300px); }
 .csky-land { bottom: clamp(100px, 12.5vw, 180px); height: clamp(190px, 24vw, 360px); }
 .csky-mist .m2, .csky-mist .m3, .csky-mist .m4 { display: none; }
+
+.rt-word { display: inline-block; white-space: nowrap; }

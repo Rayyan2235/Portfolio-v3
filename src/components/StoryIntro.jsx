@@ -14,7 +14,7 @@ import { resolveSky } from '../sky.js';
 export const BEATS = [
   { id: 'hello', label: 'Hello', line: 'I am Rayyan. I walk toward the mountain and leave the path wider than I found it.' },
   { id: 'from', label: 'Where from', line: 'From the sands of Dubai to the snows of State College, I crossed the water.' },
-  { id: 'build', label: 'What I build', line: 'Agents for the yard, a pharmacist for every counter, a companion for the long night.' },
+  { id: 'build', label: 'What I build', line: 'Lanterns for dark roads, bridges over fast water, a light left on for whoever comes next.' },
   { id: 'enter', label: 'Come in', line: 'The lanterns are lit. Step inside.' }
 ];
 const N = BEATS.length;

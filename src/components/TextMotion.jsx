@@ -15,16 +15,28 @@ export function RotatingText({ phrases, interval = 2800, className = '' }) {
     return () => clearInterval(id);
   }, [motionOn, phrases.length, interval]);
   const text = phrases[motionOn ? i : 0];
+  // letters animate one by one, but each word is its own unbreakable box so a line never splits a word
+  let k = 0;
   return (
     <span className={`rt ${className}`} aria-hidden="true">
       <AnimatePresence mode="wait" initial={false}>
         <motion.span key={text} className="rt-phrase">
-          {[...text].map((ch, k) => (
-            <motion.span key={k} className="rt-ch"
-              initial={{ y: '105%', opacity: 0 }} animate={{ y: '0%', opacity: 1 }} exit={{ y: '-105%', opacity: 0 }}
-              transition={{ duration: 0.5, delay: k * 0.022, ease: [0.16, 1, 0.3, 1] }}>
-              {ch === ' ' ? ' ' : ch}
-            </motion.span>
+          {text.split(' ').map((word, w) => (
+            <span key={w}>
+              {w > 0 && ' '}
+              <span className="rt-word">
+                {[...word].map(ch => {
+                  const n = k++;
+                  return (
+                    <motion.span key={n} className="rt-ch"
+                      initial={{ y: '105%', opacity: 0 }} animate={{ y: '0%', opacity: 1 }} exit={{ y: '-105%', opacity: 0 }}
+                      transition={{ duration: 0.5, delay: n * 0.022, ease: [0.16, 1, 0.3, 1] }}>
+                      {ch}
+                    </motion.span>
+                  );
+                })}
+              </span>
+            </span>
           ))}
         </motion.span>
       </AnimatePresence>

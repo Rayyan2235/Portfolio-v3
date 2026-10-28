@@ -11,7 +11,7 @@ import { featured, scraps, experience, EMAIL, GITHUB, LINKEDIN, RESUME } from '.
 const head = { initial: { opacity: 0, y: 16 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-80px' }, transition: { duration: 0.6, ease: [0.2, 0.8, 0.2, 1] } };
 
 // The hero line keeps "I build" and turns over what comes next; every phrase is something on this site.
-const HERO_PHRASES = ['what outlasts the storm.', 'bridges where there were none.', 'help for those who wait.', 'agents that keep the yard moving.'];
+const HERO_PHRASES = ['what outlasts the storm.', 'bridges where there were none.', 'paths others can follow.', 'like the tide, a little every day.'];
 
 export function HeroText() {
   const [time, setTime] = useState('');
@@ -24,7 +24,7 @@ export function HeroText() {
       <p className="corner">Rayyan Syed<br />CS at Penn State, May 2027<br />University Park, {time}</p>
       <div className="ed">
         <h1 id="hero-title" aria-label="I build what outlasts the storm."><span aria-hidden="true">I build </span><RotatingText className="rt-hero" phrases={HERO_PHRASES} /></h1>
-        <p>Agents for warehouse yards. Pharmacy care in Urdu. A companion for hard nights.</p>
+        <p>Patient as the tide, steady as the mountain. Every line written to leave the path a little wider.</p>
       </div>
       <nav className="idx" aria-label="Sections">
         <a href="#work" data-go="work"><span>01</span>Work</a>
