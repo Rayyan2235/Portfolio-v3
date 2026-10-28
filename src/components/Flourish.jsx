@@ -47,7 +47,9 @@ export function Preloader() {
 }
 
 // Ink cursor: a soft ring trails the pointer, swells over anything clickable, and a click scatters a few petals.
-// Elements marked data-magnet lean toward the pointer. Desktop mouse only; the system cursor stays visible.
+// Elements marked data-magnet lean toward the pointer and spring back with an elastic settle when it leaves (traced
+// with rea from dennissnellenberg.com: a 1.5s ease toward the pointer, an elastic return, the frame lagging for depth).
+// Desktop mouse only; the system cursor stays visible.
 export function InkCursor() {
   const { motionOn } = usePrefs();
   const ring = useRef(null);
@@ -67,15 +69,18 @@ export function InkCursor() {
       hot = !!t?.closest('a, button, [role="button"], input, .dcard');
       el.classList.toggle('hot', hot);
       const m = t?.closest('[data-magnet]');
-      if (magnet && magnet !== m) { magnet.style.transform = ''; magnet = null; }
+      if (magnet && magnet !== m) { release(magnet); magnet = null; }
       if (m) {
         const r = m.getBoundingClientRect();
-        m.style.transform = `translate(${(e.clientX - (r.left + r.width / 2)) * 0.25}px, ${(e.clientY - (r.top + r.height / 2)) * 0.3}px)`;
+        m.classList.remove('magnet-off');
+        m.style.setProperty('--pull-x', `${(e.clientX - (r.left + r.width / 2)) * 0.3}px`);
+        m.style.setProperty('--pull-y', `${(e.clientY - (r.top + r.height / 2)) * 0.35}px`);
         magnet = m;
       }
       kick();
     };
-    const leave = () => { el.style.opacity = '0'; if (magnet) { magnet.style.transform = ''; magnet = null; } };
+    const release = m => { m.classList.add('magnet-off'); m.style.setProperty('--pull-x', '0px'); m.style.setProperty('--pull-y', '0px'); };
+    const leave = () => { el.style.opacity = '0'; if (magnet) { release(magnet); magnet = null; } };
     const click = e => {
       for (let i = 0; i < 5; i++) {
         const p = document.createElement('i');
@@ -94,7 +99,7 @@ export function InkCursor() {
     return () => {
       cancelAnimationFrame(raf);
       removeEventListener('pointermove', move); document.removeEventListener('pointerleave', leave); removeEventListener('pointerdown', click);
-      if (magnet) magnet.style.transform = '';
+      if (magnet) release(magnet);
     };
   }, [motionOn]);
   if (!motionOn) return null;

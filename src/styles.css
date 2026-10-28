@@ -856,3 +856,11 @@ html.still .roll-track { animation: none; }
 .xp-card { transition: opacity .3s; }
 @media (hover: hover) and (pointer: fine) { .xp-list:hover .xp-item:not(:hover) .xp-card { opacity: .55; } }
 .close .btn:not(.solid) { border-color: transparent; }
+
+/* magnetic pull (traced with rea from dennissnellenberg.com): ease in toward the pointer, elastic settle on release,
+   the corner frame lags behind the label so the button reads as two layers */
+[data-magnet] { translate: var(--pull-x, 0px) var(--pull-y, 0px); transition: translate .9s cubic-bezier(.16, 1, .3, 1); }
+[data-magnet].magnet-off { transition: translate 1.4s linear(0, .22 7%, .78 15%, 1.13 22%, 1.2 26%, 1.13 31%, .97 39%, .94 44%, .97 51%, 1.01 60%, 1.02 66%, 1 80%, 1); }
+.btn[data-magnet]::before { translate: calc(var(--pull-x, 0px) * -.35) calc(var(--pull-y, 0px) * -.35); transition: --k .35s cubic-bezier(.39, .575, .565, 1), translate .9s cubic-bezier(.16, 1, .3, 1); }
+.btn[data-magnet].magnet-off::before { transition: --k .35s cubic-bezier(.39, .575, .565, 1), translate 1.4s linear(0, .22 7%, .78 15%, 1.13 22%, 1.2 26%, 1.13 31%, .97 39%, .94 44%, .97 51%, 1.01 60%, 1.02 66%, 1 80%, 1); }
+html.still [data-magnet] { translate: none; }
