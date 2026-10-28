@@ -130,8 +130,8 @@ export default function GreatWaveHero({ children }) {
     const rain = [];
 
     const size = () => {
-      // the print is soft anyway, so render under 1x: a full screen shader at full size is what spins up laptop fans
-      const d = 0.75; W = host.clientWidth; H = host.clientHeight;
+      // render at 1x, never at the screen's 2x: a full screen shader at 2x is what spins up laptop fans
+      const d = 1; W = host.clientWidth; H = host.clientHeight;
       cv.width = W * d; cv.height = H * d; fx.width = W * d; fx.height = H * d; gl.viewport(0, 0, W * d, H * d); fc.setTransform(d, 0, 0, d, 0, 0);
       const A = W / H;
       if (A > IA) { cov = [1, IA / A]; off = [0, (0.46 - 0.5) * (1 - cov[1])]; } else { cov = [A / IA, 1]; off = [(0.42 - 0.5) * (1 - cov[0]), 0]; }
@@ -156,9 +156,15 @@ export default function GreatWaveHero({ children }) {
     const io = new IntersectionObserver(es => { vis = es[0].isIntersecting; }); io.observe(host);
     size();
     // the hero can grow inside the scroll-expand frame, so watch the element, not just the window
-    // while the frame is opening it resizes every frame; reallocating the canvas each time stutters, so wait for it to settle
+    // while the frame is opening it resizes every frame. Reallocating the canvas each frame stutters, but waiting for it
+    // to settle shows a stretched, pixelated picture; so resize once it has grown 5%, and once more when it settles
     let rt = 0;
-    const ro = new ResizeObserver(() => { clearTimeout(rt); rt = setTimeout(() => { size(); if (ready) gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }, 120); });
+    const resize = () => { size(); if (ready) gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); };
+    const ro = new ResizeObserver(() => {
+      clearTimeout(rt);
+      const w = host.clientWidth, h = host.clientHeight;
+      if (Math.abs(w - W) > W * 0.05 || Math.abs(h - H) > H * 0.05) resize(); else rt = setTimeout(resize, 120);
+    });
     ro.observe(host);
 
     const makeBolt = () => {

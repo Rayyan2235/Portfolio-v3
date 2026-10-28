@@ -816,3 +816,7 @@ html.still .csky-mist i, html.still .csky-stars { animation: none; }
 .xp-line { width: 2px; background: repeating-linear-gradient(180deg, rgba(255, 248, 238, .6) 0 2px, transparent 2px 6px); }
 .xp-line i { position: absolute; inset: 0 -1px; background: #c8361f; border-radius: 2px; transform-origin: 50% 0; will-change: transform; }
 .xp-node { left: calc(-1 * clamp(34px, 5vw, 64px) + clamp(6px, 1.4vw, 18px) - 8px); }
+/* the scrolls made experience taller than the painting: pin the painting at screen height while they pass over it */
+.exp { overflow: clip; }
+.exp .mtn { inset: 0; height: auto; overflow: clip; }
+.exp .mtn-frame { position: sticky; top: -120px; left: auto; margin-left: 50%; height: calc(100svh + 240px); width: max(100%, calc((100svh + 240px) * 2.3571)); aspect-ratio: auto; }
