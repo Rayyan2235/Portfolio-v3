@@ -325,9 +325,9 @@ function Petals({ strength, wind, live }) {
     // near layer is big and faint instead of blurred: canvas blur per petal is too heavy for phones
     const LAYERS = [{ s: [6, 9], v: 0.4, a: 0.5 }, { s: [10, 14], v: 1, a: 0.85 }, { s: [22, 34], v: 1.8, a: 0.55 }];
     const TINTS = ['#f9c9a8', '#f7b27a', '#fde0c8', '#f4b49a'];
-    let W = 0, H = 0, raf = 0, gust = 0, last = performance.now();
+    let W = 0, H = 0, raf = 0, gust = 0, last = performance.now(), drawn = false;
     const size = () => {
-      const r = c.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+      const r = c.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 1.25);
       W = r.width; H = r.height; c.width = W * d; c.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0);
     };
     const spawn = (p, top) => {
@@ -353,8 +353,10 @@ function Petals({ strength, wind, live }) {
       const dt = Math.min(0.05, (now - last) / 1000); last = now;
       gust += (Math.max(-14, Math.min(14, wind.get() / 60)) - gust) * 0.06;
       const k = strength.get();
+      if (k <= 0.01) { if (drawn) { ctx.clearRect(0, 0, W, H); drawn = false; } raf = requestAnimationFrame(tick); return; }
+      drawn = true;
       ctx.clearRect(0, 0, W, H);
-      if (k > 0.01) {
+      {
         for (const p of ps) {
           const L = LAYERS[p.layer];
           p.phase += dt * 1.4;

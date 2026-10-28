@@ -202,17 +202,56 @@ export function Work() {
   );
 }
 
+// Each role is a small hanging scroll on an ink path down the mountain.
+function ExpPath() {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 75%', 'end 60%'] });
+  return (
+    <div className="xp" ref={ref}>
+      <div className="xp-line" aria-hidden="true"><motion.i style={{ scaleY: scrollYProgress }} /></div>
+      <ol className="xp-list">
+        {experience.map(([when, title, body], i) => <ExpScroll key={title} i={i} when={when} title={title} body={body} />)}
+      </ol>
+    </div>
+  );
+}
+
+function ExpScroll({ i, when, title, body }) {
+  const cut = title.lastIndexOf(', ');
+  const role = cut > 0 ? title.slice(0, cut) : title, org = cut > 0 ? title.slice(cut + 2) : '';
+  const spot = e => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
+    e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
+  };
+  return (
+    <li className="xp-item">
+      <motion.span className="xp-node" aria-hidden="true" initial={{ scale: 0.4, opacity: 0.4 }} whileInView={{ scale: 1, opacity: 1 }}
+        viewport={{ once: true, margin: '-35% 0px' }} transition={{ type: 'spring', stiffness: 400, damping: 16 }} />
+      <motion.article className="xp-card" onPointerMove={spot}
+        initial={{ clipPath: 'inset(-30px -30px 100% -30px)', y: 24 }} whileInView={{ clipPath: 'inset(-30px -30px -60px -30px)', y: 0 }} whileHover={{ y: -4, rotate: -0.4 }}
+        viewport={{ once: true, margin: '-12% 0px' }} transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}>
+        <i className="xp-rod" aria-hidden="true" />
+        <div className="xp-body">
+          <span className="xp-no" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <span className="xp-tag">{when}</span>
+          {org && <p className="xp-org">{org}</p>}
+          <h3>{role}</h3>
+          <p className="xp-text"><Counted text={body} /></p>
+        </div>
+        <i className="xp-rod" aria-hidden="true" />
+      </motion.article>
+    </li>
+  );
+}
+
 export function Experience() {
   return (
     <section className="exp" id="experience" aria-labelledby="exp-title">
       <MountainSky />
       <div className="wrap">
       <motion.div className="head" {...head}><span className="label"><Hanko n="01" />Experience</span><h2 id="exp-title">Where I have worked</h2></motion.div>
-      <ol className="rows">
-        {experience.map(([when, title, body]) => (
-          <li key={title}><span className="when">{when}</span><div><h3>{title}</h3><p><Counted text={body} /></p></div></li>
-        ))}
-      </ol>
+      <ExpPath />
       </div>
     </section>
   );

@@ -130,8 +130,8 @@ export default function GreatWaveHero({ children }) {
     const rain = [];
 
     const size = () => {
-      // the print is soft anyway, so render at 1x: a full screen shader at 2x is what spins up laptop fans
-      const d = 1; W = host.clientWidth; H = host.clientHeight;
+      // the print is soft anyway, so render under 1x: a full screen shader at full size is what spins up laptop fans
+      const d = 0.75; W = host.clientWidth; H = host.clientHeight;
       cv.width = W * d; cv.height = H * d; fx.width = W * d; fx.height = H * d; gl.viewport(0, 0, W * d, H * d); fc.setTransform(d, 0, 0, d, 0, 0);
       const A = W / H;
       if (A > IA) { cov = [1, IA / A]; off = [0, (0.46 - 0.5) * (1 - cov[1])]; } else { cov = [A / IA, 1]; off = [(0.42 - 0.5) * (1 - cov[0]), 0]; }
@@ -156,7 +156,10 @@ export default function GreatWaveHero({ children }) {
     const io = new IntersectionObserver(es => { vis = es[0].isIntersecting; }); io.observe(host);
     size();
     // the hero can grow inside the scroll-expand frame, so watch the element, not just the window
-    const ro = new ResizeObserver(() => { size(); if (ready) gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }); ro.observe(host);
+    // while the frame is opening it resizes every frame; reallocating the canvas each time stutters, so wait for it to settle
+    let rt = 0;
+    const ro = new ResizeObserver(() => { clearTimeout(rt); rt = setTimeout(() => { size(); if (ready) gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }, 120); });
+    ro.observe(host);
 
     const makeBolt = () => {
       let x = W * (0.45 + Math.random() * 0.5), y = 0; const pts = [[x, y]];
@@ -211,14 +214,16 @@ export default function GreatWaveHero({ children }) {
       }
     };
 
+    // the sky moves slowly: 30 frames a second is plenty and halves the GPU work
+    let lastDraw = 0;
     const loop = now => {
-      if (ready && vis) frame(now);
+      if (ready && vis && now - lastDraw > 31) { lastDraw = now; frame(now); }
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => {
       cancelled = true; gl.deleteProgram(pr);
-      cancelAnimationFrame(raf); io.disconnect(); ro.disconnect();
+      cancelAnimationFrame(raf); clearTimeout(rt); io.disconnect(); ro.disconnect();
       host.removeEventListener('pointermove', onMove); host.removeEventListener('pointerleave', onLeave);
     };
   }, [scrollYProgress]);
