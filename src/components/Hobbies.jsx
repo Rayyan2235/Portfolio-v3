@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
 import { siu as playSiu } from '../audio.js';
+import { Hanko } from './Charms.jsx';
 
 // Off the clock: the things outside code, written on ema, the wooden wish plaques that hang at Japanese shrines.
 // Behind them, the red sky and plum branches of Hiroshige's Plum Garden at Kameido (red, like Old Trafford).
@@ -61,7 +62,7 @@ export default function Hobbies() {
       <div className="hobby-art" aria-hidden="true"><img src="/art/story/kameido.jpg" alt="" draggable={false} /></div>
       <div className="wrap hobby-wrap">
         <div className="hobby-head">
-          <span className="label">Off the clock</span>
+          <span className="label"><Hanko n="03" />Off the clock</span>
           <h2 id="hobby-title">When the brush is set down</h2>
         </div>
         <ul className="ema-rail">{EMA.map((e, i) => <Ema key={e.id} e={e} i={i} />)}</ul>

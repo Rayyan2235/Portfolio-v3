@@ -271,7 +271,7 @@ html.still .btn, html.still .hx a, html.still .dots i { transition: none; }
 html.still .close .sea-s { animation: none; }
 
 /* story intro: one pinned stage, five scenes cut like a film (phone first) */
-.st-root { position: relative; height: 1000svh; }
+.st-root { position: relative; height: 800svh; }
 .st-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; color: var(--ink); }
 .st-sky, .st-stars, .st-petals, .st-grain { position: absolute; inset: 0; pointer-events: none; }
 .st-petals { width: 100%; height: 100%; z-index: 3; }
@@ -377,7 +377,7 @@ html.still .close .sea-s { animation: none; }
 .st-plain { max-width: 720px; margin: 0 auto; padding: 120px 20px 40px; display: flex; flex-direction: column; gap: 28px; }
 .st-plain p { margin: 0; display: flex; flex-direction: column; gap: 8px; font: 500 clamp(22px, 4vw, 32px)/1.2 var(--display); }
 @media (min-width: 900px) {
-  .st-root { height: 1100svh; }
+  .st-root { height: 880svh; }
 }
 
 /* story title card: no words, a lone figure on a cliff above the clouds, keyed to the visitor's sky */
@@ -686,3 +686,55 @@ html.still .ema-board { animation: none; }
 .st-line, .hero h1, .statement p, .dcard h3 { letter-spacing: -.01em; }
 .st-line { font-weight: 700; }
 .who { font-weight: 700 !important; }
+
+/* ink drawn over the story prints: the trail up Fuji, the altitude, sky lanterns, footprints to the gate */
+.st-over { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; overflow: visible; pointer-events: none; will-change: transform; }
+.tr-guide { fill: none; stroke: rgba(255, 248, 238, .35); stroke-width: 2; stroke-dasharray: 2 9; stroke-linecap: round; }
+.tr-ink { fill: none; stroke: #ffe9c8; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px rgba(255, 200, 140, .7)); }
+.tr-head circle { fill: #ffe2b0; } .tr-head .glow { fill: rgba(255, 190, 110, .35); }
+.st-summit .ring { fill: rgba(200, 54, 31, .2); stroke: none; }
+.st-summit .ring2 { fill: none; stroke: #c8361f; stroke-width: 3; }
+.st-alt { position: absolute; top: calc(84px + env(safe-area-inset-top, 0px)); right: clamp(16px, 4vw, 48px); z-index: 2; display: grid; gap: 2px; justify-items: end;
+  padding: 10px 14px; background: rgba(255, 248, 238, .86); color: #1b2433; border-left: 3px solid #c8361f; }
+.st-alt span { font: 500 10px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; opacity: .7; }
+.st-alt b { font: 700 clamp(20px, 2.6vw, 30px)/1 var(--display); font-variant-numeric: tabular-nums; }
+.st-skylans { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.st-skylan { position: absolute; top: 50%; display: grid; justify-items: center; gap: 6px; will-change: transform, opacity; }
+.st-skylan i { width: 22px; height: 30px; border-radius: 6px 6px 9px 9px; background: linear-gradient(180deg, #ffe4a8, #ff9a4a); box-shadow: 0 0 22px 6px rgba(255, 160, 70, .45); }
+.st-skylan small { font: 500 11px/1 var(--mono); color: #ffe9c8; letter-spacing: .06em; white-space: nowrap; text-shadow: 0 1px 6px rgba(0, 0, 0, .8); }
+.st-skylan.k1 i, .st-skylan.k4 i, .st-skylan.k7 i { transform: scale(.8); }
+.st-print { fill: rgba(70, 82, 102, .55); }
+.st-gate-lanterns { position: absolute; top: 0; left: 0; right: 0; z-index: 2; display: flex; justify-content: space-evenly; }
+.st-chochin em { position: absolute; inset: -14px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 200, 110, .85), transparent 70%); }
+.st-chochin.g1, .st-chochin.g3 { margin-top: 70px; } .st-chochin.g2 { margin-top: 30px; }
+@media (max-width: 640px) {
+  .st-skylan:nth-child(n+7) { display: none; }
+  .st-alt { top: calc(72px + env(safe-area-inset-top, 0px)); padding: 8px 10px; }
+}
+.st-gate-lanterns .st-chochin { box-shadow: none; animation: st-sway 4.5s ease-in-out infinite; }
+.st-gate-lanterns .st-chochin.g1 { animation-delay: -1.2s; } .st-gate-lanterns .st-chochin.g3 { animation-delay: -2.6s; }
+
+/* charms: hanko seal on headings, kamon back to top, omikuji fortune */
+.label .hanko { display: inline-block; width: 34px; height: 34px; margin-right: 10px; vertical-align: middle; }
+.hanko svg { display: block; width: 100%; height: 100%; }
+.hanko rect { fill: #c8361f; } .hanko rect.in { fill: none; stroke: #fff8ee; stroke-width: 1.4; opacity: .8; }
+.hanko text { font: 700 17px var(--display); fill: #fff8ee; }
+.kamon { position: fixed; right: max(16px, env(safe-area-inset-right, 0px) + 12px); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 60;
+  width: 56px; height: 56px; padding: 0; border: 0; border-radius: 50%; background: #fff8ee; color: #1d3557; cursor: pointer;
+  box-shadow: 0 6px 22px rgba(27, 36, 51, .22); }
+.kamon svg { display: block; width: 100%; height: 100%; }
+.kamon .track { fill: none; stroke: rgba(29, 53, 87, .15); stroke-width: 3; }
+.kamon .fill { fill: none; stroke: #c8361f; stroke-width: 3; stroke-linecap: round; }
+.kamon .waves path { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.kamon:focus-visible { outline: 2px solid #c8361f; outline-offset: 3px; }
+.omikuji { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 34px; min-height: 96px; flex-wrap: wrap; }
+.omi-box { display: inline-flex; align-items: center; gap: 10px; padding: 8px 16px 8px 10px; border: 1px solid currentColor; border-radius: 999px;
+  background: transparent; color: inherit; font: 500 14px var(--sans); cursor: pointer; transform-origin: 50% 90%; }
+.omi-box svg { width: 22px; height: 34px; }
+.omi-box rect { fill: #8a5a32; } .omi-box rect.stick { fill: #e8d3a8; } .omi-box path { stroke: #e8b04a; stroke-width: 2; }
+.omi-slot { min-width: min(320px, 100%); min-height: 96px; display: grid; place-items: center; }
+.omi-slip { transform-origin: 50% 0; max-width: 320px; padding: 14px 18px; text-align: left; background: #fff8ee; color: #1b2433;
+  border-top: 4px solid #c8361f; box-shadow: 0 8px 24px rgba(10, 12, 20, .25); }
+.omi-slip b { display: block; font: 400 20px/1.1 var(--brush); color: #c8361f; margin-bottom: 6px; }
+.omi-slip p { margin: 0; font: 500 16px/1.4 var(--display); }
+@media (max-width: 640px) { .kamon { width: 46px; height: 46px; } }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useInView, useScroll, useTransform } from 'motion/react';
 import MountainSky from './MountainSky.jsx';
 import { RotatingText, Counted } from './TextMotion.jsx';
+import { Hanko, Omikuji } from './Charms.jsx';
 import { usePrefs } from '../prefs.jsx';
 import { resolveSky } from '../sky.js';
 import { featured, scraps, experience, EMAIL, GITHUB, LINKEDIN, RESUME } from '../data.js';
@@ -178,7 +179,7 @@ export function Work() {
   return (
     <section className="work" id="work" aria-labelledby="work-title">
       <div className="wrap">
-        <motion.div className="head" {...head}><span className="label"><span className="jp" aria-hidden="true">波</span> · Work</span><h2 id="work-title">What I have built</h2></motion.div>
+        <motion.div className="head" {...head}><span className="label"><Hanko n="02" />Work</span><h2 id="work-title">What I have built</h2></motion.div>
       </div>
       {motionOn ? (
         <div className="deck" ref={ref} style={{ '--n': n }}>
@@ -205,7 +206,7 @@ export function Experience() {
     <section className="exp" id="experience" aria-labelledby="exp-title">
       <MountainSky />
       <div className="wrap">
-      <motion.div className="head" {...head}><span className="label"><span className="jp" aria-hidden="true">葉</span> · Experience</span><h2 id="exp-title">Where I have worked</h2></motion.div>
+      <motion.div className="head" {...head}><span className="label"><Hanko n="01" />Experience</span><h2 id="exp-title">Where I have worked</h2></motion.div>
       <ol className="rows">
         {experience.map(([when, title, body]) => (
           <li key={title}><span className="when">{when}</span><div><h3>{title}</h3><p><Counted text={body} /></p></div></li>
@@ -222,7 +223,7 @@ export function Island({ Scene }) {
   return (
     <section ref={ref} className="island" id="island" aria-labelledby="island-title">
       <div className="wrap island-head">
-        <motion.div className="head" {...head}><span className="label"><span className="jp" aria-hidden="true">島</span> · A quiet place</span><h2 id="island-title">Stay a while</h2></motion.div>
+        <motion.div className="head" {...head}><span className="label">A quiet place</span><h2 id="island-title">Stay a while</h2></motion.div>
         <p className="hint">Drag to look around. The light follows the sky you picked.</p>
       </div>
       {near ? <Scene /> : <div className="shrine3d" />}
@@ -241,11 +242,12 @@ export function Contact({ toast }) {
     <section className="close" id="contact" ref={ref} aria-labelledby="contact-title">
       <div className="sunwrap" aria-hidden="true"><motion.div className="sun" style={motionOn ? { y: sunY, opacity: sunOpacity } : undefined} /></div>
       <div className="wrap">
-        <span className="label"><span className="jp" aria-hidden="true">日</span> · Contact</span>
+        <span className="label"><Hanko n="04" />Contact</span>
         <h2 id="contact-title">The tea is warm. Bring me a problem worth solving.</h2>
         <p>Open to software and AI engineering internships and new grad roles. Email is fastest.</p>
         <div className="mail"><code>{EMAIL}</code><button className="btn solid" type="button" onClick={copy} data-magnet>Copy email</button></div>
         <div className="btns center"><a className="btn" href={GITHUB} data-magnet>GitHub</a><a className="btn" href={LINKEDIN} data-magnet>LinkedIn</a><a className="btn" href={RESUME} data-magnet>Resume</a></div>
+        <Omikuji />
       </div>
       <SeaBand />
     </section>

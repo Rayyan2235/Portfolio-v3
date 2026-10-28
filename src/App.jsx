@@ -10,6 +10,7 @@ import CommandMenu from './components/CommandMenu.jsx';
 import Ambient from './components/Ambient.jsx';
 import Hobbies from './components/Hobbies.jsx';
 import { Preloader, InkCursor, SmoothScroll, ToolWave } from './components/Flourish.jsx';
+import { KamonTop } from './components/Charms.jsx';
 import { HeroText, Statement, Work, Experience, Contact, Footer } from './components/Sections.jsx';
 
 // The 3D island (Shrine3D.jsx, Island in Sections.jsx) is hidden for now: too much GPU for visitors.
@@ -40,6 +41,7 @@ function Page() {
         <Contact toast={toast} />
       </main>
       <Footer />
+      <KamonTop />
       <CommandMenu open={menu} setOpen={setMenu} toast={toast} />
       <AnimatePresence>
         {msg && <motion.div className="toast" role="status" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>{msg}</motion.div>}

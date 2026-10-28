@@ -2,17 +2,18 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useScroll, useTransform, useMotionValueEvent, useVelocity } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
 import { featured } from '../data.js';
+
+const SKY_LANTERNS = [...new Set(featured.flatMap(f => f.stack))].slice(0, 9);
 import { Storm } from './MountainSky.jsx';
 import { resolveSky } from '../sky.js';
 
-// Story intro: one pinned stage, five scenes cut together like a film. The sky runs one long day
+// Story intro: one pinned stage, four scenes cut together like a film. The sky runs one long day
 // (dawn, bright sea, dusk, lantern night, sunrise through the torii) and the text flips light or dark with it.
 // SVG + CSS + canvas + motion only. Lines are placeholders until Rayyan writes them (ADR 0014).
 // Research: vault reference/story-components, docs/story-handoff.md.
 export const BEATS = [
   { id: 'hello', label: 'Hello', line: 'I am Rayyan. I walk toward the mountain and leave the path wider than I found it.' },
   { id: 'from', label: 'Where from', line: 'From the sands of Dubai to the snows of State College, I crossed the water.' },
-  { id: 'why', label: 'What drives me', line: 'Rain does not stop the work. It only shows who keeps walking.' },
   { id: 'build', label: 'What I build', line: 'Agents for the yard, a pharmacist for every counter, a companion for the long night.' },
   { id: 'enter', label: 'Come in', line: 'The lanterns are lit. Step inside.' }
 ];
@@ -86,12 +87,17 @@ function Birds() {
 
 // A chapter's painting: a public domain print (public/art/story) filling the whole stage, with a slow camera move
 // driven by the chapter's progress, a color grade for where the day is, and a dark shade at the foot for the line.
-function Painting({ q, src, origin = '50% 50%', pos = '50% 50%', zoom = [1.04, 1.18], pan, grade = '', wide = false, children }) {
+function Painting({ q, src, origin = '50% 50%', pos = '50% 50%', zoom = [1.04, 1.18], pan, grade = '', wide = false, dims, overlay, children }) {
   const scale = useTransform(q, [-0.12, 1.1], zoom);
   const x = useTransform(q, [0, 1], pan || ['0%', '0%']);
+  const box = useRef(null);
+  const cover = useCover(box, dims, pos);
   return (
-    <div className={`st-paint ${grade}${wide ? ' wide' : ''}`} aria-hidden="true">
+    <div ref={box} className={`st-paint ${grade}${wide ? ' wide' : ''}`} aria-hidden="true">
       <motion.img src={src} alt="" draggable={false} style={{ scale, x, objectPosition: pos, transformOrigin: origin }} />
+      {overlay && cover && (
+        <motion.svg className="st-over" viewBox={`0 0 ${cover.W} ${cover.H}`} style={{ scale, x, transformOrigin: origin }}>{overlay(cover)}</motion.svg>
+      )}
       <span className="st-grade" />
       {children}
       <span className="st-shade" />
@@ -99,13 +105,103 @@ function Painting({ q, src, origin = '50% 50%', pos = '50% 50%', zoom = [1.04, 1
   );
 }
 
+// Maps a point on a print (in its own pixels) onto the stage, following object-fit: cover and the object position,
+// so ink drawn over a painting stays on the mountain or the gate at any screen size.
+function useCover(ref, dims, pos) {
+  const [box, setBox] = useState(null);
+  useEffect(() => {
+    if (!dims || !ref.current) return;
+    const ro = new ResizeObserver(([e]) => setBox({ W: e.contentRect.width, H: e.contentRect.height }));
+    ro.observe(ref.current);
+    return () => ro.disconnect();
+  }, [dims, ref]);
+  if (!box || !dims) return null;
+  const [w, h] = dims;
+  const s = Math.max(box.W / w, box.H / h);
+  const [px, py] = pos.split(' ').map(v => parseFloat(v) / 100);
+  const ox = (box.W - w * s) * px, oy = (box.H - h * s) * py;
+  return { W: box.W, H: box.H, s, at: (x, y) => [ox + x * s, oy + y * s] };
+}
+
+// An ink line drawn as the chapter plays, with a small lantern walking at its head.
+function Trail({ q, d, range, className, children }) {
+  const ink = useRef(null), head = useRef(null);
+  const len = useTransform(q, range, [0, 1]);
+  const place = v => {
+    const el = ink.current;
+    if (!el || !head.current) return;
+    const p = el.getPointAtLength(v * el.getTotalLength());
+    head.current.setAttribute('transform', `translate(${p.x} ${p.y})`);
+    head.current.style.opacity = v > 0.002 && v < 0.999 ? 1 : 0;
+  };
+  useMotionValueEvent(len, 'change', place);
+  useEffect(() => place(len.get()), [d]); // eslint-disable-line react-hooks/exhaustive-deps
+  return (
+    <g className={className}>
+      <path d={d} className="tr-guide" />
+      <motion.path ref={ink} d={d} className="tr-ink" style={{ pathLength: len }} />
+      <g ref={head} className="tr-head"><circle r="11" className="glow" /><circle r="4.5" /></g>
+      {children}
+    </g>
+  );
+}
+const pathOf = (cover, pts) => pts.map(([x, y], i) => {
+  const [a, b] = cover.at(x, y);
+  return `${i ? 'L' : 'M'}${a.toFixed(1)} ${b.toFixed(1)}`;
+}).join(' ');
+
+// Mount Fuji is 3,776 m. The counter climbs with the trail.
+function Altitude({ q }) {
+  const m = useTransform(q, [0.1, 0.78], [0, 3776], { clamp: true });
+  const text = useTransform(m, v => `${Math.round(v).toLocaleString('en-US')} m`);
+  return <div className="st-alt" aria-hidden="true"><span>Altitude</span><motion.b>{text}</motion.b></div>;
+}
+
+// Footprints in the snow, one by one, from the viewer to the temple gate.
+function Prints({ q, cover }) {
+  const steps = 14;
+  return Array.from({ length: steps }, (_, i) => {
+    const t = i / (steps - 1);
+    const x = 560 + (775 - 560) * t + (i % 2 ? 14 : -14) * (1 - t * 0.6);
+    const y = 1190 - (1190 - 1000) * Math.pow(t, 0.8);
+    const [px, py] = cover.at(x, y);
+    return <Print key={i} q={q} at={0.12 + t * 0.55} x={px} y={py} r={cover.s * (13 - t * 8)} tilt={i % 2 ? 8 : -8} />;
+  });
+}
+function Print({ q, at, x, y, r, tilt }) {
+  const opacity = useTransform(q, [at, at + 0.04], [0, 0.85]);
+  return <motion.ellipse cx={x} cy={y} rx={r * 0.55} ry={r} className="st-print" style={{ opacity }} transform={`rotate(${tilt} ${x} ${y})`} />;
+}
+
+// Sky lanterns carry the tools the projects are built with up past the fireworks.
+function SkyLantern({ q, i, name }) {
+  const start = 0.04 + (i % 5) * 0.06;
+  const y = useTransform(q, [start, start + 0.9], ['45svh', `${-70 - (i % 3) * 12}svh`]);
+  const opacity = useTransform(q, [start, start + 0.08, start + 0.75, start + 0.9], [0, 1, 1, 0]);
+  return (
+    <motion.span className={`st-skylan k${i}`} style={{ y, opacity, left: `${6 + ((i * 37) % 86)}%` }}>
+      <i /><small>{name}</small>
+    </motion.span>
+  );
+}
+
 const Scenes = {
   // 01 dawn: Hokusai's Red Fuji. The camera drifts up toward the summit while mist crosses and birds pass.
   hello: function Hello({ q }) {
     return (
-      <Painting q={q} src="/art/story/red-fuji.jpg" pos="70% 50%" origin="70% 25%" zoom={[1.02, 1.2]} grade="g-dawn">
+      <Painting q={q} src="/art/story/red-fuji.jpg" pos="70% 50%" origin="70% 25%" zoom={[1.02, 1.2]} grade="g-dawn" dims={[2000, 1351]}
+        overlay={cover => {
+          const d = pathOf(cover, [[1150, 1240], [1400, 1080], [1235, 930], [1470, 780], [1350, 640], [1500, 500], [1420, 380], [1495, 300], [1478, 245]]);
+          const [sx, sy] = cover.at(1478, 230);
+          return (
+            <Trail q={q} d={d} range={[0.1, 0.78]} className="st-trail">
+              <Summit q={q} x={sx} y={sy} />
+            </Trail>
+          );
+        }}>
         <span className="st-mist m1" /><span className="st-mist m2" /><span className="st-mist m3" />
         <Birds />
+        <Altitude q={q} />
       </Painting>
     );
   },
@@ -148,22 +244,13 @@ const Scenes = {
     );
   },
 
-  // 03 what drives me: Kawase Hasui's Shin Ohashi (1926). Night rain on an iron bridge, lamps burning, one rickshaw
-  // still out in it; a rain layer slides over the print so the storm keeps falling.
-  why: function Drive({ q }) {
-    return (
-      <Painting q={q} src="/art/story/shin-ohashi.jpg" pos="45% 58%" origin="50% 55%" zoom={[1.04, 1.18]}>
-        <span className="st-rain" />
-      </Painting>
-    );
-  },
-
-  // 04 night: Hiroshige's Fireworks at Ryogoku. New bursts open over the river while the projects hang in the dark.
+  // 03 night: Hiroshige's Fireworks at Ryogoku. New bursts open over the river while the projects hang in the dark.
   build: function Night({ q }) {
     return (
       <>
         <Painting q={q} src="/art/story/fireworks.jpg" pos="50% 22%" origin="60% 20%" zoom={[1.02, 1.12]}>
           {[0, 1, 2, 3].map(i => <span key={i} className={`st-burst b${i}`} />)}
+          <div className="st-skylans">{SKY_LANTERNS.map((s, i) => <SkyLantern key={s} q={q} i={i} name={s} />)}</div>
         </Painting>
         <div className="st-art st-nightart">
           <div className="st-lanterns" aria-hidden="true">{[0, 1, 2].map(i => <span key={i} className={`st-chochin l${i}`}><i /></span>)}</div>
@@ -173,12 +260,43 @@ const Scenes = {
     );
   },
 
-  // 05 come in: Kawase Hasui's Ioridani Pass (1923). Dusk over the valley, the river silver, the village windows lit;
-  // the camera sinks toward the lights until the flash hands off to the portfolio.
-  enter: function Valley({ q }) {
-    return <Painting q={q} src="/art/story/ioridani.jpg" pos="50% 52%" origin="50% 62%" zoom={[1, 1.5]} />;
+  // 04 come in: Hiroshige's Kinryuzan Temple at Asakusa, cropped to the snowy court and the red gate. Footprints
+  // walk to the gate, the lanterns over it light one by one and the camera follows the steps in until the flash.
+  enter: function Gate({ q }) {
+    const glow = useTransform(q, [0.3, 0.85], [0, 1]);
+    return (
+      <Painting q={q} src="/art/story/kinryuzan.jpg" pos="50% 62%" origin="62% 76%" zoom={[1, 1.7]} dims={[1254, 1200]}
+        overlay={cover => {
+          const [gx, gy] = cover.at(770, 900);
+          return (
+            <>
+              <defs><radialGradient id="st-gate-glow"><stop offset="0" stopColor="#ffd38a" stopOpacity=".95" /><stop offset="1" stopColor="#ffb25a" stopOpacity="0" /></radialGradient></defs>
+              <motion.ellipse cx={gx} cy={gy} rx={cover.s * 150} ry={cover.s * 120} fill="url(#st-gate-glow)" style={{ opacity: glow }} />
+              <Prints q={q} cover={cover} />
+            </>
+          );
+        }}>
+        <span className="st-snow" />
+        <div className="st-lanterns st-gate-lanterns">{[0, 1, 2, 3, 4].map(i => <GateLantern key={i} q={q} i={i} />)}</div>
+      </Painting>
+    );
   }
 };
+
+function Summit({ q, x, y }) {
+  const s = useTransform(q, [0.74, 0.84], [0, 1]);
+  return (
+    <motion.g className="st-summit" style={{ opacity: s }}>
+      <circle cx={x} cy={y} r="22" className="ring" />
+      <motion.circle cx={x} cy={y} r="22" className="ring2" style={{ pathLength: s }} />
+    </motion.g>
+  );
+}
+
+function GateLantern({ q, i }) {
+  const on = useTransform(q, [0.2 + i * 0.09, 0.27 + i * 0.09], [0, 1]);
+  return <span className={`st-chochin g${i}`}><motion.em style={{ opacity: on }} /><i /></span>;
+}
 
 function Hang({ q, i, f }) {
   const start = 0.08 + i * 0.12;
@@ -333,7 +451,7 @@ function Film() {
     if (v > 0.95) { try { localStorage.setItem(SEEN_KEY, '1'); } catch { /* storage blocked */ } }
   });
 
-  const petals = useTransform(g, [0, 0.14, 0.22], [1, 1, 0]); // dawn only; the last chapter has its own snow
+  const petals = useTransform(g, [0, 0.18, 0.28], [1, 1, 0]); // dawn only; the last chapter has its own snow
   // walking through the torii ends in light; lives on the stage so it can never cover the page below
   const flash = useTransform(g, [0.956, 1], [0, 1]);
 

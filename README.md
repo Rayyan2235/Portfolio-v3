@@ -85,9 +85,9 @@ A few decisions worth knowing:
 * Kano Chikanobu, *Crane, Tortoise, Pine, and Bamboo under a Rising Sun*. The Met, object 45728, public domain.
 * Matsumura Goshun, *Cherry Blossoms*. The Met, object 49049, public domain.
 * Story chapters and section backdrops (`public/art/story`), all public domain or CC0 via Wikimedia Commons:
-  * Kawase Hasui, *Evening Snow at Terashima Village* (1920), *Shin Ōhashi* (1926) and *Ioridani Pass* (1923). Public domain in Japan (artist died 1957) and in the US (published before 1931).
+  * Kawase Hasui, *Evening Snow at Terashima Village* (1920). Public domain in Japan (artist died 1957) and in the US (published before 1931).
   * Katsushika Hokusai, *Fine Wind, Clear Morning* (Red Fuji).
-  * Utagawa Hiroshige, *The Whirlpools of Awa* (The Met DP146864), *Fireworks at Ryōgoku* (Musée Guimet EO1841), *Evening Cherry Blossoms at Gotenyama* (The Met DP123249, cropped to the sky and blossoms) and *Plum Garden at Kameido* (Rijksmuseum RP-P-1956-743, cropped to the red sky and branches).
+  * Utagawa Hiroshige, *The Whirlpools of Awa* (The Met DP146864), *Fireworks at Ryōgoku* (Musée Guimet EO1841), *Evening Cherry Blossoms at Gotenyama* (The Met DP123249, cropped to the sky and blossoms) *Plum Garden at Kameido* (Rijksmuseum RP-P-1956-743, cropped to the red sky and branches) and *Kinryūzan Temple at Asakusa* (The Met DP122116, CC0, cropped to the snowy court and gate).
 * `src/components/reactbits/Stack` from [React Bits](https://reactbits.dev) by David Haz, MIT + Commons Clause. Free to use here; the component itself may not be resold.
 * The opening is adapted from 21st.dev's scroll expansion hero.
 * Fonts: Shippori Mincho B1, Yuji Boku, Zen Kaku Gothic New and Geist Mono, SIL Open Font License 1.1.
