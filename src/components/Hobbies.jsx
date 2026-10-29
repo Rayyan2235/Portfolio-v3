@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
 import { siu as playSiu } from '../audio.js';
 import { Hanko } from './Charms.jsx';
+import { Footprints } from './Trail.jsx';
 
 // Off the clock: the things outside code, written on ema, the wooden wish plaques that hang at Japanese shrines.
 // Behind them, the red sky and plum branches of Hiroshige's Plum Garden at Kameido (red, like Old Trafford).
@@ -10,6 +11,10 @@ import { Hanko } from './Charms.jsx';
 
 const Ball = () => (
   <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="24" /><path d="M32 20 l10 7 -4 12 h-12 l-4 -12 z" className="fill" /><path d="M32 8 v12 M42 27 l13 -5 M38 39 l8 11 M26 39 l-8 11 M22 27 l-13 -5" /></svg>
+);
+// a peak with a switchback trail that draws itself when you hover the plaque, and a flag at the top
+const Peak = () => (
+  <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M4 54 L26 18 L34 30 L40 22 L60 54 Z" /><path d="M20 28 l6 -10 l6 10" className="snow" /><path className="trail" d="M12 52 L30 46 L20 40 L34 35 L28 30 L33 24" /><path d="M33 24 V12 l8 3 -8 3" className="flag" /></svg>
 );
 const Dumbbell = () => (
   <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="8" y="22" width="8" height="20" rx="2" className="fill" /><rect x="48" y="22" width="8" height="20" rx="2" className="fill" /><rect x="16" y="26" width="5" height="12" rx="1.5" /><rect x="43" y="26" width="5" height="12" rx="1.5" /><path d="M21 32 h22" /></svg>
@@ -23,6 +28,7 @@ const Pad = () => (
 
 const EMA = [
   { id: 'football', Icon: Ball, title: 'Football', line: 'Manchester United, every season.', extra: 'GOAT: Ronaldo', number: '7' },
+  { id: 'hike', Icon: Peak, title: 'Walks and hikes', line: 'Long walks, longer trails. The best thinking happens uphill.' },
   { id: 'gym', Icon: Dumbbell, title: 'The gym', line: 'Where I go to reset.' },
   { id: 'food', Icon: Bowl, title: 'Good food', line: 'I like to eat. Send me your best spot.' },
   { id: 'games', Icon: Pad, title: 'Games', line: 'A few rounds here and there.' }
@@ -57,8 +63,10 @@ function Ema({ e, i }) {
 }
 
 export default function Hobbies() {
+  const ref = useRef(null);
   return (
-    <section className="hobby" id="hobbies" aria-labelledby="hobby-title">
+    <section className="hobby" id="hobbies" aria-labelledby="hobby-title" ref={ref}>
+      <Footprints target={ref} />
       <div className="hobby-art" aria-hidden="true"><img src="/art/story/kameido.jpg" alt="" draggable={false} /></div>
       <div className="wrap hobby-wrap">
         <div className="hobby-head">

@@ -5,6 +5,7 @@ import { RotatingText, Counted } from './TextMotion.jsx';
 import { Hanko } from './Charms.jsx';
 import { Currents } from './Flow.jsx';
 import { Orbit } from './Craft.jsx';
+import { InkLens } from './Trail.jsx';
 import { Storm, Birds as SkyFlock } from './MountainSky.jsx';
 import { usePrefs } from '../prefs.jsx';
 import { resolveSky } from '../sky.js';
@@ -61,7 +62,9 @@ export function Statement() {
       <Currents />
       <CraneGlide />
       <div className="wrap">
-        <motion.p {...head}>Like water, begin where people need it most. <span>Then wear down the stone, one drop at a time.</span></motion.p>
+        <InkLens under="Patient as water, steady as stone. I keep showing up until the path opens.">
+          <motion.p {...head}>Like water, begin where people need it most. <span>Then wear down the stone, one drop at a time.</span></motion.p>
+        </InkLens>
       </div>
     </section>
   );

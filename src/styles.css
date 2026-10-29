@@ -893,3 +893,30 @@ html.still .rl-ch { transition: none; }
 html.still .orbit-ring i { animation: none; }
 .close .mail { margin-block: 14px; }
 .mail .orbit { margin-inline: 16px 18px; }
+
+/* five plaques now that walks and hikes joined */
+.ema-rail { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@media (max-width: 1100px) { .ema-rail { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 40px; } }
+@media (max-width: 860px) { .ema-rail { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ema-hike .ema-icon svg .snow { stroke: #2a1b22; fill: #fff8ee; }
+.ema-hike .ema-icon svg .trail { stroke: #c8361f; stroke-dasharray: 60; stroke-dashoffset: 60; transition: stroke-dashoffset 1.1s cubic-bezier(.65, 0, .35, 1); }
+.ema-hike .ema-icon svg .flag { stroke: #c8361f; fill: #c8361f; opacity: 0; transition: opacity .3s .9s; }
+.ema-hike .ema-board:hover .trail, .ema-hike.ema .ema-board:focus-within .trail { stroke-dashoffset: 0; }
+.ema-hike .ema-board:hover .flag { opacity: 1; }
+@media (hover: none) { .ema-hike .ema-icon svg .trail { stroke-dashoffset: 0; } .ema-hike .ema-icon svg .flag { opacity: 1; } }
+
+/* footprints across the hobbies (after the Codrops image trail) */
+.fp-layer { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.fp { position: absolute; width: 10px; height: 17px; margin: -8px 0 0 -5px; border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%; background: rgba(255, 248, 238, .55); opacity: 0;
+  transform: rotate(var(--a)); }
+.fp::after { content: ""; position: absolute; left: 2px; right: 2px; top: -7px; height: 6px; border-radius: 50%; background: inherit; }
+.fp.r { transform: rotate(var(--a)) scaleX(-1); }
+.fp.on { animation: fp-fade 1.6s ease-out forwards; }
+@keyframes fp-fade { 0% { opacity: 0; } 10% { opacity: 1; } 100% { opacity: 0; } }
+.hobby-wrap { z-index: 2; }
+
+/* ink lens over the statement (after the mask cursor hover) */
+.lens { position: relative; }
+.lens-under { position: absolute; inset: 0; margin: 0; pointer-events: none; font: 500 clamp(32px, 4.6vw, 60px)/1.08 var(--display); letter-spacing: -.01em; max-width: 20ch;
+  color: #fff8ee; background: #c8361f; padding: 0; clip-path: circle(0 at var(--lx, 50%) var(--ly, 50%)); transition: clip-path .35s cubic-bezier(.16, 1, .3, 1); }
+.lens.lens-on .lens-under { clip-path: circle(110px at var(--lx, 50%) var(--ly, 50%)); }
