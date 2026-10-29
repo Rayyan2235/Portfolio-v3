@@ -162,60 +162,86 @@ function drawWaterSlash(c, W, H, p, phase, parts) {
   c.globalAlpha = 1;
 }
 
-// Thunder: one flash step. The room drops to a warm dark, a white hot streak shoots across with blue white arcs
-// crackling around it, throwing sparks and dust; a flash; a single straight glowing cut is left hanging in the
-// dark, and the screen parts along it to show the page.
+// Thunder: one flash step. The room drops to a warm dark, a white hot streak zigzags across with blue white arcs
+// crackling around it, throwing sparks and dust; a flash; the jagged cut is left glowing in the dark, and the
+// screen parts along it to show the page.
 function drawThunderSlash(c, W, H, p, phase, parts) {
-  if (!parts.length) parts.push({ y: H * rnd(0.44, 0.56), sparks: [], smoke: [] });
-  const S = parts[0], y0 = S.y, BG = '#120d1f';
-  const arc = (x0, x1, y, amp, col, w) => {
-    // a jagged arc, redrawn every frame so it flickers
-    const n = Math.max(3, Math.round((x1 - x0) / 26));
-    c.beginPath(); c.moveTo(x0, y);
-    for (let i = 1; i <= n; i++) c.lineTo(x0 + ((x1 - x0) * i) / n, y + (i === n ? 0 : rnd(-amp, amp)));
-    c.strokeStyle = col; c.lineWidth = w; c.stroke();
+  if (!parts.length) {
+    // sharp switchbacks from edge to edge, alternating high and low
+    const n = W < 700 ? 5 : 7, y0 = H * rnd(0.46, 0.54), A = H * 0.2, pts = [[-40, y0]];
+    for (let i = 1; i < n; i++) pts.push([-40 + ((W + 80) * i) / n + rnd(-W * 0.03, W * 0.03), y0 + (i % 2 ? -1 : 1) * A * rnd(0.6, 1)]);
+    pts.push([W + 40, y0]);
+    const len = [0];
+    for (let i = 1; i < pts.length; i++) len.push(len[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+    parts.push({ pts, len, sparks: [], smoke: [] });
+  }
+  const S = parts[0], { pts, len } = S, total = len[len.length - 1], BG = '#120d1f';
+  const upTo = d => {
+    // the path from the start to distance d along it, ending exactly at the head
+    const out = [pts[0]];
+    for (let i = 1; i < pts.length; i++) {
+      if (len[i] <= d) { out.push(pts[i]); continue; }
+      const t = (d - len[i - 1]) / (len[i] - len[i - 1]);
+      out.push([pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * t, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * t]);
+      break;
+    }
+    return out;
   };
-  const cut = a => {
-    if (a <= 0) return;
-    c.save(); c.globalAlpha = a;
-    const g = c.createLinearGradient(0, y0 - 90, 0, y0 + 90);
-    g.addColorStop(0, 'rgba(255,140,50,0)'); g.addColorStop(0.5, 'rgba(255,140,50,.35)'); g.addColorStop(1, 'rgba(255,140,50,0)');
-    c.fillStyle = g; c.fillRect(0, y0 - 90, W, 180);
-    c.shadowColor = '#ff9a3c'; c.shadowBlur = 26; c.strokeStyle = '#ffd27a'; c.lineWidth = 6;
-    c.beginPath(); c.moveTo(-10, y0); c.lineTo(W + 10, y0); c.stroke();
-    c.shadowBlur = 0; c.strokeStyle = '#fffbe6'; c.lineWidth = 2; c.stroke(); c.restore();
+  const line = (ps, col, w) => { c.beginPath(); ps.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); c.strokeStyle = col; c.lineWidth = w; c.stroke(); };
+  const jag = (ps, amp) => {
+    // the same path broken into small kinks, new every frame so it flickers
+    const out = [ps[0]];
+    for (let i = 1; i < ps.length; i++) {
+      const [ax, ay] = ps[i - 1], [bx, by] = ps[i], L = Math.hypot(bx - ax, by - ay), k = Math.max(1, Math.round(L / 22));
+      for (let j = 1; j <= k; j++) { const t = j / k, o = j === k ? 0 : rnd(-amp, amp); out.push([ax + (bx - ax) * t - ((by - ay) / L) * o, ay + (by - ay) * t + ((bx - ax) / L) * o]); }
+    }
+    return out;
   };
-  const crackle = (x0, x1, a) => {
-    c.save(); c.globalAlpha = a; c.shadowColor = '#7fd8ff'; c.shadowBlur = 14; c.lineJoin = 'miter';
-    arc(x0, x1, y0 - 10, 22, '#bfeaff', 2.5); arc(x0, x1, y0 + 10, 22, '#bfeaff', 2.5); arc(x0, x1, y0, 30, '#ffffff', 1.6);
+  const crackle = (ps, a) => {
+    if (ps.length < 2) return;
+    c.save(); c.globalAlpha = a; c.lineJoin = 'miter'; c.shadowColor = '#7fd8ff'; c.shadowBlur = 14;
+    line(jag(ps, 20), '#bfeaff', 2.5); line(jag(ps, 26), '#bfeaff', 1.8); line(jag(ps, 12), '#ffffff', 1.4);
     c.restore();
+  };
+  const cut = (ps, a) => {
+    if (a <= 0) return;
+    c.save(); c.globalAlpha = a; c.lineJoin = 'miter'; c.lineCap = 'round';
+    line(ps, 'rgba(255,140,50,.28)', 46);
+    c.shadowColor = '#ff9a3c'; c.shadowBlur = 26; line(ps, '#ffd27a', 6);
+    c.shadowBlur = 0; line(ps, '#fffbe6', 2); c.restore();
   };
   if (phase === 0) {
     c.globalAlpha = Math.min(1, p * 3); c.fillStyle = BG; c.fillRect(0, 0, W, H);
-    const room = c.createRadialGradient(W * 0.5, y0, 0, W * 0.5, y0, Math.max(W, H) * 0.7);
+    const room = c.createRadialGradient(W * 0.5, H * 0.5, 0, W * 0.5, H * 0.5, Math.max(W, H) * 0.7);
     room.addColorStop(0, 'rgba(190,90,30,.4)'); room.addColorStop(1, 'rgba(190,90,30,0)');
     c.fillStyle = room; c.fillRect(0, 0, W, H); c.globalAlpha = 1;
     const d = Math.max(0, Math.min(1, (p - 0.16) / 0.3));
-    if (p > 0.04 && p < 0.16) crackle(0, W * 0.06, 0.8); // charging at the edge
+    if (p > 0.04 && p < 0.16) crackle(upTo(total * 0.05), 0.8); // charging at the edge
     if (d > 0 && d < 1) {
-      const head = -W * 0.1 + easeIn(d) * W * 1.3, tail = -20, th = Math.max(18, H * 0.03);
-      const gr = c.createLinearGradient(tail, 0, head, 0);
-      gr.addColorStop(0, 'rgba(255,190,90,0)'); gr.addColorStop(0.65, 'rgba(255,228,160,.9)'); gr.addColorStop(1, '#ffffff');
-      c.save(); c.shadowColor = '#ffd27a'; c.shadowBlur = 40; c.fillStyle = gr;
-      c.beginPath(); c.moveTo(tail, y0 - 2); c.lineTo(head - th, y0 - th); c.quadraticCurveTo(head + th, y0, head - th, y0 + th); c.lineTo(tail, y0 + 2); c.closePath(); c.fill(); c.restore();
-      crackle(Math.max(tail, head - W * 0.55), head, 0.95);
-      for (let i = 0; i < 7; i++) S.sparks.push({ x: head, y: y0 + rnd(-th, th), vx: rnd(-16, -3), vy: rnd(-10, 10), l: 1, dust: i % 2 });
-      if (Math.random() < 0.6) S.smoke.push({ x: head - rnd(0, 80), y: y0 + rnd(-40, 40), r: rnd(30, 70), l: 1 });
+      const dist = easeIn(d) * total, trail = upTo(dist), head = trail[trail.length - 1], th = Math.max(16, H * 0.026);
+      c.save(); c.lineJoin = 'miter'; c.lineCap = 'round';
+      line(trail, 'rgba(255,200,110,.35)', th * 2.2);
+      c.shadowColor = '#ffd27a'; c.shadowBlur = 36; line(trail, '#ffe4a0', th);
+      c.shadowBlur = 0; line(trail, '#ffffff', th * 0.4);
+      const g = c.createRadialGradient(head[0], head[1], 0, head[0], head[1], th * 3);
+      g.addColorStop(0, '#ffffff'); g.addColorStop(1, 'rgba(255,230,160,0)'); c.fillStyle = g; c.beginPath(); c.arc(head[0], head[1], th * 3, 0, 7); c.fill();
+      c.restore();
+      crackle(upTo(dist).filter(([x]) => x > head[0] - W * 0.6), 0.95);
+      for (let i = 0; i < 7; i++) S.sparks.push({ x: head[0], y: head[1] + rnd(-th, th), vx: rnd(-14, 4), vy: rnd(-10, 10), l: 1, dust: i % 2 });
+      if (Math.random() < 0.6) S.smoke.push({ x: head[0] - rnd(0, 60), y: head[1] + rnd(-40, 40), r: rnd(30, 70), l: 1 });
     }
-    if (d >= 1) { cut(Math.min(1, (p - 0.46) / 0.08)); if (Math.random() < 0.5) crackle(rnd(0, W * 0.6), rnd(W * 0.6, W), 0.6); }
+    if (d >= 1) { cut(pts, Math.min(1, (p - 0.46) / 0.08)); if (Math.random() < 0.6) crackle(pts, 0.55); }
     if (p > 0.46 && p < 0.72) { c.fillStyle = `rgba(255,244,214,${0.9 * (1 - Math.abs(p - 0.54) / 0.18)})`; c.fillRect(0, 0, W, H); }
   } else {
-    // the two halves slide apart along the cut; dust stays behind in the dark
+    // the two halves slide apart along the jagged cut; dust stays behind in the dark
     S.smoke.length = 0;
-    const off = ease(p) * H * 0.62;
-    c.fillStyle = BG; c.fillRect(0, -off, W, y0); c.fillRect(0, y0 + off, W, H - y0);
-    cut(1 - Math.min(1, p * 1.6));
-    if (p < 0.35 && Math.random() < 0.5) crackle(rnd(0, W * 0.5), rnd(W * 0.5, W), 0.6 * (1 - p / 0.35));
+    const off = ease(p) * H * 0.75, half = (dy, edge) => {
+      c.beginPath(); pts.forEach(([x, y], i) => (i ? c.lineTo(x, y + dy) : c.moveTo(x, y + dy)));
+      c.lineTo(W + 40, edge + dy); c.lineTo(-40, edge + dy); c.closePath(); c.fill();
+    };
+    c.fillStyle = BG; half(-off, -H); half(off, H * 2);
+    cut(pts, 1 - Math.min(1, p * 1.6));
+    if (p < 0.35 && Math.random() < 0.5) crackle(pts, 0.6 * (1 - p / 0.35));
   }
   for (let n = S.smoke.length - 1; n >= 0; n--) {
     const q = S.smoke[n]; q.r += 3; q.x -= 1.5; q.l -= 0.035;
