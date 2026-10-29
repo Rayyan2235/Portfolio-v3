@@ -182,7 +182,7 @@ function drawThunderSlash(c, W, H, p, phase, parts) {
     c.fillStyle = '#120d1f'; c.globalAlpha = Math.min(1, p * 2.4); c.fillRect(0, 0, W, H); c.globalAlpha = 1;
     const t = Math.min(1, p / 0.45);
     bolt(t, 1);
-    if (t < 1) { const [hx, hy] = pts[Math.min(pts.length - 1, Math.ceil(pts.length * t) - 1)]; for (let i = 0; i < 5; i++) parts.push({ x: hx, y: hy, vx: rnd(-6, 2), vy: rnd(-6, 6), l: 1 }); }
+    if (t > 0 && t < 1) { const [hx, hy] = pts[Math.max(0, Math.min(pts.length - 1, Math.ceil(pts.length * t) - 1))]; for (let i = 0; i < 5; i++) parts.push({ x: hx, y: hy, vx: rnd(-6, 2), vy: rnd(-6, 6), l: 1 }); }
     if (p > 0.5 && p < 0.7) { c.fillStyle = `rgba(255,236,170,${0.8 * (1 - Math.abs(p - 0.6) / 0.1)})`; c.fillRect(0, 0, W, H); }
   } else {
     c.fillStyle = '#120d1f'; c.globalAlpha = 1 - ease(p); c.fillRect(0, 0, W, H); c.globalAlpha = 1;
@@ -234,12 +234,15 @@ export function TransitionProvider({ children }) {
     busy.current = true; cv.classList.add('on');
     if ((kind === 'storm' || kind === 'thunder') && snd) setTimeout(() => thunder(0.9), kind === 'thunder' ? 120 : 250);
     const t0 = performance.now(); let jumped = false; const parts = [];
+    const finish = () => { if (!jumped) { jumped = true; jump(id); } c.clearRect(0, 0, W, H); cv.classList.remove('on'); busy.current = false; };
     const step = now => {
-      const t = now - t0; c.clearRect(0, 0, W, H);
+      // the first frame's timestamp can fall a hair before t0, so clamp at zero
+      const t = Math.max(0, now - t0); c.clearRect(0, 0, W, H);
       let phase = 0, p = t / spec.inMs;
       if (t >= spec.inMs) { if (!jumped) { jumped = true; jump(id); } phase = 1; p = Math.min(1, (t - spec.inMs) / spec.outMs); }
-      renderTransitionFrame(kind, c, W, H, p, phase, parts, tile.current, from);
-      if (phase === 1 && p >= 1) { c.clearRect(0, 0, W, H); cv.classList.remove('on'); busy.current = false; return; }
+      // a drawing error must never leave the screen covered: land on the target and lift the cover
+      try { renderTransitionFrame(kind, c, W, H, p, phase, parts, tile.current, from); } catch (err) { console.error(err); finish(); return; }
+      if (phase === 1 && p >= 1) { finish(); return; }
       requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
