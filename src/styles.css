@@ -872,16 +872,18 @@ html.still [data-magnet] { translate: none; }
 a:hover > .rl .rl-ch, a:focus-visible > .rl .rl-ch { transform: translateY(-100%); }
 html.still .rl-ch { transition: none; }
 
-/* scroll ruler (after rauno.me): hairline ticks, red section marks, a frame that slides to where you are */
-.ruler { position: fixed; right: 22px; top: 50%; translate: 0 -50%; z-index: 35; width: 26px; height: var(--h); display: none; }
-@media (min-width: 1100px) and (pointer: fine) { .ruler { display: block; } }
-.ruler-tick { position: absolute; right: 0; width: 8px; height: 1px; background: rgba(128, 128, 128, .7); }
-.ruler-mark { position: absolute; right: 0; width: 18px; height: 9px; translate: 0 -4px; display: block; }
-.ruler-mark::before { content: ""; position: absolute; right: 0; top: 4px; width: 100%; height: 2px; background: #c8361f; }
-.ruler-mark span { position: absolute; right: 28px; top: 50%; translate: 0 -50%; padding: 5px 9px; white-space: nowrap; font: 500 12px/1 var(--sans);
-  color: #fff8ee; background: #1d3557; opacity: 0; transform: translateX(6px); transition: opacity .2s, transform .2s; pointer-events: none; }
-.ruler-mark:hover span, .ruler-mark:focus-visible span { opacity: 1; transform: none; }
-.ruler-tracker { position: absolute; right: -4px; top: -5px; width: 26px; height: 10px; border: 1.5px solid #c8361f; background: rgba(255, 248, 238, .6); will-change: transform; }
+/* section counter: a corner chip that rolls to the section you are in */
+.sc { position: fixed; left: max(16px, env(safe-area-inset-left, 0px) + 12px); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 60;
+  display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; column-gap: 8px; align-items: baseline; padding: 10px 14px 12px; border: 0; cursor: pointer;
+  background: #fff8ee; color: #1b2433; box-shadow: 0 6px 22px rgba(27, 36, 51, .22); text-align: left; overflow: hidden; }
+.sc-num { grid-row: 1 / 3; display: inline-flex; overflow: hidden; height: 1em; font: 700 30px/1 var(--display); font-variant-numeric: tabular-nums; color: #c8361f; }
+.sc-num b { display: block; font: inherit; }
+.sc-of { font: 500 11px/1 var(--mono); opacity: .55; align-self: start; padding-top: 3px; }
+.sc-name { display: inline-flex; overflow: hidden; height: 1.25em; font: 500 13px/1.25 var(--sans); white-space: nowrap; align-self: end; }
+.sc-name span { display: block; }
+.sc-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: #c8361f; transform-origin: 0 50%; }
+.sc:focus-visible { outline: 2px solid #c8361f; outline-offset: 3px; }
+@media (max-width: 640px) { .sc { display: none; } }
 
 /* orbit (after pacomepertant.com): letters travel round the email chip */
 .orbit { position: relative; display: inline-block; }

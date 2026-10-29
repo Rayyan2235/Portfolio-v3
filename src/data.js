@@ -1,7 +1,7 @@
 // Copy comes from the live v2 site (resume backed). Bracketed items are for Rayyan to fill.
 export const EMAIL = 'rayyan2235@gmail.com';
 export const GITHUB = 'https://github.com/Rayyan2235';
-export const LINKEDIN = 'https://linkedin.com/in/RayyanSyed';
+export const LINKEDIN = 'https://www.linkedin.com/in/rayyan-syed-5a846725a/';
 export const RESUME = '#'; // [RESUME PDF]
 
 export const featured = [

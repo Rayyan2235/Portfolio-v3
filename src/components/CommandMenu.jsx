@@ -19,7 +19,7 @@ export default function CommandMenu({ open, setOpen, toast }) {
     ['Contact', 'Section', () => go('contact')],
     ['Copy email address', EMAIL, () => (navigator.clipboard ? navigator.clipboard.writeText(EMAIL) : Promise.reject()).then(() => toast('Email copied'), () => toast(EMAIL))],
     ['Open GitHub', 'github.com/Rayyan2235', () => { location.href = GITHUB; }],
-    ['Open LinkedIn', 'linkedin.com/in/RayyanSyed', () => { location.href = LINKEDIN; }],
+    ['Open LinkedIn', 'linkedin.com/in/rayyan-syed-5a846725a', () => { location.href = LINKEDIN; }],
     ...['auto', 'dawn', 'day', 'dusk', 'night', 'storm'].map(k => [`Sky: ${k === 'auto' ? 'your time' : SKIES[k].label}`, 'Scene', () => { setSky(k); go('top', undefined, k === 'storm' ? 'storm' : undefined); }]),
     ...['mixed', ...Object.keys(KINDS)].map(k => [`Transition: ${k === 'mixed' ? 'Mixed' : KINDS[k].label}`, 'Preference', () => { setTransition(k); toast('Transition set'); }]),
     [motionOn ? 'Turn motion off' : 'Turn motion on', 'Preference', () => setMotionOn(!motionOn)]

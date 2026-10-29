@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useMotionValueEvent, useScroll, useTransform } from 'motion/react';
-import { usePrefs } from '../prefs.jsx';
+import { AnimatePresence, motion, useMotionValue, useMotionValueEvent, useScroll } from 'motion/react';
 import { useTransition } from './Transitions.jsx';
 
 // A second round of pieces taken apart from award winning portfolios (traced over the DevTools protocol alongside
@@ -21,53 +20,61 @@ export function Roll({ children }) {
   );
 }
 
-// Scroll ruler, after Rauno Freiberg's minimap (rauno.me): a column of hairline ticks down the right edge, longer
-// red ticks where each section starts, and a small frame that slides to where you are. Tap a section tick to go there.
-const RULER_SECTIONS = [['top', 'Home'], ['experience', 'Experience'], ['work', 'Work'], ['hobbies', 'Off the clock'], ['contact', 'Contact']];
-const RULER_H = 260;
-export function ScrollRuler() {
-  const { motionOn } = usePrefs();
+// Section counter, after the rolling numbers on art-yakushev.com and Elliott Mangham's counters: a small chip in the
+// bottom left corner that rolls to the number of the section you are in, with a hairline showing how far through it
+// you are. Tap it for the next section. Sits in a corner so it never covers the work.
+const SECTIONS = [['top', 'Home'], ['experience', 'Experience'], ['work', 'Work'], ['hobbies', 'Off the clock'], ['contact', 'Contact']];
+export function SectionCounter() {
   const { go } = useTransition();
   const { scrollY } = useScroll();
-  const [range, setRange] = useState({ start: 0, end: 1, marks: [] });
-  const [show, setShow] = useState(false);
-  const live = useRef({ start: 0, end: 1 }); // read every frame, so the tracker never runs on a stale measurement
+  const [i, setI] = useState(-1);
+  const bar = useMotionValue(0);
+  const tops = useRef([]);
   useEffect(() => {
     const measure = () => {
-      const top = document.getElementById('top');
-      if (!top) return;
-      const start = top.getBoundingClientRect().top + window.scrollY;
-      const end = Math.max(start + 1, document.documentElement.scrollHeight - innerHeight);
-      const marks = RULER_SECTIONS.map(([id, label]) => {
+      tops.current = SECTIONS.map(([id]) => {
         const el = document.getElementById(id);
-        const y = el ? el.getBoundingClientRect().top + window.scrollY : start;
-        return { id, label, at: Math.min(1, Math.max(0, (y - start) / (end - start))) };
+        return el ? el.getBoundingClientRect().top + window.scrollY : Infinity;
       });
-      live.current = { start, end };
-      setRange({ start, end, marks });
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(document.body);
     const late = setTimeout(measure, 1500);
-    addEventListener('load', measure);
-    return () => { ro.disconnect(); clearTimeout(late); removeEventListener('load', measure); };
+    return () => { ro.disconnect(); clearTimeout(late); };
   }, []);
-  useMotionValueEvent(scrollY, 'change', v => setShow(v > live.current.start - innerHeight * 0.4));
-  const y = useTransform(scrollY, v => { const { start, end } = live.current; return Math.min(1, Math.max(0, (v - start) / (end - start))) * RULER_H; });
-  const ticks = Array.from({ length: 27 }, (_, i) => i / 26);
+  useMotionValueEvent(scrollY, 'change', v => {
+    const t = tops.current, mid = v + innerHeight * 0.45;
+    let k = -1;
+    t.forEach((top, n) => { if (mid >= top) k = n; });
+    setI(k);
+    if (k >= 0) {
+      const end = k + 1 < t.length ? t[k + 1] : document.documentElement.scrollHeight;
+      bar.set(Math.min(1, Math.max(0, (mid - t[k]) / (end - t[k]))));
+    }
+  });
+  const show = i >= 0;
+  const next = SECTIONS[Math.min(SECTIONS.length - 1, i + 1)];
+  const pad = n => String(n).padStart(2, '0');
   return (
-    <motion.nav className="ruler" aria-label="Sections" initial={false} animate={{ opacity: show ? 1 : 0, x: show ? 0 : 16 }}
-      transition={{ duration: motionOn ? 0.4 : 0 }} style={{ '--h': `${RULER_H}px`, pointerEvents: show ? 'auto' : 'none' }}>
-      {ticks.map(t => <i key={t} className="ruler-tick" style={{ top: `${t * RULER_H}px` }} aria-hidden="true" />)}
-      {range.marks.map(m => (
-        <a key={m.id} href={`#${m.id}`} className="ruler-mark" style={{ top: `${m.at * RULER_H}px` }}
-          onClick={e => { e.preventDefault(); go(m.id); }}>
-          <span>{m.label}</span>
-        </a>
-      ))}
-      <motion.span className="ruler-tracker" style={{ y }} aria-hidden="true" />
-    </motion.nav>
+    <AnimatePresence>{show && (
+      <motion.button type="button" className="sc" onClick={() => go(i + 1 < SECTIONS.length ? next[0] : 'top')}
+        aria-label={i + 1 < SECTIONS.length ? `Next section: ${next[1]}` : 'Back to the top'}
+        initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} transition={{ duration: 0.35 }}>
+        <span className="sc-num" aria-hidden="true">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.b key={i} initial={{ y: '100%' }} animate={{ y: '0%' }} exit={{ y: '-100%' }} transition={{ duration: 0.45, ease: [0.65, 0, 0.35, 1] }}>{pad(i + 1)}</motion.b>
+          </AnimatePresence>
+        </span>
+        <span className="sc-of" aria-hidden="true">/ {pad(SECTIONS.length)}</span>
+        <span className="sc-name" aria-hidden="true">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span key={i} initial={{ y: '100%', opacity: 0 }} animate={{ y: '0%', opacity: 1 }} exit={{ y: '-100%', opacity: 0 }} transition={{ duration: 0.45, ease: [0.65, 0, 0.35, 1] }}>{SECTIONS[i][1]}</motion.span>
+          </AnimatePresence>
+        </span>
+        <motion.i className="sc-bar" style={{ scaleX: bar }} aria-hidden="true" />
+      </motion.button>
+    )}</AnimatePresence>
   );
 }
 

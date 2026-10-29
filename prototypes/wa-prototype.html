@@ -287,7 +287,7 @@ html.still .close .sea-s{animation:none}
       <div class="mail"><code id="addr">rayyan2235@gmail.com</code><button class="btn solid" type="button" id="copy">Copy email</button></div>
       <div class="btns" style="justify-content:center">
         <a class="btn" href="https://github.com/Rayyan2235">GitHub</a>
-        <a class="btn" href="https://linkedin.com/in/RayyanSyed">LinkedIn</a>
+        <a class="btn" href="https://www.linkedin.com/in/rayyan-syed-5a846725a/">LinkedIn</a>
         <a class="btn" href="#">Resume</a>
       </div>
     </div>
@@ -463,7 +463,7 @@ function toast(m){toastEl.textContent=m;toastEl.classList.add('on');clearTimeout
   var cmds=[['Work','Section',go('work')],['Experience','Section',go('experience')],['What went wrong','Section',go('lessons')],['Contact','Section',go('contact')],
     ['Copy email address','rayyan2235@gmail.com',function(){close();(navigator.clipboard?navigator.clipboard.writeText('rayyan2235@gmail.com'):Promise.reject()).then(function(){toast('Email copied')},function(){toast('rayyan2235@gmail.com')})}],
     ['Open GitHub','github.com/Rayyan2235',function(){close();location.href='https://github.com/Rayyan2235'}],
-    ['Open LinkedIn','linkedin.com/in/RayyanSyed',function(){close();location.href='https://linkedin.com/in/RayyanSyed'}],
+    ['Open LinkedIn','linkedin.com/in/rayyan-syed-5a846725a',function(){close();location.href='https://www.linkedin.com/in/rayyan-syed-5a846725a/'}],
     [reduce?'Turn motion on':'Turn motion off','Preference',function(){document.getElementById('mot').click()}]];
   function render(){var s=q.value.toLowerCase();shown=cmds.filter(function(c){return (c[0]+' '+c[1]).toLowerCase().indexOf(s)>-1});if(sel>=shown.length)sel=0;list.innerHTML='';
     shown.forEach(function(c,i){var li=document.createElement('li');li.id='cmo'+i;li.setAttribute('role','option');li.setAttribute('aria-selected',String(i===sel));li.innerHTML='<span></span><small></small>';li.firstChild.textContent=c[0];li.lastChild.textContent=c[1];li.onclick=function(){c[2]()};list.appendChild(li)});

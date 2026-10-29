@@ -94,4 +94,4 @@ A few decisions worth knowing:
 
 ---
 
-<p align="center">Built by <a href="https://github.com/Rayyan2235">Rayyan Syed</a> · <a href="https://linkedin.com/in/RayyanSyed">LinkedIn</a></p>
+<p align="center">Built by <a href="https://github.com/Rayyan2235">Rayyan Syed</a> · <a href="https://www.linkedin.com/in/rayyan-syed-5a846725a/">LinkedIn</a></p>
