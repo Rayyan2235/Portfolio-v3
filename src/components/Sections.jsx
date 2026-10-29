@@ -4,6 +4,7 @@ import MountainSky from './MountainSky.jsx';
 import { RotatingText, Counted } from './TextMotion.jsx';
 import { Hanko } from './Charms.jsx';
 import { Currents } from './Flow.jsx';
+import { Orbit } from './Craft.jsx';
 import { Storm, Birds as SkyFlock } from './MountainSky.jsx';
 import { usePrefs } from '../prefs.jsx';
 import { resolveSky } from '../sky.js';
@@ -293,7 +294,7 @@ export function Contact({ toast }) {
         <span className="label"><Hanko n="04" />Contact</span>
         <h2 id="contact-title">The tea is warm. Bring me a problem worth solving.</h2>
         <p>Open to software and AI engineering internships and new grad roles. Email is fastest.</p>
-        <div className="mail"><code>{EMAIL}</code><button className="btn solid" type="button" onClick={copy} data-magnet>Copy email</button></div>
+        <div className="mail"><Orbit text="Class of 2027 · Open to internships and new grad roles · "><code>{EMAIL}</code></Orbit><button className="btn solid" type="button" onClick={copy} data-magnet>Copy email</button></div>
         <div className="btns center"><a className="btn" href={GITHUB} data-magnet>GitHub</a><a className="btn" href={LINKEDIN} data-magnet>LinkedIn</a><a className="btn" href={RESUME} data-magnet>Resume</a></div>
       </div>
       <SeaBand />

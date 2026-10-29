@@ -5,6 +5,7 @@ import { SKIES, resolveSky } from '../sky.js';
 import { KINDS } from './Transitions.jsx';
 import { RESUME } from '../data.js';
 import { audioContext } from '../audio.js';
+import { Roll } from './Craft.jsx';
 
 export default function Nav({ onOpenMenu }) {
   const { motionOn, setMotionOn, sky, setSky, transition, setTransition, sound, setSound } = usePrefs();
@@ -42,10 +43,10 @@ export default function Nav({ onOpenMenu }) {
     <motion.nav className="nav" aria-label="Main" initial={false}
       animate={{ y: hidden && !open ? -90 : 0 }} transition={{ type: 'spring', stiffness: 380, damping: 36 }}>
       <a className="who" href="#top" data-go="top"><span className="who-seal" aria-hidden="true">R</span>Rayyan Syed</a>
-      <a className={`l${here === 'experience' ? ' on' : ''} opt`} href="#experience" data-go="experience">Experience</a>
-      <a className={`l${here === 'work' ? ' on' : ''}`} href="#work" data-go="work">Work</a>
-      <a className={`l${here === 'hobbies' ? ' on' : ''} opt`} href="#hobbies" data-go="hobbies">Off the clock</a>
-      <a className="l" href={RESUME}>Resume</a>
+      <a className={`l${here === 'experience' ? ' on' : ''} opt`} href="#experience" data-go="experience"><Roll>Experience</Roll></a>
+      <a className={`l${here === 'work' ? ' on' : ''}`} href="#work" data-go="work"><Roll>Work</Roll></a>
+      <a className={`l${here === 'hobbies' ? ' on' : ''} opt`} href="#hobbies" data-go="hobbies"><Roll>Off the clock</Roll></a>
+      <a className="l" href={RESUME}><Roll>Resume</Roll></a>
       <a className="cta" href="#contact" data-go="contact" data-magnet>Email</a>
       <button ref={btnRef} type="button" className="l sky-btn" aria-expanded={open} aria-haspopup="true" onClick={() => setOpen(o => !o)}>
         <span className={`sky-dot sky-dot-${now}`} aria-hidden="true" />{SKIES[now].label}

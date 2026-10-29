@@ -864,3 +864,32 @@ html.still .roll-track { animation: none; }
 .btn[data-magnet]::before { translate: calc(var(--pull-x, 0px) * -.35) calc(var(--pull-y, 0px) * -.35); transition: --k .35s cubic-bezier(.39, .575, .565, 1), translate .9s cubic-bezier(.16, 1, .3, 1); }
 .btn[data-magnet].magnet-off::before { transition: --k .35s cubic-bezier(.39, .575, .565, 1), translate 1.4s linear(0, .22 7%, .78 15%, 1.13 22%, 1.2 26%, 1.13 31%, .97 39%, .94 44%, .97 51%, 1.01 60%, 1.02 66%, 1 80%, 1); }
 html.still [data-magnet] { translate: none; }
+
+/* rolling labels (after art-yakushev.com): letters roll up one by one and their copies take their place */
+.rl { display: inline-flex; overflow: hidden; line-height: 1.2; padding-block: .06em; vertical-align: bottom; }
+.rl-ch { position: relative; display: inline-block; transition: transform .45s cubic-bezier(.65, 0, .35, 1) calc(var(--i) * 18ms); }
+.rl-ch::after { content: attr(data-c); position: absolute; left: 0; top: 100%; color: #c8361f; }
+a:hover > .rl .rl-ch, a:focus-visible > .rl .rl-ch { transform: translateY(-100%); }
+html.still .rl-ch { transition: none; }
+
+/* scroll ruler (after rauno.me): hairline ticks, red section marks, a frame that slides to where you are */
+.ruler { position: fixed; right: 22px; top: 50%; translate: 0 -50%; z-index: 35; width: 26px; height: var(--h); display: none; }
+@media (min-width: 1100px) and (pointer: fine) { .ruler { display: block; } }
+.ruler-tick { position: absolute; right: 0; width: 8px; height: 1px; background: rgba(128, 128, 128, .7); }
+.ruler-mark { position: absolute; right: 0; width: 18px; height: 9px; translate: 0 -4px; display: block; }
+.ruler-mark::before { content: ""; position: absolute; right: 0; top: 4px; width: 100%; height: 2px; background: #c8361f; }
+.ruler-mark span { position: absolute; right: 28px; top: 50%; translate: 0 -50%; padding: 5px 9px; white-space: nowrap; font: 500 12px/1 var(--sans);
+  color: #fff8ee; background: #1d3557; opacity: 0; transform: translateX(6px); transition: opacity .2s, transform .2s; pointer-events: none; }
+.ruler-mark:hover span, .ruler-mark:focus-visible span { opacity: 1; transform: none; }
+.ruler-tracker { position: absolute; right: -4px; top: -5px; width: 26px; height: 10px; border: 1.5px solid #c8361f; background: rgba(255, 248, 238, .6); will-change: transform; }
+
+/* orbit (after pacomepertant.com): letters travel round the email chip */
+.orbit { position: relative; display: inline-block; }
+.orbit-ring { position: absolute; inset: -14px; pointer-events: none; }
+.orbit-ring i { position: absolute; left: 0; top: 0; font: 500 10px/1 var(--mono); font-style: normal; text-transform: uppercase; color: currentColor; opacity: .8;
+  offset-path: var(--path); offset-anchor: 50% 50%; animation: orbit 22s linear infinite; }
+.orbit.orbit-off .orbit-ring i { animation-play-state: paused; }
+@keyframes orbit { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+html.still .orbit-ring i { animation: none; }
+.close .mail { margin-block: 14px; }
+.mail .orbit { margin-inline: 16px 18px; }
