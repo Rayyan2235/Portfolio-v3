@@ -44,6 +44,38 @@ export function RotatingText({ phrases, interval = 2800, className = '' }) {
   );
 }
 
+// Typewriter: types a phrase, rests, backspaces it, types the next. An invisible copy of the longest phrase holds
+// the space so nothing below jumps while letters come and go. Rests while off screen.
+export function Typewriter({ phrases, className = '', type = 62, erase = 32, hold = 1700 }) {
+  const { motionOn } = usePrefs();
+  const ref = useRef(null);
+  const [text, setText] = useState(phrases[0]);
+  useEffect(() => {
+    if (!motionOn) { setText(phrases[0]); return undefined; }
+    let p = 0, n = phrases[0].length, dir = -1, t, seen = true;
+    const step = () => {
+      if (!seen) { t = setTimeout(step, 400); return; }
+      const full = phrases[p];
+      if (dir > 0 && n === full.length) { dir = -1; t = setTimeout(step, hold); return; }
+      if (dir < 0 && n === 0) { dir = 1; p = (p + 1) % phrases.length; t = setTimeout(step, 380); return; }
+      n += dir;
+      setText(phrases[p].slice(0, n));
+      t = setTimeout(step, dir > 0 ? type + Math.random() * 60 : erase);
+    };
+    t = setTimeout(step, hold);
+    const io = new IntersectionObserver(([e]) => { seen = e.isIntersecting; });
+    if (ref.current) io.observe(ref.current);
+    return () => { clearTimeout(t); io.disconnect(); };
+  }, [motionOn, phrases, type, erase, hold]);
+  const longest = phrases.reduce((a, b) => (b.length > a.length ? b : a), '');
+  return (
+    <span className={`tw ${className}`} ref={ref} aria-hidden="true">
+      <span className="tw-ghost">{longest}</span>
+      <span className="tw-text">{text}<i className="tw-caret" /></span>
+    </span>
+  );
+}
+
 // One number that counts up from zero the first time it scrolls into view.
 export function CountUp({ to, suffix = '', duration = 1.4 }) {
   const ref = useRef(null);

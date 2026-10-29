@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useInView, useScroll, useTransform } from 'motion/react';
 import MountainSky from './MountainSky.jsx';
-import { RotatingText, Counted } from './TextMotion.jsx';
+import { Typewriter, Counted } from './TextMotion.jsx';
 import { Hanko } from './Charms.jsx';
 import { Currents } from './Flow.jsx';
 import { Orbit } from './Craft.jsx';
@@ -26,7 +26,7 @@ export function HeroText() {
     <>
       <p className="corner">Rayyan Syed<br />CS at Penn State, May 2027<br />University Park, {time}</p>
       <div className="ed">
-        <h1 id="hero-title" aria-label="I build what outlasts the storm."><span aria-hidden="true">I build </span><RotatingText className="rt-hero" phrases={HERO_PHRASES} /></h1>
+        <h1 id="hero-title" aria-label="I build what outlasts the storm."><span aria-hidden="true">I build </span><Typewriter className="rt-hero" phrases={HERO_PHRASES} /></h1>
         <p>Patient as the tide, steady as the mountain. Every line written to leave the path a little wider.</p>
       </div>
       <nav className="idx" aria-label="Sections">

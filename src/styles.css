@@ -922,3 +922,30 @@ html.still .orbit-ring i { animation: none; }
 .lens-under { position: absolute; inset: 0; margin: 0; pointer-events: none; font: 500 clamp(32px, 4.6vw, 60px)/1.08 var(--display); letter-spacing: -.01em; max-width: 20ch;
   color: #fff8ee; background: #c8361f; padding: 0; clip-path: circle(0 at var(--lx, 50%) var(--ly, 50%)); transition: clip-path .35s cubic-bezier(.16, 1, .3, 1); }
 .lens.lens-on .lens-under { clip-path: circle(110px at var(--lx, 50%) var(--ly, 50%)); }
+
+/* typewriter in the hero: the hidden longest phrase holds the space, the typed text sits on top of it */
+.tw { display: inline-grid; vertical-align: top; }
+.tw > span { grid-area: 1 / 1; }
+.tw-ghost { visibility: hidden; }
+.tw-caret { display: inline-block; width: .08em; height: .82em; margin-left: .06em; vertical-align: -.04em; background: currentColor; border-radius: 2px; animation: tw-blink 1s steps(1) infinite; }
+@keyframes tw-blink { 50% { opacity: 0; } }
+html.still .tw-caret { animation: none; }
+
+/* phones */
+@media (max-width: 640px) {
+  /* the drifting cloud strips stretch into bars on a tall narrow frame; the print has its own clouds */
+  .mtn-clouds { display: none; }
+  /* sky lanterns start above the caption so their names never sit on the words */
+  .st-skylans { clip-path: inset(0 0 46% 0); }
+  /* letters circling the email crowd the button below on a narrow screen */
+  .mail .orbit-ring { display: none; }
+  .mail .orbit { margin-inline: 0; }
+  /* finger sized targets */
+  .nav a.l, .nav button.l, .nav a.cta { padding-block: 15px; }
+  .idx a { min-height: 44px; display: inline-flex; align-items: center; }
+  /* nothing smaller than 12px */
+  .dc-meta, .dc-seal, .deck-hint, .st-alt span, .st-skylan small, .dc-tags span, .st-kake-in small { font-size: 12px; }
+  /* keep the corner button off the last lines of the footer */
+  footer { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+  .tc-skip { min-height: 44px; padding-inline: 12px; }
+}
