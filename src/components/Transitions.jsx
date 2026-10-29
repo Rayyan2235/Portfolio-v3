@@ -10,7 +10,7 @@ export const KINDS = {
   ink: { label: 'Sumi ink', inMs: 850, outMs: 900 },
   storm: { label: 'Lightning', inMs: 520, outMs: 1000 },
   water: { label: 'Water slash', inMs: 900, outMs: 900 },
-  thunder: { label: 'Thunder slash', inMs: 650, outMs: 900 }
+  thunder: { label: 'Thunder slash', inMs: 760, outMs: 900 }
 };
 const MIXED = { top: 'petals', work: 'water', experience: 'leaves', hobbies: 'thunder', contact: 'petals' };
 
@@ -162,34 +162,73 @@ function drawWaterSlash(c, W, H, p, phase, parts) {
   c.globalAlpha = 1;
 }
 
-// Thunder: the screen dims, a gold bolt tears across it left to right with a white hot core and sparks, a flash,
-// then the dark lifts with the bolt's afterimage fading.
+// Thunder: one flash step. The room drops to a warm dark, a white hot streak shoots across with blue white arcs
+// crackling around it, throwing sparks and dust; a flash; a single straight glowing cut is left hanging in the
+// dark, and the screen parts along it to show the page.
 function drawThunderSlash(c, W, H, p, phase, parts) {
-  if (!parts.length) {
-    const pts = []; let x = -40, y = H * rnd(0.42, 0.58);
-    while (x < W + 40) { x += rnd(40, 90); y = Math.max(H * 0.25, Math.min(H * 0.75, y + rnd(-70, 70))); pts.push([x, y]); }
-    parts.push({ pts: [[-40, pts[0][1]], ...pts] });
-  }
-  const pts = parts[0].pts;
-  const bolt = (t, a) => {
-    const n = Math.max(2, Math.ceil(pts.length * t));
-    c.save(); c.lineJoin = 'miter'; c.lineCap = 'round'; c.globalAlpha = a;
-    c.shadowColor = '#ffd23f'; c.shadowBlur = 30; c.strokeStyle = '#ffc61a'; c.lineWidth = 12;
-    c.beginPath(); pts.slice(0, n).forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); c.stroke();
-    c.shadowBlur = 0; c.strokeStyle = '#fffbe6'; c.lineWidth = 4; c.stroke(); c.restore();
+  if (!parts.length) parts.push({ y: H * rnd(0.44, 0.56), sparks: [], smoke: [] });
+  const S = parts[0], y0 = S.y, BG = '#120d1f';
+  const arc = (x0, x1, y, amp, col, w) => {
+    // a jagged arc, redrawn every frame so it flickers
+    const n = Math.max(3, Math.round((x1 - x0) / 26));
+    c.beginPath(); c.moveTo(x0, y);
+    for (let i = 1; i <= n; i++) c.lineTo(x0 + ((x1 - x0) * i) / n, y + (i === n ? 0 : rnd(-amp, amp)));
+    c.strokeStyle = col; c.lineWidth = w; c.stroke();
+  };
+  const cut = a => {
+    if (a <= 0) return;
+    c.save(); c.globalAlpha = a;
+    const g = c.createLinearGradient(0, y0 - 90, 0, y0 + 90);
+    g.addColorStop(0, 'rgba(255,140,50,0)'); g.addColorStop(0.5, 'rgba(255,140,50,.35)'); g.addColorStop(1, 'rgba(255,140,50,0)');
+    c.fillStyle = g; c.fillRect(0, y0 - 90, W, 180);
+    c.shadowColor = '#ff9a3c'; c.shadowBlur = 26; c.strokeStyle = '#ffd27a'; c.lineWidth = 6;
+    c.beginPath(); c.moveTo(-10, y0); c.lineTo(W + 10, y0); c.stroke();
+    c.shadowBlur = 0; c.strokeStyle = '#fffbe6'; c.lineWidth = 2; c.stroke(); c.restore();
+  };
+  const crackle = (x0, x1, a) => {
+    c.save(); c.globalAlpha = a; c.shadowColor = '#7fd8ff'; c.shadowBlur = 14; c.lineJoin = 'miter';
+    arc(x0, x1, y0 - 10, 22, '#bfeaff', 2.5); arc(x0, x1, y0 + 10, 22, '#bfeaff', 2.5); arc(x0, x1, y0, 30, '#ffffff', 1.6);
+    c.restore();
   };
   if (phase === 0) {
-    c.fillStyle = '#120d1f'; c.globalAlpha = Math.min(1, p * 2.4); c.fillRect(0, 0, W, H); c.globalAlpha = 1;
-    const t = Math.min(1, p / 0.45);
-    bolt(t, 1);
-    if (t > 0 && t < 1) { const [hx, hy] = pts[Math.max(0, Math.min(pts.length - 1, Math.ceil(pts.length * t) - 1))]; for (let i = 0; i < 5; i++) parts.push({ x: hx, y: hy, vx: rnd(-6, 2), vy: rnd(-6, 6), l: 1 }); }
-    if (p > 0.5 && p < 0.7) { c.fillStyle = `rgba(255,236,170,${0.8 * (1 - Math.abs(p - 0.6) / 0.1)})`; c.fillRect(0, 0, W, H); }
+    c.globalAlpha = Math.min(1, p * 3); c.fillStyle = BG; c.fillRect(0, 0, W, H);
+    const room = c.createRadialGradient(W * 0.5, y0, 0, W * 0.5, y0, Math.max(W, H) * 0.7);
+    room.addColorStop(0, 'rgba(190,90,30,.4)'); room.addColorStop(1, 'rgba(190,90,30,0)');
+    c.fillStyle = room; c.fillRect(0, 0, W, H); c.globalAlpha = 1;
+    const d = Math.max(0, Math.min(1, (p - 0.16) / 0.3));
+    if (p > 0.04 && p < 0.16) crackle(0, W * 0.06, 0.8); // charging at the edge
+    if (d > 0 && d < 1) {
+      const head = -W * 0.1 + easeIn(d) * W * 1.3, tail = -20, th = Math.max(18, H * 0.03);
+      const gr = c.createLinearGradient(tail, 0, head, 0);
+      gr.addColorStop(0, 'rgba(255,190,90,0)'); gr.addColorStop(0.65, 'rgba(255,228,160,.9)'); gr.addColorStop(1, '#ffffff');
+      c.save(); c.shadowColor = '#ffd27a'; c.shadowBlur = 40; c.fillStyle = gr;
+      c.beginPath(); c.moveTo(tail, y0 - 2); c.lineTo(head - th, y0 - th); c.quadraticCurveTo(head + th, y0, head - th, y0 + th); c.lineTo(tail, y0 + 2); c.closePath(); c.fill(); c.restore();
+      crackle(Math.max(tail, head - W * 0.55), head, 0.95);
+      for (let i = 0; i < 7; i++) S.sparks.push({ x: head, y: y0 + rnd(-th, th), vx: rnd(-16, -3), vy: rnd(-10, 10), l: 1, dust: i % 2 });
+      if (Math.random() < 0.6) S.smoke.push({ x: head - rnd(0, 80), y: y0 + rnd(-40, 40), r: rnd(30, 70), l: 1 });
+    }
+    if (d >= 1) { cut(Math.min(1, (p - 0.46) / 0.08)); if (Math.random() < 0.5) crackle(rnd(0, W * 0.6), rnd(W * 0.6, W), 0.6); }
+    if (p > 0.46 && p < 0.72) { c.fillStyle = `rgba(255,244,214,${0.9 * (1 - Math.abs(p - 0.54) / 0.18)})`; c.fillRect(0, 0, W, H); }
   } else {
-    c.fillStyle = '#120d1f'; c.globalAlpha = 1 - ease(p); c.fillRect(0, 0, W, H); c.globalAlpha = 1;
-    bolt(1, 1 - p);
+    // the two halves slide apart along the cut; dust stays behind in the dark
+    S.smoke.length = 0;
+    const off = ease(p) * H * 0.62;
+    c.fillStyle = BG; c.fillRect(0, -off, W, y0); c.fillRect(0, y0 + off, W, H - y0);
+    cut(1 - Math.min(1, p * 1.6));
+    if (p < 0.35 && Math.random() < 0.5) crackle(rnd(0, W * 0.5), rnd(W * 0.5, W), 0.6 * (1 - p / 0.35));
   }
-  c.fillStyle = '#ffe27a';
-  for (let n = parts.length - 1; n >= 1; n--) { const q = parts[n]; q.x += q.vx; q.y += q.vy; q.vy += 0.3; q.l -= 0.04; if (q.l <= 0) { parts.splice(n, 1); continue; } c.globalAlpha = q.l; c.fillRect(q.x, q.y, 3, 3); }
+  for (let n = S.smoke.length - 1; n >= 0; n--) {
+    const q = S.smoke[n]; q.r += 3; q.x -= 1.5; q.l -= 0.035;
+    if (q.l <= 0) { S.smoke.splice(n, 1); continue; }
+    const puff = c.createRadialGradient(q.x, q.y, 0, q.x, q.y, q.r);
+    puff.addColorStop(0, `rgba(138,106,82,${0.3 * q.l})`); puff.addColorStop(1, 'rgba(138,106,82,0)');
+    c.fillStyle = puff; c.beginPath(); c.arc(q.x, q.y, q.r, 0, 7); c.fill();
+  }
+  for (let n = S.sparks.length - 1; n >= 0; n--) {
+    const q = S.sparks[n]; q.x += q.vx; q.y += q.vy; q.vy += 0.35; q.l -= 0.04;
+    if (q.l <= 0) { S.sparks.splice(n, 1); continue; }
+    c.globalAlpha = q.l; c.fillStyle = q.dust ? '#3a2418' : '#ffe9a8'; c.fillRect(q.x, q.y, q.dust ? 4 : 3, q.dust ? 4 : 2);
+  }
   c.globalAlpha = 1;
 }
 
