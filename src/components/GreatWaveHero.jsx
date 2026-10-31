@@ -3,6 +3,7 @@ import { useScroll } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
 import { SKIES, resolveSky } from '../sky.js';
 import { thunder, setRain } from '../audio.js';
+import { loopWhileVisible } from '../loop.js';
 
 const IMG = '/great-wave.jpg';
 const IA = 1.488; // image aspect
@@ -123,7 +124,7 @@ export default function GreatWaveHero({ children }) {
       [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(p => gl.texParameteri(gl.TEXTURE_2D, p, gl.CLAMP_TO_EDGE));
     };
 
-    let W = 0, H = 0, cov = [1, 1], off = [0, 0], ready = false, vis = true, raf = 0;
+    let W = 0, H = 0, cov = [1, 1], off = [0, 0], ready = false;
     let mx = 0, my = 0, tmx = 0, tmy = 0, flash = 0, nextBolt = performance.now() + 2500, bolt = null;
     const cur = {}; // smoothed palette
     const t0 = performance.now();
@@ -153,19 +154,9 @@ export default function GreatWaveHero({ children }) {
     const onMove = e => { const r = host.getBoundingClientRect(); tmx = (e.clientX - r.left) / r.width - 0.5; tmy = (e.clientY - r.top) / r.height - 0.5; };
     const onLeave = () => { tmx = tmy = 0; };
     host.addEventListener('pointermove', onMove); host.addEventListener('pointerleave', onLeave);
-    const io = new IntersectionObserver(es => { vis = es[0].isIntersecting; }); io.observe(host);
     size();
-    // the hero can grow inside the scroll-expand frame, so watch the element, not just the window
-    // while the frame is opening it resizes every frame. Reallocating the canvas each frame stutters, but waiting for it
-    // to settle shows a stretched, pixelated picture; so resize once it has grown 5%, and once more when it settles
-    let rt = 0;
+    // the scroll-expand frame scales the hero instead of resizing it, so this only fires on a real window resize
     const resize = () => { size(); if (ready) gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); };
-    const ro = new ResizeObserver(() => {
-      clearTimeout(rt);
-      const w = host.clientWidth, h = host.clientHeight;
-      if (Math.abs(w - W) > W * 0.05 || Math.abs(h - H) > H * 0.05) resize(); else rt = setTimeout(resize, 120);
-    });
-    ro.observe(host);
 
     const makeBolt = () => {
       let x = W * (0.45 + Math.random() * 0.5), y = 0; const pts = [[x, y]];
@@ -221,15 +212,9 @@ export default function GreatWaveHero({ children }) {
     };
 
     // the sky moves slowly: 30 frames a second is plenty and halves the GPU work
-    let lastDraw = 0;
-    const loop = now => {
-      if (ready && vis && now - lastDraw > 31) { lastDraw = now; frame(now); }
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
+    const stop = loopWhileVisible(host, now => { if (ready) frame(now); }, { onResize: resize });
     return () => {
-      cancelled = true; gl.deleteProgram(pr);
-      cancelAnimationFrame(raf); clearTimeout(rt); io.disconnect(); ro.disconnect();
+      cancelled = true; gl.deleteProgram(pr); stop();
       host.removeEventListener('pointermove', onMove); host.removeEventListener('pointerleave', onLeave);
     };
   }, [scrollYProgress]);

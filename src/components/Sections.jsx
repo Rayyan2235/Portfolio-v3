@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion, useInView, useScroll, useTransform } from 'motion/react';
+import { AnimatePresence, motion, useScroll, useTransform } from 'motion/react';
 import MountainSky from './MountainSky.jsx';
 import { Typewriter, Counted } from './TextMotion.jsx';
 import { Hanko } from './Charms.jsx';
@@ -262,20 +262,6 @@ export function Experience() {
       <motion.div className="head" {...head}><span className="label"><Hanko n="01" />Experience</span><h2 id="exp-title">Where I have worked</h2></motion.div>
       <ExpPath />
       </div>
-    </section>
-  );
-}
-
-export function Island({ Scene }) {
-  const ref = useRef(null);
-  const near = useInView(ref, { once: true, margin: '800px 0px' });
-  return (
-    <section ref={ref} className="island" id="island" aria-labelledby="island-title">
-      <div className="wrap island-head">
-        <motion.div className="head" {...head}><span className="label">A quiet place</span><h2 id="island-title">Stay a while</h2></motion.div>
-        <p className="hint">Drag to look around. The light follows the sky you picked.</p>
-      </div>
-      {near ? <Scene /> : <div className="shrine3d" />}
     </section>
   );
 }

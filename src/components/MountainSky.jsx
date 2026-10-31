@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
 import { resolveSky } from '../sky.js';
 import { thunder } from '../audio.js';
+import { loopWhileVisible } from '../loop.js';
 
 // The mountain valley behind Work: Rayyan's ink painting (public/art/mountains.jpg), kept in step with the
 // visitor's sky like the hero. Dawn and dusk wash it warm and turn the painted moon into a sun, day leaves the
@@ -34,11 +35,9 @@ export function Storm({ sound }) {
   snd.current = sound;
   useEffect(() => {
     const c = cv.current, ctx = c.getContext('2d');
-    let W = 0, H = 0, raf = 0, vis = false, last = performance.now(), next = last + 1200, bolt = null;
+    let W = 0, H = 0, next = performance.now() + 1200, bolt = null;
     const size = () => { W = c.clientWidth; H = c.clientHeight; c.width = W; c.height = H; };
     size();
-    const ro = new ResizeObserver(size); ro.observe(c);
-    const io = new IntersectionObserver(es => { vis = es[0].isIntersecting; }); io.observe(c);
     const drops = Array.from({ length: innerWidth < 700 ? 70 : 150 }, () => ({ x: Math.random() * 1.3, y: Math.random(), v: 0.9 + Math.random() * 0.6, l: 12 + Math.random() * 16 }));
     const makeBolt = () => {
       let x = W * (0.2 + Math.random() * 0.6), y = 0; const pts = [[x, y]];
@@ -46,10 +45,7 @@ export function Storm({ sound }) {
       const fork = pts.slice(Math.floor(pts.length / 2)).map(([a, b], i) => [a + i * 10 * (Math.random() > 0.5 ? 1 : -1), b + i * 5]).slice(0, 5);
       return { pts, fork, life: 1 };
     };
-    const loop = now => {
-      raf = requestAnimationFrame(loop);
-      const dt = Math.min(0.05, (now - last) / 1000); last = now;
-      if (!vis) return;
+    const loop = (now, dt) => {
       ctx.clearRect(0, 0, W, H);
       ctx.strokeStyle = 'rgba(214, 224, 238, .55)'; ctx.lineWidth = 1; ctx.beginPath();
       for (const d of drops) {
@@ -69,8 +65,7 @@ export function Storm({ sound }) {
         ctx.shadowBlur = 0; bolt.life -= dt * 2.5; if (bolt.life <= 0) bolt = null;
       }
     };
-    raf = requestAnimationFrame(loop);
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); };
+    return loopWhileVisible(c, loop, { fps: 60, onResize: size });
   }, []);
   return <><canvas ref={cv} className="mtn-rain" /><span ref={flash} className="mtn-flash" /></>;
 }

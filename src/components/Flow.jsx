@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { usePrefs } from '../prefs.jsx';
+import { loopWhileVisible } from '../loop.js';
 
 // Pieces reverse engineered from award winning portfolios and redrawn for the prints.
 // Each one runs only while on screen and touches a single canvas or a transform.
@@ -13,7 +14,7 @@ export function Currents() {
   useEffect(() => {
     const cv = ref.current, c = cv.getContext('2d');
     const noise = makeNoise();
-    let W = 0, H = 0, lines = [], raf = 0, vis = false, last = 0;
+    let W = 0, H = 0, lines = [];
     const mouse = { x: -999, y: -999, sx: -999, sy: -999, lx: 0, ly: 0, vs: 0, a: 0, set: false };
     const size = () => {
       W = cv.clientWidth; H = cv.clientHeight; cv.width = W; cv.height = H;
@@ -49,11 +50,6 @@ export function Currents() {
       c.stroke();
     };
     const tick = now => {
-      raf = 0;
-      if (!vis) return;
-      raf = requestAnimationFrame(tick);
-      if (now - last < 31) return;
-      last = now;
       mouse.sx += (mouse.x - mouse.sx) * 0.15; mouse.sy += (mouse.y - mouse.sy) * 0.15;
       const v = Math.hypot(mouse.x - mouse.lx, mouse.y - mouse.ly);
       mouse.vs += (Math.min(100, v) - mouse.vs) * 0.15; mouse.lx = mouse.x; mouse.ly = mouse.y;
@@ -69,12 +65,9 @@ export function Currents() {
     };
     size(); style();
     if (!motionOn) { draw(4000); return undefined; }
-    const io = new IntersectionObserver(([e]) => { vis = e.isIntersecting; if (vis && !raf) raf = requestAnimationFrame(tick); });
-    io.observe(cv);
-    const ro = new ResizeObserver(() => { size(); style(); });
-    ro.observe(cv);
+    const stop = loopWhileVisible(cv, tick, { onResize: () => { size(); style(); } });
     addEventListener('pointermove', onMove, { passive: true });
-    return () => { cancelAnimationFrame(raf); io.disconnect(); ro.disconnect(); removeEventListener('pointermove', onMove); };
+    return () => { stop(); removeEventListener('pointermove', onMove); };
   }, [motionOn]);
   return <canvas ref={ref} className="currents" aria-hidden="true" />;
 }

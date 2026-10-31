@@ -72,7 +72,7 @@ export function setRain(on) {
 }
 
 // A stadium roar for the Siuuu: pink-ish noise through a band pass that swells and fades, about two seconds.
-export function crowdRoar() {
+function crowdRoar() {
   const c = audioContext();
   if (!c) return;
   const buf = c.createBuffer(1, c.sampleRate * 2.4, c.sampleRate);

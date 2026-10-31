@@ -15,7 +15,7 @@ a { color: inherit; }
 :focus-visible { outline: 2px solid var(--sun); outline-offset: 3px; }
 .wrap { max-width: 1160px; margin: 0 auto; padding-left: var(--gl); padding-right: var(--gr); }
 .label { font: 400 12px/16px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-.label .jp { letter-spacing: 0; margin-right: 2px; }
+
 [hidden] { display: none !important; }
 
 /* layers */
@@ -24,7 +24,7 @@ a { color: inherit; }
 .fxlayer.on { pointer-events: auto; }
 
 /* nav */
-.nav { position: fixed; top: calc(14px + env(safe-area-inset-top, 0px)); left: 0; right: 0; margin: 0 auto; width: max-content; max-width: calc(100% - 24px); z-index: 40; display: flex; align-items: center; gap: 2px; padding: 6px; background: rgba(255, 252, 246, .9); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 10px 30px -18px rgba(29, 53, 87, .35); flex-wrap: nowrap; }
+.nav { position: fixed; top: calc(14px + env(safe-area-inset-top, 0px)); left: 0; right: 0; margin: 0 auto; width: max-content; max-width: calc(100% - 24px); z-index: 40; display: flex; align-items: center; gap: 2px; padding: 6px; background: rgba(255, 252, 246, .9); border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 10px 30px -18px rgba(29, 53, 87, .35); flex-wrap: nowrap; backdrop-filter: none; -webkit-backdrop-filter: none; }
 .nav .who { font: 600 18px/1 var(--display); padding: 0 12px 0 10px; white-space: nowrap; text-decoration: none; }
 .nav a.l, .nav button.l { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font: 500 14px/1 var(--sans); padding: 11px 12px; border-radius: 999px; white-space: nowrap; color: var(--soft); }
 .nav a.l:hover, .nav button.l:hover { background: var(--sunk); color: var(--ink); }
@@ -122,17 +122,13 @@ html.still .sx-petals { display: none; }
 .crane-sky { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 .crane-ink { position: absolute; right: 2vw; top: 18%; width: clamp(300px, 36vw, 540px); height: auto; mix-blend-mode: multiply;
   -webkit-mask: radial-gradient(closest-side, #000 72%, transparent 100%); mask: radial-gradient(closest-side, #000 72%, transparent 100%); }
-.branch { position: absolute; right: 0; top: 0; bottom: 0; width: min(46vw, 640px); pointer-events: none; overflow: hidden; }
-.branch-ink { position: absolute; right: -4vw; top: -2vw; width: 100%; height: auto; mix-blend-mode: multiply; transform-origin: 85% 0%;
-  animation: sway 9s ease-in-out infinite alternate;
-  -webkit-mask: radial-gradient(120% 95% at 92% 0%, #000 52%, transparent 88%); mask: radial-gradient(120% 95% at 92% 0%, #000 52%, transparent 88%); }
-.branch-petals { position: absolute; inset: 0; width: 100%; height: 100%; }
+
 @keyframes sway { from { transform: rotate(-1.3deg); } to { transform: rotate(1.1deg) translateX(-6px); } }
-html.still .branch-ink { animation: none; }
+
 .statement > .wrap, .exp > .wrap { position: relative; z-index: 1; }
 @media (max-width: 760px) {
   .crane-ink { width: 70vw; top: auto; bottom: 0; opacity: .7; }
-  .branch { width: 70vw; opacity: .55; }
+
 }
 
 /* statement */
@@ -143,7 +139,6 @@ html.still .branch-ink { animation: none; }
 /* heads */
 .head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 40px; }
 .head h2 { font-size: clamp(34px, 4.4vw, 52px); line-height: 1.04; font-weight: 500; letter-spacing: -.02em; }
-.head h2.h-sm { font-size: clamp(28px, 3vw, 36px); }
 
 /* work */
 .work { position: relative; padding-block: clamp(110px, 10vw, 140px) clamp(80px, 10vw, 130px); }
@@ -235,19 +230,8 @@ html.still .mtn-drift, html.still .mtn-stars i { animation: none; }
 .rows p { margin: 0; color: var(--soft); max-width: 62ch; }
 @media (max-width: 680px) { .rows li { grid-template-columns: 1fr; } }
 
-
-/* 3D island */
-.island { position: relative; padding-block: clamp(100px, 10vw, 140px) 0; background: linear-gradient(180deg, var(--paper) 0%, #fbe3c7 55%, #fbe3c7 100%); }
-.island-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
-.island-head .head { margin-bottom: 0; }
-.shrine3d { position: relative; height: clamp(460px, 62vw, 720px); cursor: grab; touch-action: pan-y; margin-top: -60px;
-  -webkit-mask: linear-gradient(180deg, transparent 0%, #000 16%, #000 84%, transparent 100%); mask: linear-gradient(180deg, transparent 0%, #000 16%, #000 84%, transparent 100%); }
-.shrine3d:active { cursor: grabbing; }
-.shrine3d canvas { display: block; width: 100% !important; height: 100% !important; }
-.shrine3d.no-3d { background: url(/art/crane-chikanobu.jpg) center 20% / cover; }
-
 /* contact */
-.close { position: relative; overflow: hidden; background: linear-gradient(180deg, #f7b27a 0%, #fde7c4 55%, #fff8ee 100%); padding-block: clamp(110px, 12vw, 170px) 0; }
+.close { position: relative; overflow: hidden; background: linear-gradient(180deg, #f7b27a 0%, #fde7c4 55%, #fff8ee 100%); padding-block: clamp(110px, 12vw, 170px) 0; --far: #8d9dbd; --mid: #57718f; --near: #2a4466; --snow: #fff8ee; --sunc: #e4572e; --halo: 247, 178, 122; }
 .close .sunwrap { position: absolute; left: 50%; top: clamp(56px, 7vw, 90px); transform: translateX(-50%); width: clamp(120px, 15vw, 200px); aspect-ratio: 1; }
 .close .sun { position: absolute; inset: 0; border-radius: 50%; background: var(--sun); box-shadow: 0 0 0 24px rgba(247, 178, 122, .35), 0 0 0 56px rgba(247, 178, 122, .18); }
 .close .wrap { position: relative; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 22px; padding-top: clamp(190px, 20vw, 260px); }
@@ -289,17 +273,14 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 .cm .foot { display: flex; gap: 16px; padding: 10px 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
 .toast { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 75; padding: 12px 18px; border-radius: 999px; background: var(--sea); color: var(--cream); font: 500 14px var(--sans); }
 
-html.still .btn, html.still .hx a, html.still .dots i { transition: none; }
+html.still .btn, html.still .dots i { transition: none; }
 html.still .close .sea-s { animation: none; }
 
 /* story intro: one pinned stage, five scenes cut like a film (phone first) */
 .st-root { position: relative; height: 800svh; }
 .st-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; color: var(--ink); }
-.st-sky, .st-stars, .st-petals, .st-grain { position: absolute; inset: 0; pointer-events: none; }
-.st-petals { width: 100%; height: 100%; z-index: 3; }
-.st-grain { z-index: 4; opacity: .5; mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .4 0 0 0 0 .28 0 0 0 .12 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-.st-stars i { position: absolute; border-radius: 50%; background: #fff6e0; box-shadow: 0 0 6px rgba(255, 246, 224, .8); animation: st-twinkle 4s ease-in-out infinite; }
+.st-petals { position: absolute; inset: 0; pointer-events: none; width: 100%; height: 100%; z-index: 3; }
+
 @keyframes st-twinkle { 50% { opacity: .25; } }
 
 /* a scene: art centered in the upper part, caption centered below, clear of the dock */
@@ -309,53 +290,21 @@ html.still .close .sea-s { animation: none; }
 .st-label { font: 400 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; opacity: .72; }
 .st-line { margin: 0; font: 600 clamp(22px, min(6.6vw, 5.4svh), 56px)/1.1 var(--display); letter-spacing: -.02em; color: inherit; }
 .st-art { position: relative; width: min(100%, 760px); height: clamp(150px, 44svh, 460px); flex: none; }
-
-/* 01 dawn */
-.st-dawn { overflow: hidden; -webkit-mask-image: radial-gradient(ellipse 72% 80% at 50% 50%, #000 58%, transparent 100%); mask-image: radial-gradient(ellipse 72% 80% at 50% 50%, #000 58%, transparent 100%); }
-.st-sunwrap { position: absolute; left: 50%; top: 14%; width: min(46vw, 210px); aspect-ratio: 1; translate: -50% 0; }
-.st-sundisk, .st-sunglow { position: absolute; inset: 0; border-radius: 50%; }
-.st-sundisk { background: var(--sun); box-shadow: 1.5px 1px 0 rgba(27, 36, 51, .18); }
-.st-sunglow { inset: -45%; background: radial-gradient(circle, rgba(247, 178, 122, .7), rgba(247, 178, 122, 0) 65%); animation: st-breathe 5s ease-in-out infinite; }
-@keyframes st-breathe { 50% { transform: scale(1.08); opacity: .8; } }
 .st-mist { position: absolute; height: 10px; border-radius: 999px; background: var(--paper); opacity: .95; animation: st-drift 14s ease-in-out infinite alternate; }
 .st-mist.m1 { top: 34%; left: 12%; width: 48%; }
 .st-mist.m2 { top: 46%; left: 40%; width: 46%; height: 8px; animation-duration: 18s; animation-direction: alternate-reverse; }
 .st-mist.m3 { top: 56%; left: 22%; width: 34%; height: 6px; animation-duration: 11s; }
 @keyframes st-drift { from { transform: translateX(-8%); } to { transform: translateX(8%); } }
-.st-seaband { position: absolute; left: 0; right: 0; bottom: 0; height: 30%; background: linear-gradient(180deg, #e9eef0, #dfe7ea); border-top: 1.5px solid rgba(29, 53, 87, .35); }
-.st-seaband svg { display: block; }
-.st-sea-drift { animation: st-sea 9s linear infinite; }
-@keyframes st-sea { to { transform: translateX(-48px); } }
 .st-birds { position: absolute; inset: 0; color: var(--ink); }
 .st-birds svg { position: absolute; width: 22px; animation: st-fly 22s linear infinite; }
 .st-birds .b0 { top: 18%; } .st-birds .b1 { top: 24%; width: 16px; animation-delay: -1.2s; } .st-birds .b2 { top: 14%; width: 13px; animation-delay: -2.1s; }
 @keyframes st-fly { from { transform: translate(-30px, 0); left: 100%; } to { transform: translate(0, -18px); left: -10%; } }
-.st-swash { position: absolute; left: 50%; bottom: -2%; width: min(80%, 420px); translate: -50% 0; overflow: visible; }
-
-/* 02 bright sea, panning map */
-.st-voyage { overflow: hidden; border-radius: 18px; background: #f7efe0; box-shadow: inset 0 0 0 1.5px #e6cfae, 0 18px 40px rgba(29, 53, 87, .12); }
-.st-pan { position: absolute; inset: 0; width: 160%; }
-.st-pan svg { width: 100%; height: 100%; display: block; }
-.st-clouds-svg rect { fill: #f1c98a; opacity: .7; }
-.st-curl { animation: st-curl 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
-@keyframes st-curl { 50% { transform: translateY(-2px); } }
 .st-bob { animation: st-bob 3s ease-in-out infinite; }
 @keyframes st-bob { 50% { transform: translateY(2.5px) rotate(-2deg); } }
-.st-place { font: 400 15px var(--hand); fill: var(--ink); }
 
-/* 03 dusk */
-.st-duskart { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
-.st-setsun { position: absolute; left: 50%; top: 16%; width: min(52vw, 240px); aspect-ratio: 1; translate: -50% 0; border-radius: 50%;
-  background: radial-gradient(circle, #d8452a 56%, rgba(216, 69, 42, 0) 72%); }
-.st-ridge { position: absolute; left: -10%; width: 120%; bottom: 0; }
-.st-ridge.far { height: 46%; fill: #8a4f6a; opacity: .75; }
-.st-ridge.near { height: 34%; fill: #3d2a45; }
 .st-mist.m4 { top: 58%; left: 10%; width: 70%; height: 12px; background: #f6c58e; opacity: .7; }
 .st-mist.m5 { top: 74%; left: 30%; width: 80%; height: 16px; background: #f3b47c; opacity: .55; animation: none; }
-.st-crane { position: absolute; top: 4%; left: 100%; width: 62%; max-width: 460px; height: auto; filter: drop-shadow(0 10px 12px rgba(40, 20, 40, .25)); }
 
-/* 04 lantern night */
-.st-moon { position: absolute; right: 6%; top: -6%; width: 64px; aspect-ratio: 1; border-radius: 50%; background: #fbf1d8; box-shadow: 0 0 40px 12px rgba(251, 241, 216, .25); }
 .st-lanterns { position: absolute; left: 0; right: 0; top: -60px; display: flex; justify-content: space-around; }
 .st-chochin { position: relative; width: 30px; height: 40px; margin-top: 46px; border-radius: 45%; transform-origin: 50% -46px;
   background: repeating-linear-gradient(180deg, #e8603a 0 5px, #c8361f 5px 6px); box-shadow: 0 0 28px 10px rgba(247, 140, 80, .45);
@@ -365,8 +314,6 @@ html.still .close .sea-s { animation: none; }
 .st-chochin.l1 { animation-delay: -1.5s, -.7s; margin-top: 30px; } .st-chochin.l2 { animation-delay: -3s, -1.4s; }
 @keyframes st-sway { 50% { transform: rotate(5deg); } }
 @keyframes st-flicker { 30% { filter: brightness(1.12); } 60% { filter: brightness(.92); } }
-.st-fly { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #ffe7a3; box-shadow: 0 0 10px 3px rgba(255, 220, 130, .7); animation: st-firefly 8s ease-in-out infinite; }
-@keyframes st-firefly { 0%, 100% { transform: translate(0, 0); opacity: .2; } 30% { opacity: 1; } 50% { transform: translate(18px, -26px); } 75% { transform: translate(-12px, -10px); opacity: .5; } }
 .st-hang { --kh: clamp(140px, 24svh, 250px); position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: flex-start; gap: clamp(10px, 4vw, 44px); }
 .st-kake { position: relative; margin: 0; width: clamp(92px, 26vw, 180px); display: flex; flex-direction: column; align-items: center; }
 .st-kake .rod { display: block; width: 114%; height: 8px; border-radius: 4px; background: #e9d7b8; position: relative; z-index: 1; }
@@ -375,16 +322,6 @@ html.still .close .sea-s { animation: none; }
 .st-kake-in b { font: 600 clamp(15px, 3.6vw, 22px)/1.1 var(--display); }
 .st-kake-in small { font: 400 10px/1.3 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .st-kake-in .seal { width: 14px; height: 14px; margin-top: auto; margin-bottom: 16px; background: var(--sun); border-radius: 2px; }
-
-/* 05 sunrise through the torii */
-.st-gate { display: grid; place-items: center; }
-.st-gate svg { position: relative; width: min(78vw, 380px); height: auto; transform-origin: 50% 72%; }
-.st-gate-sun { position: absolute; left: 50%; top: 30%; translate: -50% 0; width: min(44vw, 200px); aspect-ratio: 1; border-radius: 50%;
-  background: radial-gradient(circle, var(--sun) 56%, rgba(228, 87, 46, 0) 72%); }
-.st-rays { position: absolute; left: 50%; top: 42%; width: 150vmax; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; pointer-events: none;
-  background: repeating-conic-gradient(rgba(247, 178, 122, .35) 0 4deg, transparent 4deg 12deg);
-  -webkit-mask-image: radial-gradient(circle, #000, transparent 45%); mask-image: radial-gradient(circle, #000, transparent 45%); animation: st-spin 80s linear infinite; }
-@keyframes st-spin { to { rotate: 360deg; } }
 .st-flash { position: absolute; inset: 0; z-index: 5; background: var(--paper); pointer-events: none; }
 .st-enter .st-line { text-shadow: 0 0 10px rgba(255, 248, 238, .7); }
 
@@ -403,31 +340,14 @@ html.still .close .sea-s { animation: none; }
 }
 
 /* story title card: no words, a lone figure on a cliff above the clouds, keyed to the visitor's sky */
-.tc { --sky-top: #f6c3a1; --sky-bot: #fde7c4; --orb: #e4572e; --glow: rgba(247, 178, 122, .6); --land: #1b2433; --bank: #fff1e2; --mist: rgba(255, 241, 226, .85);
-  padding: calc(10px + env(safe-area-inset-top, 0px)) 10px 10px; background: var(--paper); }
-.tc-day { --sky-top: #9fc7dc; --sky-bot: #f1ede0; --orb: #fff4d8; --glow: rgba(255, 244, 216, .7); --land: #22303b; --bank: #fbfaf4; --mist: rgba(250, 249, 242, .9); }
+.tc { --sky-top: #f6c3a1; --sky-bot: #fde7c4; --orb: #e4572e; --glow: rgba(247, 178, 122, .6); --land: #1b2433; --bank: #fff1e2; --mist: rgba(255, 241, 226, .85); padding: calc(10px + env(safe-area-inset-top, 0px)) 10px 10px; background: var(--paper); --torii: #c8361f; --peak: #5b4a6e; }
+.tc-day { --sky-top: #9fc7dc; --sky-bot: #f1ede0; --orb: #fff4d8; --glow: rgba(255, 244, 216, .7); --land: #22303b; --bank: #fbfaf4; --mist: rgba(250, 249, 242, .9); --peak: #4c6a86; }
 .tc-dusk { --sky-top: #5d4170; --sky-bot: #f2a46b; --orb: #c8361f; --glow: rgba(228, 87, 46, .55); --land: #1c1424; --bank: #f6c9a8; --mist: rgba(246, 201, 168, .8); }
-.tc-night { --sky-top: #070d1a; --sky-bot: #22325a; --orb: #f8f3e3; --glow: rgba(220, 230, 255, .35); --land: #05080f; --bank: #3c4c78; --mist: rgba(60, 76, 120, .85); }
-.tc-storm { --sky-top: #3f4757; --sky-bot: #8a93a2; --orb: #c9ced8; --glow: rgba(200, 206, 216, .15); --land: #151a22; --bank: #a9b0bc; --mist: rgba(169, 176, 188, .9); }
+.tc-night { --sky-top: #070d1a; --sky-bot: #22325a; --orb: #f8f3e3; --glow: rgba(220, 230, 255, .35); --land: #05080f; --bank: #3c4c78; --mist: rgba(60, 76, 120, .85); --torii: #6b1e16; --peak: #18223c; }
+.tc-storm { --sky-top: #3f4757; --sky-bot: #8a93a2; --orb: #c9ced8; --glow: rgba(200, 206, 216, .15); --land: #151a22; --bank: #a9b0bc; --mist: rgba(169, 176, 188, .9); --torii: #6e2a22; --peak: #3a4352; }
 .tc-frame { position: relative; height: calc(100svh - 20px); min-height: 520px; border-radius: clamp(18px, 2.4vw, 32px); overflow: hidden; isolation: isolate;
   background: linear-gradient(180deg, var(--sky-top), var(--sky-bot) 78%); transition: background 1.2s; }
-.tc-scene { position: absolute; inset: 0; width: 100%; height: 100%; transform-origin: 46% 74%; }
-.tc-glow-in { stop-color: var(--glow); } .tc-glow-out { stop-color: var(--glow); stop-opacity: 0; }
-.tc-orb { fill: var(--orb); transition: fill 1.2s; }
-.tc-storm .tc-orb { opacity: .25; }
-.tc-mist-top { stop-color: var(--mist); stop-opacity: 0; } .tc-mist-bot { stop-color: var(--mist); }
-.tc-bank { fill: var(--bank); }
-.tc-bank.far { opacity: .7; }
-.tc-cliff, .tc-pine, .tc-me, .tc-laptop { fill: var(--land); }
-.tc-arm { stroke: var(--land); }
-.tc-grass path { fill: none; stroke: var(--land); stroke-width: 2.2; stroke-linecap: round; transform-box: fill-box; transform-origin: 50% 100%; animation: tc-sway 3.4s ease-in-out infinite alternate; }
-@keyframes tc-sway { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
-.tc-screen-glow { animation: tc-screen 4s ease-in-out infinite alternate; }
-@keyframes tc-screen { to { opacity: .55; } }
-.tc-day .tc-screen-glow { opacity: .35; animation: none; }
-.tc-stars { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s; }
-.tc-night .tc-stars { opacity: 1; }
-.tc-stars i { position: absolute; border-radius: 50%; background: #fff6e0; box-shadow: 0 0 6px rgba(255, 246, 224, .8); animation: st-twinkle 4s ease-in-out infinite; }
+
 .tc-frame .mtn-birds { height: 45%; }
 .tc-day .mtn-bird, .tc-dawn .mtn-bird { color: #2b3446; } .tc-dusk .mtn-bird { color: #2a1b2c; }
 .tc-cue { position: absolute; left: 0; right: 0; bottom: clamp(16px, 3vw, 32px); z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 10px; }
@@ -436,51 +356,19 @@ html.still .close .sea-s { animation: none; }
 @keyframes tc-wheel { 0% { transform: translateY(0); opacity: 1; } 80% { transform: translateY(12px); opacity: 0; } 100% { opacity: 0; } }
 .tc-skip { border: 0; background: none; padding: 8px 4px; color: rgba(255, 248, 238, .9); font: 500 13px var(--sans); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; text-shadow: 0 1px 6px rgba(0, 0, 0, .35); }
 .tc-skip:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
-html.still .tc-grass path, html.still .tc-screen-glow, html.still .tc-scroll i, html.still .tc-stars i { animation: none; }
-/* title card, Japanese print details: peak, kasumi, seigaiha cloud sea, kumo, torii, cranes, petals, grain, seal */
-.tc { --torii: #c8361f; --peak: #5b4a6e; }
-.tc-day { --peak: #4c6a86; } .tc-night { --torii: #6b1e16; --peak: #18223c; } .tc-storm { --torii: #6e2a22; --peak: #3a4352; }
-.tc-peak { fill: var(--peak); opacity: .85; }
+html.still .tc-scroll i { animation: none; }
+
 .tc-snow { fill: var(--bank); }
-.tc-kasumi rect { fill: var(--sky-bot); opacity: .9; }
-.tc-night .tc-kasumi rect { opacity: .35; }
-.tc-sei-bg { fill: var(--bank); }
-.tc-sei-line { fill: none; stroke: var(--land); stroke-opacity: .22; stroke-width: 1.4; }
-.tc-sea { opacity: .95; }
-.tc-kumo rect, .tc-kumo circle { fill: var(--bank); stroke: var(--land); stroke-opacity: .45; stroke-width: 2; }
-.tc-kumo path { stroke: var(--land); stroke-opacity: .45; stroke-width: 2; }
-.tc-torii { fill: var(--torii); }
-.tc-torii-dark { fill: var(--land); }
+
 .mtn-bird.crane { width: 54px; color: var(--land); }
 .mtn-bird.crane svg { fill: currentColor; stroke: none; animation-duration: .9s; }
 .mtn-bird.crane .cr-legs { fill: none; stroke: currentColor; stroke-width: 1.4; }
 .mtn-bird.crane .cr-wing { transform-box: fill-box; transform-origin: 50% 100%; }
 .mtn-bird.crane .cr-crown { fill: #c8361f; }
-.tc-petals { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.tc-petals i { position: absolute; top: -20px; width: 9px; height: 7px; border-radius: 70% 0 70% 0; background: #f7c3c9; opacity: .85; animation: tc-fall linear infinite; }
+
 @keyframes tc-fall { 0% { transform: translate(0, 0) rotate(0); } 50% { transform: translate(60px, 50svh) rotate(200deg); } 100% { transform: translate(-20px, 105svh) rotate(420deg); } }
 .tc-grain { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; opacity: .45;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .4 0 0 0 0 .28 0 0 0 .14 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-.tc-seal { position: absolute; left: clamp(16px, 3vw, 34px); bottom: clamp(16px, 3vw, 34px); z-index: 2; width: 34px; height: 46px; border: 2.5px solid #c8361f; border-radius: 3px;
-  display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 6px; opacity: .85; transform: rotate(-3deg); }
-.tc-seal i { background: #c8361f; border-radius: 1px; }
-.tc-seal i:nth-child(3) { grid-column: 1 / 3; height: 4px; align-self: end; }
-html.still .tc-petals { display: none; }
-
-/* story: the traveller in every chapter, ink ridges brushing in, a fast foreground wave */
-.st-me { position: absolute; height: clamp(40px, 8svh, 68px); width: auto; overflow: visible; fill: #1b2433; pointer-events: none; }
-.st-shore { position: absolute; left: 8%; bottom: 18%; width: 22%; height: 9%; background: #1b2433; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
-.st-me.in-hello { left: 15%; bottom: 26%; }
-.st-nearband { position: absolute; left: -10%; width: 120%; bottom: 0; height: 34%; }
-.st-nearband .st-ridge.near { left: 0; width: 100%; height: 100%; }
-.st-me.in-why { left: 30%; bottom: 38%; height: clamp(32px, 7svh, 56px); fill: #24182a; }
-.st-me.in-build { left: 3%; bottom: 0; fill: #0b0f18; filter: drop-shadow(0 0 14px rgba(247, 178, 122, .65)); }
-.st-gate svg.st-me.in-enter { position: absolute; left: 50%; bottom: 0; width: auto; height: clamp(40px, 8svh, 68px); translate: -50% 0; transform-origin: 50% 100%; }
-.st-me-walk .leg { transform-box: fill-box; transform-origin: 50% 0; animation: st-step .7s ease-in-out infinite alternate; }
-.st-me-walk .leg.r { animation-direction: alternate-reverse; }
-@keyframes st-step { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
-.st-fgwave { position: absolute; left: 0; bottom: -2px; width: 160%; height: 16%; fill: var(--sea); opacity: .35; pointer-events: none; }
-html.still .st-me-walk .leg { animation: none; }
 
 /* story chapters as full bleed paintings (public domain prints in public/art/story) */
 .st-scene { justify-content: flex-end; padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
@@ -492,16 +380,11 @@ html.still .st-me-walk .leg { animation: none; }
 .st-grade, .st-shade { position: absolute; inset: 0; pointer-events: none; }
 .st-grade { mix-blend-mode: multiply; }
 .g-dawn .st-grade { background: linear-gradient(180deg, #ffd9b8, #fff1e2); }
-.g-dusk .st-grade { background: linear-gradient(180deg, #c98a92, #f0b08c); }
-.g-sunrise .st-grade { background: linear-gradient(180deg, #ffd3a8, #fff6ea); }
+
 .st-shade { background: linear-gradient(180deg, rgba(10, 12, 20, .38), transparent 20%, transparent 48%, rgba(10, 12, 20, .82)); }
 .st-paint .st-mist { z-index: 1; opacity: .7; }
 .st-paint .st-birds { z-index: 1; color: #1b2433; }
-.st-bolt { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen; opacity: 0;
-  background: radial-gradient(ellipse 60% 50% at 80% 82%, rgba(255, 236, 214, .95), transparent 70%); animation: st-bolt 6.5s infinite; }
-@keyframes st-bolt { 0%, 86%, 100% { opacity: 0; } 88% { opacity: .9; } 90% { opacity: .15; } 92% { opacity: .75; } 95% { opacity: 0; } }
-.st-skyband { position: absolute; left: 0; right: 0; top: 8%; height: 40%; overflow: hidden; }
-.st-skyband .st-crane { top: 0; }
+
 .st-burst { position: absolute; width: clamp(110px, 16vw, 220px); aspect-ratio: 1; border-radius: 50%; opacity: 0; pointer-events: none; mix-blend-mode: screen;
   background: repeating-conic-gradient(rgba(255, 214, 150, .95) 0 2.5deg, transparent 2.5deg 14deg);
   -webkit-mask-image: radial-gradient(circle, transparent 18%, #000 30%, #000 46%, transparent 52%); mask-image: radial-gradient(circle, transparent 18%, #000 30%, #000 46%, transparent 52%);
@@ -510,16 +393,14 @@ html.still .st-me-walk .leg { animation: none; }
 .st-burst.b2 { left: 30%; top: 26%; animation-delay: -2.3s; } .st-burst.b3 { left: 76%; top: 4%; animation-delay: -3.2s; width: clamp(90px, 12vw, 170px); }
 @keyframes st-burst { 0% { transform: scale(.2); opacity: 0; } 10% { opacity: 1; } 70% { opacity: .6; } 100% { transform: scale(1.15); opacity: 0; } }
 .st-nightart { height: clamp(150px, 34svh, 360px); }
-html.still .st-bolt, html.still .st-burst { animation: none; }
+html.still .st-burst { animation: none; }
 
 /* title card: Kajikazawa, graded to the visitor's sky */
-.tc-paint { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 55% 50%; transform-origin: 55% 42%; user-select: none; }
+.tc-paint { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 55% 50%; user-select: none; transform-origin: 58% 62%; }
 .tc-grade { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; opacity: 0; transition: opacity 1.2s;
   background: linear-gradient(180deg, var(--sky-top), var(--sky-bot)); }
 .tc-dawn .tc-grade { opacity: .55; } .tc-dusk .tc-grade { opacity: .75; } .tc-night .tc-grade { opacity: .95; } .tc-storm .tc-grade { opacity: .85; }
-.tc-mist { position: absolute; height: 12px; border-radius: 999px; background: #fff8ee; opacity: .55; pointer-events: none; animation: mtn-drift 22s ease-in-out infinite alternate; }
-.tc-mist.m1 { top: 30%; left: 6%; width: 42%; } .tc-mist.m2 { top: 40%; left: 48%; width: 36%; height: 9px; animation-duration: 30s; animation-direction: alternate-reverse; }
-.tc-night .tc-mist { opacity: .12; }
+
 .tc-frame::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(10, 12, 20, .25), transparent 22%, transparent 70%, rgba(10, 12, 20, .45)); }
 
 /* experience on the mountain painting; the rows sit on paper so they never blend into the art */
@@ -578,11 +459,11 @@ html.still .st-rain, html.still .st-snow { animation: none; }
 .crane-ink { mix-blend-mode: normal; will-change: transform; }
 
 /* title card: Hasui's lone walker in the snow, and the one line that names him */
-.tc-paint { object-position: 58% 64%; transform-origin: 58% 62%; }
+.tc-paint { object-position: 58% 64%; }
 .tc-snow { z-index: 1; }
 .tc-aura { position: absolute; left: clamp(20px, 4vw, 56px); bottom: clamp(84px, 12svh, 120px); z-index: 2; max-width: min(92%, 900px); color: #fff8ee; text-shadow: 0 2px 24px rgba(8, 10, 18, .6); }
 .tc-kicker { margin: 0 0 10px; font: 400 clamp(12px, 1.2vw, 14px) var(--mono); letter-spacing: .32em; text-transform: uppercase; opacity: 0; animation: tc-fade 1.2s .1s ease-out forwards; }
-.tc-name { margin: 0; font: 600 clamp(52px, 10vw, 150px)/.9 var(--display); letter-spacing: -.01em; display: flex; flex-wrap: wrap; }
+.tc-name { margin: 0; font: 600 clamp(52px, 10vw, 150px)/.9 var(--display); letter-spacing: -.01em; display: flex; flex-wrap: wrap; line-height: 1; }
 .tc-name span { display: inline-block; opacity: 0; transform: translateY(40%); animation: tc-rise .9s cubic-bezier(.16, 1, .3, 1) forwards; }
 @keyframes tc-rise { to { opacity: 1; transform: none; } }
 @keyframes tc-fade { to { opacity: .85; } }
@@ -590,9 +471,6 @@ html.still .st-rain, html.still .st-snow { animation: none; }
 html.still .tc-name span, html.still .tc-kicker { animation: none; opacity: 1; transform: none; }
 
 /* text motion (TextMotion.jsx): rotating hero phrase, counting numbers */
-.rt { display: inline; }
-.rt-phrase { display: inline; }
-.rt-ch { display: inline-block; will-change: transform; }
 .hero h1 .rt-hero { color: var(--sun); }
 .hero.sky-night h1 .rt-hero, .hero.sky-storm h1 .rt-hero { color: #f7b27a; }
 .cu-n { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink); }
@@ -689,7 +567,7 @@ html.still .nav a.cta::before, html.still .sky-dot { animation: none; }
 .ema-icon svg .fill { fill: #2a1b22; }
 .ema-football .ema-icon svg .fill { fill: #da291c; stroke: #2a1b22; }
 .ema-board h3 { margin: 4px 0 0; font: 600 24px/1.1 var(--display); }
-.ema-board p { margin: 0; font: 600 21px/1.15 var(--hand); color: #4a2a22; }
+.ema-board p { margin: 0; font: 600 21px/1.15 var(--hand); color: #4a2a22; line-height: 1.3; }
 .ema-extra { margin-top: auto; display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 999px; background: #da291c; color: #fff8ee; font: 600 13px var(--sans); }
 .ema-extra b { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #fff8ee; color: #da291c; font: 700 15px var(--display); }
 .ema-football .ema-board { cursor: pointer; }
@@ -702,9 +580,9 @@ html.still .nav a.cta::before, html.still .sky-dot { animation: none; }
 html.still .ema-board { animation: none; }
 
 /* type with Japanese roots: Shippori Mincho B1 for display, Yuji Boku brush for the name and the ema, Zen Kaku Gothic New for body */
-.tc-name { font-family: var(--brush); font-weight: 400; letter-spacing: 0; line-height: 1; }
+.tc-name { font-family: var(--brush); font-weight: 400; letter-spacing: 0; }
 .ema-board h3 { font-family: var(--brush); font-weight: 400; font-size: 26px; }
-.ema-board p { font-weight: 400; font-size: 19px; line-height: 1.3; }
+.ema-board p { font-weight: 400; font-size: 19px; }
 .st-line, .hero h1, .statement p, .dcard h3 { letter-spacing: -.01em; }
 .st-line { font-weight: 700; }
 .who { font-weight: 700 !important; }
@@ -712,7 +590,7 @@ html.still .ema-board { animation: none; }
 /* ink drawn over the story prints: the trail up Fuji, the altitude, sky lanterns, footprints to the gate */
 .st-over { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; overflow: visible; pointer-events: none; will-change: transform; }
 .tr-guide { fill: none; stroke: rgba(255, 248, 238, .35); stroke-width: 2; stroke-dasharray: 2 9; stroke-linecap: round; }
-.tr-ink { fill: none; stroke: #ffe9c8; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px rgba(255, 200, 140, .7)); }
+.tr-ink { fill: none; stroke: #ffe9c8; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; filter: none; }
 .tr-head circle { fill: #ffe2b0; } .tr-head .glow { fill: rgba(255, 190, 110, .35); }
 .st-summit .ring { fill: rgba(200, 54, 31, .2); stroke: none; }
 .st-summit .ring2 { fill: none; stroke: #c8361f; stroke-width: 3; }
@@ -753,8 +631,7 @@ html.still .ema-board { animation: none; }
 @media (max-width: 640px) { .kamon { width: 46px; height: 46px; } }
 
 /* contact: a sky-aware print. The section's mode class sets the palette for every layer */
-.close { --sky: linear-gradient(180deg, #f7b27a 0%, #fde7c4 55%, #fff1de 100%); --far: #8d9dbd; --mid: #57718f; --near: #2a4466; --snow: #fff8ee;
-  --mist: rgba(255, 244, 228, .75); --sunc: #e4572e; --halo: 247, 178, 122; --txt: #1b2433; --txt2: #3a4252; background: var(--sky); color: var(--txt); }
+.close { --sky: linear-gradient(180deg, #f7b27a 0%, #fde7c4 55%, #fff1de 100%); --mist: rgba(255, 244, 228, .75); --txt: #1b2433; --txt2: #3a4252; background: var(--sky); color: var(--txt); }
 .close-day { --sky: linear-gradient(180deg, #8fc3e6 0%, #cfe6f1 55%, #f3f0e6 100%); --far: #93afcc; --mid: #5d86a6; --near: #2b5277;
   --mist: rgba(255, 255, 255, .78); --sunc: #fff0bf; --halo: 255, 240, 190; }
 .close-dusk { --sky: linear-gradient(180deg, #3f3563 0%, #b65f7c 48%, #f4a067 100%); --far: #8a5f86; --mid: #5b3f66; --near: #2d2440; --snow: #f6dccf;
@@ -797,25 +674,21 @@ html.still .csky-mist i, html.still .csky-stars { animation: none; }
 .csky-land { bottom: clamp(100px, 12.5vw, 180px); height: clamp(190px, 24vw, 360px); }
 .csky-mist .m2, .csky-mist .m3, .csky-mist .m4 { display: none; }
 
-.rt-word { display: inline-block; white-space: nowrap; }
 
 /* frame budget: no blur behind the fixed nav (it re-blurs every scrolled frame), no animated filters */
-.nav { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(255, 252, 246, .97); }
-.tr-ink { filter: none; }
+.nav { background: rgba(255, 252, 246, .97); }
 .st-chochin { animation: st-sway 4.5s ease-in-out infinite; }
 .st-chochin.l1 { animation-delay: -1.5s; } .st-chochin.l2 { animation-delay: -3s; }
-.st-me.in-build, .st-crane { filter: none; }
 
 /* experience: hanging scrolls on an ink path */
 .xp { position: relative; padding-left: clamp(34px, 5vw, 64px); }
 .xp-line { position: absolute; left: clamp(6px, 1.4vw, 18px); top: 0; bottom: 0; width: 12px; height: 100%; overflow: visible; }
-.xp-line .guide { fill: none; stroke: rgba(255, 248, 238, .45); stroke-width: 2; stroke-dasharray: 1 3; vector-effect: non-scaling-stroke; }
+
 .xp-line .ink { fill: none; stroke: #c8361f; stroke-width: 3; stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .xp-list { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(22px, 3vw, 34px); }
 .xp-item { position: relative; }
-.xp-node { position: absolute; left: calc(-1 * clamp(34px, 5vw, 64px) + clamp(6px, 1.4vw, 18px) - 3px); top: 34px; width: 18px; height: 18px; border-radius: 50%;
-  background: #c8361f; border: 3px solid #fff8ee; box-shadow: 0 0 0 1px rgba(27, 36, 51, .25); }
-.xp-card { position: relative; max-width: 760px; }
+.xp-node { position: absolute; top: 34px; width: 18px; height: 18px; border-radius: 50%; background: #c8361f; border: 3px solid #fff8ee; box-shadow: 0 0 0 1px rgba(27, 36, 51, .25); left: calc(-1 * clamp(34px, 5vw, 64px) + clamp(6px, 1.4vw, 18px) - 8px); }
+.xp-card { position: relative; max-width: 760px; transition: opacity .3s; }
 .xp-rod { display: block; height: 12px; margin: 0 -10px; border-radius: 6px; background: linear-gradient(180deg, #5a3a22, #2e1d10 70%, #4a2f1a);
   box-shadow: 0 3px 6px rgba(10, 8, 6, .35); position: relative; z-index: 1; }
 .xp-rod::before, .xp-rod::after { content: ""; position: absolute; top: -2px; width: 16px; height: 16px; border-radius: 50%; background: #c9a24a; box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .25); }
@@ -837,7 +710,6 @@ html.still .csky-mist i, html.still .csky-stars { animation: none; }
 
 .xp-line { width: 2px; background: repeating-linear-gradient(180deg, rgba(255, 248, 238, .6) 0 2px, transparent 2px 6px); }
 .xp-line i { position: absolute; inset: 0 -1px; background: #c8361f; border-radius: 2px; transform-origin: 50% 0; will-change: transform; }
-.xp-node { left: calc(-1 * clamp(34px, 5vw, 64px) + clamp(6px, 1.4vw, 18px) - 8px); }
 /* the scrolls made experience taller than the painting: pin the painting at screen height while they pass over it */
 .exp { overflow: clip; }
 .exp .mtn { inset: 0; height: auto; overflow: clip; }
@@ -874,8 +746,6 @@ html.still .roll-track { animation: none; }
 .btn.solid::before { display: none; }
 .btn:hover::before, .btn:focus-visible::before { --k: 51%; }
 
-/* experience hover (after brittanychiang.com): the scroll you point at stays bright, the rest step back */
-.xp-card { transition: opacity .3s; }
 @media (hover: hover) and (pointer: fine) { .xp-list:hover .xp-item:not(:hover) .xp-card { opacity: .55; } }
 .close .btn:not(.solid) { border-color: transparent; }
 

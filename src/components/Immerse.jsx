@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
+import { loopWhileVisible } from '../loop.js';
 
 // A fourth round of pieces after award winning portfolios, kept to one canvas or plain transforms.
 
@@ -18,7 +19,7 @@ export function Koi({ host }) {
   useEffect(() => {
     const cv = ref.current, el = host.current, c = cv.getContext('2d');
     if (!motionOn || !el) return undefined;
-    let W = 0, H = 0, raf = 0, vis = false, last = 0;
+    let W = 0, H = 0;
     const ripples = [], aim = { x: 0, y: 0, until: 0, near: false };
     const size = () => { W = cv.clientWidth; H = cv.clientHeight; cv.width = W; cv.height = H; };
     size();
@@ -88,22 +89,13 @@ export function Koi({ host }) {
         outline(f); c.strokeStyle = 'rgba(27,36,51,.35)'; c.lineWidth = 1; c.stroke();
       }
     };
-    const tick = now => {
-      raf = 0;
-      if (!vis) return;
-      raf = requestAnimationFrame(tick);
-      if (now - last < 31) return;
-      last = now; draw(now);
-    };
     const local = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
     const move = e => { if (e.pointerType !== 'mouse') return; [aim.x, aim.y] = local(e); aim.near = true; };
     const leave = () => { aim.near = false; };
     const tap = e => { const [x, y] = local(e); aim.x = x; aim.y = y; aim.until = performance.now() + 1600; ripples.push({ x, y, t: 0 }); };
     el.addEventListener('pointermove', move, { passive: true }); el.addEventListener('pointerleave', leave); el.addEventListener('pointerdown', tap, { passive: true });
-    const io = new IntersectionObserver(([e]) => { vis = e.isIntersecting; if (vis && !raf) raf = requestAnimationFrame(tick); });
-    io.observe(cv);
-    const ro = new ResizeObserver(size); ro.observe(cv);
-    return () => { cancelAnimationFrame(raf); io.disconnect(); ro.disconnect(); el.removeEventListener('pointermove', move); el.removeEventListener('pointerleave', leave); el.removeEventListener('pointerdown', tap); };
+    const stop = loopWhileVisible(cv, draw, { onResize: size });
+    return () => { stop(); el.removeEventListener('pointermove', move); el.removeEventListener('pointerleave', leave); el.removeEventListener('pointerdown', tap); };
   }, [motionOn, host]);
   return <canvas ref={ref} className="koi" aria-hidden="true" />;
 }

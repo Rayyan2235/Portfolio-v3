@@ -1,48 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, animate, motion, useInView } from 'motion/react';
+import { animate, useInView } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
 
-// Small text motions after React Bits (Rotating Text, Count Up), rebuilt on `motion` so they add no dependency
-// and only touch transforms, opacity and text. Both sit still when the Motion switch is off.
-
-// Cycles through phrases: the old one's letters lift away, the new one's rise in from below, one after another.
-export function RotatingText({ phrases, interval = 2800, className = '' }) {
-  const { motionOn } = usePrefs();
-  const [i, setI] = useState(0);
-  useEffect(() => {
-    if (!motionOn) return undefined;
-    const id = setInterval(() => setI(n => (n + 1) % phrases.length), interval);
-    return () => clearInterval(id);
-  }, [motionOn, phrases.length, interval]);
-  const text = phrases[motionOn ? i : 0];
-  // letters animate one by one, but each word is its own unbreakable box so a line never splits a word
-  let k = 0;
-  return (
-    <span className={`rt ${className}`} aria-hidden="true">
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.span key={text} className="rt-phrase">
-          {text.split(' ').map((word, w) => (
-            <span key={w}>
-              {w > 0 && ' '}
-              <span className="rt-word">
-                {[...word].map(ch => {
-                  const n = k++;
-                  return (
-                    <motion.span key={n} className="rt-ch"
-                      initial={{ y: '105%', opacity: 0 }} animate={{ y: '0%', opacity: 1 }} exit={{ y: '-105%', opacity: 0 }}
-                      transition={{ duration: 0.5, delay: n * 0.022, ease: [0.16, 1, 0.3, 1] }}>
-                      {ch}
-                    </motion.span>
-                  );
-                })}
-              </span>
-            </span>
-          ))}
-        </motion.span>
-      </AnimatePresence>
-    </span>
-  );
-}
+// Small text motions, rebuilt on `motion` so they add no dependency and only touch transforms, opacity and text.
+// They sit still when the Motion switch is off.
 
 // Typewriter: types a phrase, rests, backspaces it, types the next. An invisible copy of the longest phrase holds
 // the space so nothing below jumps while letters come and go. Rests while off screen.

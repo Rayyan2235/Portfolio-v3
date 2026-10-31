@@ -6,11 +6,12 @@ import { featured } from '../data.js';
 const SKY_LANTERNS = [...new Set(featured.flatMap(f => f.stack))].slice(0, 9);
 import { Storm } from './MountainSky.jsx';
 import { resolveSky } from '../sky.js';
+import { loopWhileVisible } from '../loop.js';
 
 // Story intro: one pinned stage, four scenes cut together like a film. The sky runs one long day
 // (dawn, bright sea, dusk, lantern night, sunrise through the torii) and the text flips light or dark with it.
 // SVG + CSS + canvas + motion only. Lines are placeholders until Rayyan writes them (ADR 0014).
-// Research: vault reference/story-components, docs/story-handoff.md.
+// Research: vault reference/story-components.
 export const BEATS = [
   { id: 'hello', label: 'Hello', line: 'I am Rayyan. I walk toward the mountain and leave the path wider than I found it.' },
   { id: 'from', label: 'Where from', line: 'From the sands of Dubai to the snows of State College, I crossed the water.' },
@@ -327,7 +328,7 @@ function Petals({ strength, wind, live }) {
     // near layer is big and faint instead of blurred: canvas blur per petal is too heavy for phones
     const LAYERS = [{ s: [6, 9], v: 0.4, a: 0.5 }, { s: [10, 14], v: 1, a: 0.85 }, { s: [22, 34], v: 1.8, a: 0.55 }];
     const TINTS = ['#f9c9a8', '#f7b27a', '#fde0c8', '#f4b49a'];
-    let W = 0, H = 0, raf = 0, gust = 0, last = performance.now(), drawn = false;
+    let W = 0, H = 0, gust = 0, drawn = false;
     const size = () => {
       const r = c.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 1.25);
       W = r.width; H = r.height; c.width = W * d; c.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0);
@@ -351,11 +352,10 @@ function Petals({ strength, wind, live }) {
       ctx.bezierCurveTo(-s / 2, s / 3, -s / 2, -s / 2, 0, -s / 2);
       ctx.fillStyle = p.tint; ctx.fill(); ctx.restore();
     };
-    const tick = now => {
-      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    const tick = (now, dt) => {
       gust += (Math.max(-14, Math.min(14, wind.get() / 60)) - gust) * 0.06;
       const k = strength.get();
-      if (k <= 0.01) { if (drawn) { ctx.clearRect(0, 0, W, H); drawn = false; } raf = requestAnimationFrame(tick); return; }
+      if (k <= 0.01) { if (drawn) { ctx.clearRect(0, 0, W, H); drawn = false; } return; }
       drawn = true;
       ctx.clearRect(0, 0, W, H);
       {
@@ -370,11 +370,8 @@ function Petals({ strength, wind, live }) {
           draw(p);
         }
       }
-      raf = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(tick);
-    addEventListener('resize', size);
-    return () => { cancelAnimationFrame(raf); removeEventListener('resize', size); };
+    return loopWhileVisible(c, tick, { fps: 60, onResize: size });
   }, [live, strength, wind]);
   return <canvas ref={ref} className="st-petals" aria-hidden="true" />;
 }
