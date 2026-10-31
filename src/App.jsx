@@ -14,6 +14,7 @@ import { KamonTop } from './components/Charms.jsx';
 import { NameRoll } from './components/Flow.jsx';
 import { SectionCounter } from './components/Craft.jsx';
 import { HeroText, Statement, Work, Experience, Contact, Footer } from './components/Sections.jsx';
+import { ZoomPrints } from './components/Immerse.jsx';
 
 // The 3D island (Shrine3D.jsx, Island in Sections.jsx) is hidden for now: too much GPU for visitors.
 // To bring it back: lazy import Shrine3D and render <Island Scene={...} /> after <Experience />.
@@ -40,6 +41,7 @@ function Page() {
         <ToolWave />
         <Work />
         <Hobbies />
+        <ZoomPrints />
         <Contact toast={toast} />
       </main>
       <NameRoll />

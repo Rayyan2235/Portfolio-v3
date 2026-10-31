@@ -303,14 +303,16 @@ function Hang({ q, i, f }) {
   const y = useTransform(q, [start, start + 0.25], [120, 0]);
   const opacity = useTransform(q, [start, start + 0.14], [0, 1]);
   const open = useTransform(q, [start + 0.1, start + 0.38], [0, 1]);
-  const h = useTransform(open, v => `calc(var(--kh) * ${v})`);
+  // unrolls with a clip and a moving bottom rod rather than a growing height, so nothing lays out per frame
+  const clip = useTransform(open, v => `inset(0 0 ${(1 - v) * 100}% 0)`);
+  const drop = useTransform(open, v => `translateY(calc(var(--kh) * ${v - 1}))`);
   return (
     <motion.figure className="st-kake" style={{ y, opacity }}>
       <i className="rod" />
-      <motion.div className="st-kake-body" style={{ height: h }}>
+      <motion.div className="st-kake-body" style={{ clipPath: clip }}>
         <div className="st-kake-in"><b>{f.name}</b><small>{f.meta}</small><i className="seal" /></div>
       </motion.div>
-      <i className="rod" />
+      <motion.i className="rod" style={{ transform: drop }} />
     </motion.figure>
   );
 }

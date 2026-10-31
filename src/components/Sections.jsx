@@ -6,6 +6,7 @@ import { Hanko } from './Charms.jsx';
 import { Currents } from './Flow.jsx';
 import { Orbit } from './Craft.jsx';
 import { InkLens } from './Trail.jsx';
+import { Koi, InkWords } from './Immerse.jsx';
 import { Storm, Birds as SkyFlock } from './MountainSky.jsx';
 import { usePrefs } from '../prefs.jsx';
 import { resolveSky } from '../sky.js';
@@ -57,13 +58,15 @@ function CraneGlide() {
 }
 
 export function Statement() {
+  const ref = useRef(null);
   return (
-    <section className="statement" aria-label="Summary">
+    <section className="statement" aria-label="Summary" ref={ref}>
       <Currents />
+      <Koi host={ref} />
       <CraneGlide />
       <div className="wrap">
         <InkLens under="Patient as water, steady as stone. I keep showing up until the path opens.">
-          <motion.p {...head}>Like water, begin where people need it most. <span>Then wear down the stone, one drop at a time.</span></motion.p>
+          <InkWords parts={[{ text: 'Like water, begin where people need it most.' }, { text: 'Then wear down the stone, one drop at a time.', cls: 'soft' }]} />
         </InkLens>
       </div>
     </section>

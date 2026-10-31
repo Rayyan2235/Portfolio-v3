@@ -86,10 +86,11 @@ A few decisions worth knowing:
 * Matsumura Goshun, *Cherry Blossoms*. The Met, object 49049, public domain.
 * Story chapters and section backdrops (`public/art/story`), all public domain or CC0 via Wikimedia Commons:
   * Kawase Hasui, *Evening Snow at Terashima Village* (1920). Public domain in Japan (artist died 1957) and in the US (published before 1931).
-  * Katsushika Hokusai, *Fine Wind, Clear Morning* (Red Fuji).
-  * Utagawa Hiroshige, *The Whirlpools of Awa* (The Met DP146864), *Fireworks at Ryōgoku* (Musée Guimet EO1841), *Evening Cherry Blossoms at Gotenyama* (The Met DP123249, cropped to the sky and blossoms) *Plum Garden at Kameido* (Rijksmuseum RP-P-1956-743, cropped to the red sky and branches) and *Kinryūzan Temple at Asakusa* (The Met DP122116, CC0, cropped to the snowy court and gate).
+  * Katsushika Hokusai, *Fine Wind, Clear Morning* (Red Fuji); `red-fuji-clear.jpg` is the same print cropped clear of its title cartouche.
+  * Utagawa Hiroshige, *The Whirlpools of Awa* (The Met DP146864), *Fireworks at Ryōgoku* (Musée Guimet EO1841, cropped clear of its cartouches), *Evening Cherry Blossoms at Gotenyama* (The Met DP123249, cropped to the sky and blossoms) *Plum Garden at Kameido* (Rijksmuseum RP-P-1956-743, cropped to the red sky and branches) and *Kinryūzan Temple at Asakusa* (The Met DP122116, CC0, cropped to the snowy court and gate).
 * `src/components/reactbits/Stack` from [React Bits](https://reactbits.dev) by David Haz, MIT + Commons Clause. Free to use here; the component itself may not be resold.
 * The opening is adapted from 21st.dev's scroll expansion hero.
+* The print gallery zoom follows exoape.com's project pages as broken down in Olivier Larose's "Zoom Parallax" tutorial; the scroll inked words follow the same idea from Apple's product pages. Both are rewritten here.
 * Fonts: Shippori Mincho B1, Yuji Boku, Zen Kaku Gothic New and Geist Mono, SIL Open Font License 1.1.
 
 ---

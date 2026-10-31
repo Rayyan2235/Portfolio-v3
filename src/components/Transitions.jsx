@@ -9,7 +9,7 @@ export const KINDS = {
   leaves: { label: 'Maple leaves', inMs: 1000, outMs: 1100 },
   ink: { label: 'Sumi ink', inMs: 850, outMs: 900 },
   storm: { label: 'Lightning', inMs: 520, outMs: 1000 },
-  water: { label: 'Water slash', inMs: 900, outMs: 900 },
+  water: { label: 'Water slash', inMs: 1050, outMs: 950 },
   thunder: { label: 'Thunder slash', inMs: 760, outMs: 900 }
 };
 const MIXED = { top: 'petals', work: 'water', experience: 'leaves', hobbies: 'thunder', contact: 'petals' };
@@ -130,36 +130,106 @@ function drawStorm(c, W, H, p, phase, parts) {
 }
 
 // Sword slashes, in the spirit of the breathing styles: an original effect, no characters or anime art.
-// Water: one blade stroke cuts the screen on a diagonal, then a wave floods out from the cut and covers it;
-// on the way out the water drains back into the cut.
+// Water, drawn like a woodblock print: a blade sweeps a wide arc over the screen and a ribbon of water follows it,
+// layered blues inside a dark ink outline, flow lines running along it, white foam curling off its crest and spray
+// thrown from the head. The ribbon swells until it floods the screen; on the way out it thins and runs off the
+// end of the arc.
 function drawWaterSlash(c, W, H, p, phase, parts) {
-  const ax = -W * 0.1, ay = H * 0.86, bx = W * 1.1, by = H * 0.14, len = Math.hypot(bx - ax, by - ay);
-  const ux = (bx - ax) / len, uy = (by - ay) / len, nx = -uy, ny = ux, D = Math.hypot(W, H);
-  const cut = (t, w, col, glow) => { c.save(); c.strokeStyle = col; c.lineWidth = w; c.lineCap = 'round'; c.shadowColor = glow; c.shadowBlur = 24; c.beginPath(); c.moveTo(ax, ay); c.lineTo(ax + (bx - ax) * t, ay + (by - ay) * t); c.stroke(); c.restore(); };
-  const ribbon = (h, wob) => {
-    // a band around the cut, its two edges rolling like water
-    const steps = 40, edge = s => { const pts = []; for (let i = 0; i <= steps; i++) { const t = i / steps, x = ax + (bx - ax) * t, y = ay + (by - ay) * t, o = h + Math.sin(t * 14 + wob) * h * 0.08 + Math.sin(t * 31 - wob) * 10; pts.push([x + nx * o * s, y + ny * o * s]); } return pts; };
-    const top = edge(1), bot = edge(-1).reverse();
-    c.beginPath(); [...top, ...bot].forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); c.closePath();
-    const g = c.createLinearGradient(ax + nx * h, ay + ny * h, ax - nx * h, ay - ny * h); g.addColorStop(0, SEA); g.addColorStop(0.5, MID); g.addColorStop(1, SEA); c.fillStyle = g; c.fill();
-    c.strokeStyle = 'rgba(255,248,238,.85)'; c.lineWidth = 5;
-    [top, bot].forEach(e => { c.beginPath(); e.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); c.stroke(); });
-    c.strokeStyle = 'rgba(159,211,255,.35)'; c.lineWidth = 2;
-    for (let k = 1; k < 5; k++) { const o = h * (k / 5); c.beginPath(); c.moveTo(ax + nx * o, ay + ny * o); c.lineTo(bx + nx * o, by + ny * o); c.moveTo(ax - nx * o, ay - ny * o); c.lineTo(bx - nx * o, by - ny * o); c.stroke(); }
+  if (!parts.length) parts.push({ drops: [] });
+  const S = parts[0], D = Math.hypot(W, H);
+  const cx = W * 0.5, cy = H * 0.95, rx = W * 0.64, ry = H * 0.56;
+  const at = t => {
+    // a point on the arc, its tangent and the outward normal
+    const a = Math.PI - 0.22 + t * (Math.PI + 0.44), cs = Math.cos(a), sn = Math.sin(a);
+    const tx = -rx * sn, ty = ry * cs, tl = Math.hypot(tx, ty) || 1, nx = cs / rx, ny = sn / ry, nl = Math.hypot(nx, ny) || 1;
+    return { x: cx + rx * cs, y: cy + ry * sn, tx: tx / tl, ty: ty / tl, nx: nx / nl, ny: ny / nl };
+  };
+  const flow = (phase + p) * 2.2;
+  const ribbon = (t0, t1, wmax, off = 0) => {
+    // off pushes the ribbon away from the arc and back, so a second stream can twist around the first
+    if (t1 - t0 < 0.005 || wmax < 1) return;
+    const N = 64, outer = [], inner = [], mid = [];
+    for (let i = 0; i <= N; i++) {
+      const t = t0 + ((t1 - t0) * i) / N, k = i / N, q0 = at(t), o = off * Math.sin(Math.PI * k * 2 + flow * 3);
+      const q = { ...q0, x: q0.x + q0.nx * o, y: q0.y + q0.ny * o };
+      // thick through the body, tapering to the tail and rounding off at the head
+      const w = wmax * Math.pow(Math.sin(Math.PI * (k * 0.9 + 0.02)), 0.55) * (1 + 0.05 * Math.sin(t * 40 - flow * 6));
+      outer.push([q.x + q.nx * w, q.y + q.ny * w, q]); inner.push([q.x - q.nx * w * 0.7, q.y - q.ny * w * 0.7]); mid.push([q, w]);
+    }
+    const shape = () => { c.beginPath(); outer.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); for (let i = inner.length - 1; i >= 0; i--) c.lineTo(inner[i][0], inner[i][1]); c.closePath(); };
+    shape(); c.fillStyle = '#1b3f73'; c.fill();
+    c.save(); shape(); c.clip();
+    // lighter water toward the crest, then flow lines that run along the arc
+    const band = (f0, f1, col) => {
+      c.beginPath();
+      mid.forEach(([q, w], i) => { const x = q.x + q.nx * w * f1, y = q.y + q.ny * w * f1; i ? c.lineTo(x, y) : c.moveTo(x, y); });
+      for (let i = mid.length - 1; i >= 0; i--) { const [q, w] = mid[i]; c.lineTo(q.x + q.nx * w * f0, q.y + q.ny * w * f0); }
+      c.closePath(); c.fillStyle = col; c.fill();
+    };
+    band(0.05, 1.1, '#2f6ea5'); band(0.55, 1.1, '#5e9fd6');
+    c.lineCap = 'round'; c.setLineDash([46, 34]);
+    [[-0.45, 'rgba(159,211,255,.28)', 3], [0.2, 'rgba(225,242,255,.45)', 2.5], [0.72, 'rgba(255,255,255,.6)', 2]].forEach(([f, col, lw], j) => {
+      c.lineDashOffset = -flow * 260 - j * 30; c.strokeStyle = col; c.lineWidth = lw; c.beginPath();
+      mid.forEach(([q, w], i) => { const x = q.x + q.nx * w * f, y = q.y + q.ny * w * f; i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke();
+    });
+    c.setLineDash([]); c.restore();
+    // ink outline, then the white crest line on top of it
+    c.lineJoin = 'round'; shape(); c.strokeStyle = '#0c2140'; c.lineWidth = 5; c.stroke();
+    c.beginPath(); outer.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); c.strokeStyle = '#f4fbff'; c.lineWidth = 3; c.stroke();
+    // foam: hooked curls riding the crest, drifting along with the water
+    const gap = 9, shift = (flow * 7) % 1;
+    for (let k = 0; k < gap; k++) {
+      const i = Math.round(((k + shift) / gap) * (outer.length - 1));
+      const [ex, ey, q] = outer[i], w = mid[i][1], r = Math.min(42, 6 + w * 0.26);
+      if (r < 4) continue;
+      c.beginPath(); c.moveTo(ex - q.tx * r * 1.6, ey - q.ty * r * 1.6);
+      c.quadraticCurveTo(ex + q.nx * r * 1.5, ey + q.ny * r * 1.5, ex + q.tx * r, ey + q.ty * r);
+      c.arc(ex + q.tx * r * 0.45 + q.nx * r * 0.2, ey + q.ty * r * 0.45 + q.ny * r * 0.2, r * 0.5, Math.atan2(q.ty, q.tx), Math.atan2(q.ty, q.tx) + 4.2);
+      c.strokeStyle = '#0c2140'; c.lineWidth = 6; c.stroke(); c.strokeStyle = '#ffffff'; c.lineWidth = 3; c.stroke();
+    }
+  };
+  const blade = (t0, t1, a) => {
+    if (t1 <= t0) return;
+    c.save(); c.globalAlpha = a; c.lineCap = 'round'; c.shadowColor = '#9fd3ff'; c.shadowBlur = 20; c.strokeStyle = '#eaf7ff'; c.lineWidth = 4;
+    c.beginPath(); for (let i = 0; i <= 30; i++) { const q = at(t0 + ((t1 - t0) * i) / 30); i ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y); } c.stroke(); c.restore();
+  };
+  const curl = (q, r, a) => {
+    // the rolling head of the wave: a spiral of foam turning over on itself
+    if (r < 6 || a <= 0) return;
+    const ox = q.x + q.nx * r * 0.35, oy = q.y + q.ny * r * 0.35, base = Math.atan2(q.ty, q.tx) + flow * 5;
+    c.save(); c.globalAlpha = a; c.lineCap = 'round';
+    [[1, '#0c2140', 9], [1, '#ffffff', 4]].forEach(([, col, lw]) => {
+      c.beginPath();
+      for (let s = 0; s <= 60; s++) { const u = s / 60, ang = base + u * Math.PI * 3.4, rr = r * (0.95 - u * 0.8); const x = ox + Math.cos(ang) * rr, y = oy + Math.sin(ang) * rr; s ? c.lineTo(x, y) : c.moveTo(x, y); }
+      c.strokeStyle = col; c.lineWidth = lw; c.stroke();
+    });
+    c.restore();
+  };
+  const spray = (q, w) => {
+    for (let i = 0; i < 3; i++) { const s = rnd(3, 10); S.drops.push({ x: q.x + q.nx * w, y: q.y + q.ny * w, vx: q.nx * s + q.tx * rnd(-1, 5), vy: q.ny * s + q.ty * rnd(-1, 5), r: rnd(3, 7), l: 1 }); }
   };
   if (phase === 0) {
-    const t1 = Math.min(1, p / 0.28), t2 = Math.max(0, (p - 0.22) / 0.78);
-    if (t2 > 0) ribbon(ease(t2) * D * 0.72, p * 9);
-    cut(easeIn(t1) * 0.4 + t1 * 0.6, 4, '#ffffff', '#9fd3ff');
-    if (t1 < 1 || Math.random() < 0.6) for (let i = 0; i < 4; i++) { const t = Math.random() * t1; parts.push({ x: ax + (bx - ax) * t, y: ay + (by - ay) * t, vx: rnd(-3, 3) + nx * rnd(-4, 4), vy: rnd(-3, 3) + ny * rnd(-4, 4), l: 1 }); }
+    c.fillStyle = '#0b1626'; c.globalAlpha = Math.min(0.85, p * 2); c.fillRect(0, 0, W, H); c.globalAlpha = 1;
+    const tb = ease(Math.min(1, p / 0.34)), head = ease(Math.max(0, Math.min(1, (p - 0.06) / 0.42)));
+    const flood = easeIn(Math.max(0, Math.min(1, (p - 0.46) / 0.54)));
+    const tail = Math.max(0, head - 0.62) * (1 - flood), wmax = Math.max(60, H * 0.15) + flood * D * 1.15;
+    if (flood < 0.6) ribbon(tail + 0.03, Math.max(tail + 0.03, head - 0.04), wmax * 0.4 * (1 - flood), wmax * 0.95);
+    ribbon(tail, Math.min(1, head + flood), wmax);
+    if (head > 0 && head < 1) curl(at(head), wmax * 0.75, 1 - flood * 2);
+    blade(Math.max(0, tb - 0.3), tb, 1 - flood);
+    if (head > 0 && head < 1) spray(at(head), wmax * 0.5);
   } else {
-    const h = (1 - ease(p)) * D * 0.72;
-    if (h > 12) ribbon(h, 9 + p * 9);
-    if (p < 0.98) cut(1, 4 * (1 - p), `rgba(255,255,255,${1 - p})`, '#9fd3ff');
+    // the flood drains back into a thin ribbon that runs off the end of the arc
+    const q = ease(p);
+    ribbon(Math.min(0.995, q * 1.05), 1, D * 1.15 * Math.pow(1 - q, 1.6));
   }
-  c.fillStyle = CREAM;
-  for (let n = parts.length - 1; n >= 0; n--) { const q = parts[n]; q.x += q.vx; q.y += q.vy; q.l -= 0.03; if (q.l <= 0) { parts.splice(n, 1); continue; } c.globalAlpha = q.l; c.beginPath(); c.arc(q.x, q.y, 2.5, 0, 7); c.fill(); }
-  c.globalAlpha = 1;
+  for (let n = S.drops.length - 1; n >= 0; n--) {
+    const d = S.drops[n]; d.x += d.vx; d.y += d.vy; d.vy += 0.32; d.l -= 0.03;
+    if (d.l <= 0) { S.drops.splice(n, 1); continue; }
+    const a = Math.atan2(d.vy, d.vx);
+    c.save(); c.globalAlpha = d.l; c.translate(d.x, d.y); c.rotate(a);
+    c.beginPath(); c.ellipse(0, 0, d.r * 1.8, d.r, 0, 0, 7); c.fillStyle = '#ffffff'; c.fill(); c.strokeStyle = '#1b3f73'; c.lineWidth = 1.5; c.stroke(); c.restore();
+  }
 }
 
 // Thunder: one flash step. The room drops to a warm dark, a white hot streak zigzags across with blue white arcs

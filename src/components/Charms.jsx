@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useScroll, useTransform } from 'motion/react';
 import { useTransition } from './Transitions.jsx';
 
@@ -23,10 +23,15 @@ export function KamonTop() {
   const { go } = useTransition();
   const { scrollY, scrollYProgress } = useScroll();
   const [show, setShow] = useState(false);
-  useEffect(() => scrollY.on('change', v => {
-    const top = document.getElementById('top');
-    setShow(!!top && top.getBoundingClientRect().top < -innerHeight * 0.8);
-  }), [scrollY]);
+  // the hero's page offset is measured on resize, not on every scroll, so scrolling never forces a layout
+  const at = useRef(Infinity);
+  useEffect(() => {
+    const measure = () => { const top = document.getElementById('top'); at.current = top ? top.getBoundingClientRect().top + scrollY.get() : Infinity; };
+    measure();
+    const ro = new ResizeObserver(measure); ro.observe(document.body);
+    const off = scrollY.on('change', v => setShow(v - at.current > innerHeight * 0.8));
+    return () => { ro.disconnect(); off(); };
+  }, [scrollY]);
   const ring = useTransform(scrollYProgress, [0.35, 1], [0, 1]);
   return (
     <AnimatePresence>{show && (
