@@ -108,7 +108,7 @@ function Drawer({ p, i, onClose }) {
 }
 
 // Behind the deck: the sky and blossoms of Hiroshige's Evening Cherry Blossoms at Gotenyama (cropped above the
-// figures), washed to the visitor's sky. Blossoms drift in fair weather; in a storm it rains instead.
+// figures), washed to the visitor's sky. Blossoms drift in fair weather; a storm only darkens the wash.
 function CherryBackdrop() {
   const { motionOn, sky } = usePrefs();
   const mode = resolveSky(sky);
@@ -116,7 +116,6 @@ function CherryBackdrop() {
     <div className={`cherry cherry-${mode}`} aria-hidden="true">
       <img src="/art/story/gotenyama.jpg" alt="" draggable={false} />
       <span className="cherry-wash" />
-      {motionOn && mode === 'storm' && <span className="st-rain cherry-rain" />}
       {motionOn && mode !== 'storm' && <div className="cherry-fall">{Array.from({ length: 18 }, (_, i) => <i key={i} style={{ left: `${(i * 37) % 100}%`, animationDelay: `${-i * 1.3}s`, animationDuration: `${9 + (i % 5) * 2}s` }} />)}</div>}
     </div>
   );

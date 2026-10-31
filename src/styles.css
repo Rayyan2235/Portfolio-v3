@@ -443,16 +443,13 @@ html.still .cherry-fall { display: none; }
 .st-tag rect { fill: #fff8ee; } .st-tag text { font: 400 24px var(--hand); fill: #1b2433; }
 .st-route .hull { fill: #1b2433; } .st-route .sail { fill: #fff8ee; stroke: #1b2433; stroke-width: 2; }
 
-/* 03 rain over Shono, 05 snow over Kanbara: tiled layers that slide on the GPU */
-.st-rain, .st-snow { position: absolute; left: 0; right: 0; top: -40%; height: 180%; z-index: 1; pointer-events: none; will-change: transform; }
-.st-rain { background-image: repeating-linear-gradient(104deg, transparent 0 22px, rgba(225, 232, 240, .32) 22px 23.5px, transparent 23.5px 47px);
-  background-size: 100% 180px; animation: st-rainfall .45s linear infinite; }
-@keyframes st-rainfall { to { transform: translate3d(-12px, 180px, 0); } }
-.st-snow { background-image: radial-gradient(2.4px 2.4px at 20px 30px, #fff 99%, transparent), radial-gradient(1.8px 1.8px at 90px 80px, #fff 99%, transparent),
+/* 05 snow over Kanbara: a tiled layer that slides on the GPU */
+.st-snow { position: absolute; left: 0; right: 0; top: -40%; height: 180%; z-index: 1; pointer-events: none; will-change: transform;
+  background-image: radial-gradient(2.4px 2.4px at 20px 30px, #fff 99%, transparent), radial-gradient(1.8px 1.8px at 90px 80px, #fff 99%, transparent),
   radial-gradient(2.8px 2.8px at 150px 20px, #fff 99%, transparent), radial-gradient(1.6px 1.6px at 60px 140px, #fff 99%, transparent), radial-gradient(2.2px 2.2px at 170px 120px, #fff 99%, transparent);
   background-size: 200px 160px; opacity: .85; animation: st-snowfall 7s linear infinite; }
 @keyframes st-snowfall { to { transform: translate3d(30px, 160px, 0); } }
-html.still .st-rain, html.still .st-snow { animation: none; }
+html.still .st-snow { animation: none; }
 @media (max-width: 767px) { .st-route { top: 14%; height: 44%; } .st-tag text { font-size: 34px; } }
 
 /* the gliding crane is a transparent PNG now, so it moves without blending */
@@ -514,7 +511,6 @@ html.lenis, html.lenis body { height: auto; }
 .cherry-night .cherry-wash { background: linear-gradient(180deg, rgba(8, 14, 34, .78), rgba(20, 32, 70, .62)); }
 .cherry-storm .cherry-wash { background: linear-gradient(180deg, rgba(40, 46, 60, .68), rgba(90, 98, 112, .5)); }
 .cherry-night .cherry-fall i { background: #e9c6d6; opacity: .7; }
-.cherry-rain { z-index: 1; }
 .cherry-night::after, .cherry-storm::after { background: linear-gradient(180deg, rgba(10, 12, 20, .35), transparent 14%, transparent 86%, rgba(255, 248, 238, .5)); }
 
 /* nav with some spice: a hanko seal, ink underlines, a living sky dot, a shimmering Email, a scroll brush */
