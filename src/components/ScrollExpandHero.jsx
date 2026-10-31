@@ -9,6 +9,8 @@ import { usePrefs } from '../prefs.jsx';
 // The card never changes size: the full screen hero is scaled down and clipped to the card, so opening it only
 // moves pixels on the GPU. Growing a real box made the page lay out and the wave canvas reallocate every frame.
 const ease = t => 1 - Math.pow(1 - t, 3);
+// a few petals loose in the room around the scroll: left %, fall seconds, delay seconds
+const PETALS = [[6, 15, -2], [17, 19, -11], [29, 14, -6], [41, 21, -15], [58, 16, -4], [66, 18, -9], [74, 13, -1], [83, 20, -13], [91, 15, -7], [97, 22, -17]];
 
 export default function ScrollExpandHero({ children, first = 'Rayyan', rest = 'Syed', kicker = 'Software engineer', hint = 'Scroll to open' }) {
   const { motionOn } = usePrefs();
@@ -46,13 +48,24 @@ export default function ScrollExpandHero({ children, first = 'Rayyan', rest = 'S
   const bgOpacity = useTransform(p, [0, 0.9], [1, 0]);
   const reveal = useTransform(p, [0.86, 1], [0, 1]);
   const frame = useTransform(p, [0, 0.8], [1, 0]);
+  // the room parts as the scroll opens: sun climbs, hills sink, the bough swings out
+  const sunY = useTransform(p, [0, 1], ['0vh', '-18vh']);
+  const hillsY = useTransform(p, [0, 1], ['0vh', '9vh']);
+  const boughX = useTransform(p, [0, 1], ['0vw', '7vw']);
 
   if (!motionOn) return <div className="sx-off">{children}</div>;
 
   return (
     <div ref={ref} className="sx">
       <div className="sx-sticky">
-        <motion.div className="sx-bg" style={{ opacity: bgOpacity }} aria-hidden="true" />
+        <motion.div className="sx-bg" style={{ opacity: bgOpacity }} aria-hidden="true">
+          <motion.span className="sx-sun" style={{ y: sunY }} />
+          <motion.div className="sx-hills" style={{ y: hillsY }}><img src="/art/mountains.jpg" alt="" decoding="async" draggable={false} /></motion.div>
+          <span className="sx-mist m1" /><span className="sx-mist m2" />
+          <motion.div className="sx-bough" style={{ x: boughX }}><img src="/art/blossom-ink.jpg" alt="" decoding="async" draggable={false} /></motion.div>
+          <span className="sx-petals">{PETALS.map(([l, d, s], i) => <i key={i} style={{ left: `${l}%`, animationDuration: `${d}s`, animationDelay: `${s}s` }} />)}</span>
+          <span className="tc-grain" />
+        </motion.div>
         <motion.span className="sx-shade" style={{ scaleX: shadeX, scaleY: shadeY, opacity: frame }} aria-hidden="true" />
         <motion.div className="sx-media" style={{ scale, clipPath: clip, '--reveal': reveal }}>
           {children}

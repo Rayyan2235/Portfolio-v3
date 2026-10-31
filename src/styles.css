@@ -76,9 +76,31 @@ kbd { font: 400 11px/1 var(--mono); padding: 5px 8px; border: 1px solid var(--li
 /* scroll-expand hero (adapted from 21st.dev): a hanging scroll that opens into the full hero */
 .sx { position: relative; height: 230vh; }
 .sx-sticky { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; overflow: hidden; background: var(--paper); }
-.sx-bg { position: absolute; inset: 0; background:
-  radial-gradient(60% 50% at 50% 55%, rgba(253, 231, 196, .9), rgba(253, 231, 196, 0) 70%),
-  url(/art/blossom-ink.jpg) right -4vw top -6vh / auto 118% no-repeat, var(--paper); background-blend-mode: normal, multiply, normal; }
+/* the room around the scroll: a red sun, ink hills under drifting mist, a blossom bough and loose petals */
+.sx-bg { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(60% 50% at 50% 55%, rgba(253, 231, 196, .9), rgba(253, 231, 196, 0) 70%), var(--paper); }
+.sx-sun { position: absolute; left: 11vw; top: 13vh; width: clamp(150px, 20vw, 320px); aspect-ratio: 1; border-radius: 50%; will-change: transform;
+  background: radial-gradient(circle at 42% 38%, #ef6a3e, var(--sun) 62%, #c8441f); box-shadow: 0 0 90px 30px rgba(247, 178, 122, .35); opacity: .88; }
+/* blend on the moving wrappers: their transform isolates whatever is inside them from the paper */
+.sx-hills { position: absolute; left: -4vw; right: -4vw; bottom: -2vh; height: 52vh; will-change: transform; mix-blend-mode: multiply; opacity: .42;
+  -webkit-mask: linear-gradient(180deg, transparent, #000 42%); mask: linear-gradient(180deg, transparent, #000 42%); }
+.sx-hills img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 70%; filter: saturate(.55); }
+.sx-mist { position: absolute; left: -20vw; width: 90vw; height: 22vh; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 248, 238, .95), rgba(255, 248, 238, 0)); animation: sx-drift 28s ease-in-out infinite alternate; }
+.sx-mist.m1 { bottom: 26vh; }
+.sx-mist.m2 { bottom: 8vh; left: 40vw; animation-duration: 34s; animation-direction: alternate-reverse; }
+@keyframes sx-drift { to { transform: translateX(22vw); } }
+.sx-bough { position: absolute; right: 0; top: -6vh; height: 118vh; will-change: transform; mix-blend-mode: multiply; }
+.sx-bough img { height: 100%; width: auto; display: block; transform-origin: 85% 0%; animation: sway 9s ease-in-out infinite alternate;
+  -webkit-mask: radial-gradient(115% 100% at 100% 0%, #000 45%, transparent 82%); mask: radial-gradient(115% 100% at 100% 0%, #000 45%, transparent 82%); }
+.sx-petals { position: absolute; inset: 0; }
+.sx-petals i { position: absolute; top: -20px; width: 11px; height: 8px; border-radius: 70% 0 70% 0; background: #f7c3c9; box-shadow: 0 0 1px rgba(150, 60, 80, .3); animation: tc-fall linear infinite; }
+html.still .sx-mist, html.still .sx-bough img { animation: none; }
+html.still .sx-petals { display: none; }
+@media (max-width: 640px) {
+  .sx-sun { left: 8vw; top: 12vh; width: 34vw; }
+  .sx-hills { height: 40vh; }
+  .sx-bough { height: 80vh; opacity: .6; }
+  .sx-petals i:nth-child(even) { display: none; }
+}
 .sx-media { position: absolute; inset: 0; z-index: 1; will-change: transform, clip-path; }
 .sx-shade { position: absolute; inset: 0; z-index: 0; border-radius: 14px; box-shadow: 0 30px 70px -30px rgba(29, 53, 87, .55); background: #1d3557; will-change: transform; }
 .sx-media .hero { height: 100%; min-height: 0; }
