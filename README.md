@@ -27,7 +27,7 @@ Most portfolios list skills. This one tries to feel like somewhere. It is built 
 
 | Moment | What you see | Where it lives |
 | --- | --- | --- |
-| **Opening** | Red Fuji in glazed porcelain on a floating island with a kintsugi gold rim, gold clouds circling it and a seigaiha sea. Scroll turns one day over it, dawn to night; the cursor tilts it. Modelled in code with three.js, loaded while the story plays. | `FujiOpening.jsx`, `scenes/fuji.js` |
+| **Opening** | The first page of the story: Mount Fuji built from real elevation data, rising out of a sea of clouds. Scroll raises the sun from the blue hour through the red glow on its face into morning; the name sits in the sky behind the summit. three.js, loaded in its own chunk. | `FujiOpening.jsx`, `scenes/fuji.js` |
 | **The sky** | Hokusai's *Great Wave*, animated in WebGL. The sky follows your clock: dawn, day, dusk or a starry night. Pick **Storm** for rain, lightning and (if you turn it on) thunder. The sun rises as you scroll and the boats bob. | `GreatWaveHero.jsx`, `sky.js` |
 | **Moving around** | Click a section and a transition carries you there: a crashing wave, a storm of sakura petals, falling maple leaves, sumi ink or a lightning flash. | `Transitions.jsx` |
 | **The paper** | A crane glides across the page as you scroll. | `Sections.jsx` |
@@ -56,7 +56,7 @@ src/
   data.js                 projects and experience
   loop.js                 the shared frame loop every canvas effect runs on
   components/
-    FujiOpening.jsx       the porcelain Fuji opening (scene in scenes/fuji.js)
+    FujiOpening.jsx       the Fuji opening, first page of the story (scene in scenes/fuji.js)
     GreatWaveHero.jsx     WebGL Great Wave, sky, rain, lightning, boats
     Transitions.jsx       the five screen transitions
     Sections.jsx          statement, work, experience, notes, contact
@@ -85,7 +85,8 @@ A few decisions worth knowing:
   * Kawase Hasui, *Evening Snow at Terashima Village* (1920). Public domain in Japan (artist died 1957) and in the US (published before 1931).
   * Katsushika Hokusai, *Fine Wind, Clear Morning* (Red Fuji); `red-fuji-clear.jpg` is the same print cropped clear of its title cartouche.
   * Utagawa Hiroshige, *The Whirlpools of Awa* (The Met DP146864), *Fireworks at Ryōgoku* (Musée Guimet EO1841, cropped clear of its cartouches), *Evening Cherry Blossoms at Gotenyama* (The Met DP123249, cropped to the sky and blossoms) *Plum Garden at Kameido* (Rijksmuseum RP-P-1956-743, cropped to the red sky and branches) and *Kinryūzan Temple at Asakusa* (The Met DP122116, CC0, cropped to the snowy court and gate).
-* The opening takes its layout from the 3D hero sites on motionsites.ai (one object in soft light, the name set big behind it); the scene itself is modelled from scratch.
+* The opening's look was worked out by taking apart igloo.inc with [rea](https://github.com/morluto/rea): real light, distance haze and film grain rather than glossy materials. Its layout (one subject, the name set big behind it) follows the 3D hero sites on motionsites.ai. The scene is modelled from scratch.
+* Mount Fuji elevation: [Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) on AWS Open Data (Mapzen Terrarium format, built from SRTM and other public sources), cut down to `public/terrain/fuji-288.u16`.
 * The print gallery zoom follows exoape.com's project pages as broken down in Olivier Larose's "Zoom Parallax" tutorial; the scroll inked words follow the same idea from Apple's product pages. Both are rewritten here.
 * Fonts: Shippori Mincho B1, Yuji Boku, Zen Kaku Gothic New and Geist Mono, SIL Open Font License 1.1.
 

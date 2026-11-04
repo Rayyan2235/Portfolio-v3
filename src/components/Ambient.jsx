@@ -21,11 +21,12 @@ export default function Ambient() {
       r: Math.random() * 6, ph: Math.random() * 6,
       col: mode === 'dusk' ? ['#b8432a', '#d9622b', '#c9a24a'][(Math.random() * 3) | 0] : ['#f2b8c6', '#d9788f', '#fdf0f2'][(Math.random() * 3) | 0]
     });
-    // the story intro has its own petals; stay idle while it is on screen (watched, not measured every frame)
+    // the story has its own petals and the Fuji opening is a real sky; stay idle while either is on screen
+    // (watched, not measured every frame)
     let storyOn = true, dirty = true, lastT = 0;
-    const story = document.querySelector('.st-root');
-    const io = story ? new IntersectionObserver(es => { storyOn = es[0].isIntersecting; }) : null;
-    if (io) io.observe(story); else storyOn = false;
+    const quiet = [...document.querySelectorAll('.st-root, .fj')], seen = new Set();
+    const io = quiet.length ? new IntersectionObserver(es => { es.forEach(e => (e.isIntersecting ? seen.add(e.target) : seen.delete(e.target))); storyOn = seen.size > 0; }) : null;
+    if (io) quiet.forEach(el => io.observe(el)); else storyOn = false;
     const idle = () => { if (dirty) { c.clearRect(0, 0, W, H); dirty = false; } raf = requestAnimationFrame(loop); };
     const loop = now => {
       const { motionOn: mo, mode } = live.current;

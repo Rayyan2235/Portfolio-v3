@@ -3,7 +3,6 @@ import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import { PrefsProvider, usePrefs } from './prefs.jsx';
 import { TransitionProvider } from './components/Transitions.jsx';
 import GreatWaveHero from './components/GreatWaveHero.jsx';
-import FujiOpening from './components/FujiOpening.jsx';
 import StoryIntro from './components/StoryIntro.jsx';
 import Nav from './components/Nav.jsx';
 import CommandMenu from './components/CommandMenu.jsx';
@@ -32,7 +31,6 @@ function Page() {
       <Nav onOpenMenu={() => setMenu(true)} />
       <main>
         <StoryIntro />
-        <FujiOpening />
         <GreatWaveHero><HeroText /></GreatWaveHero>
         <Statement />
         <Experience />

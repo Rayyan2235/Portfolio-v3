@@ -2,11 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useScroll, useTransform, useMotionValueEvent, useVelocity } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
 import { featured } from '../data.js';
+import { loopWhileVisible } from '../loop.js';
+import FujiOpening from './FujiOpening.jsx';
 
 const SKY_LANTERNS = [...new Set(featured.flatMap(f => f.stack))].slice(0, 9);
-import { Storm } from './MountainSky.jsx';
-import { resolveSky } from '../sky.js';
-import { loopWhileVisible } from '../loop.js';
 
 // Story intro: one pinned stage, four scenes cut together like a film. The sky runs one long day
 // (dawn, bright sea, dusk, lantern night, sunrise through the torii) and the text flips light or dark with it.
@@ -190,7 +189,7 @@ const Scenes = {
   // 01 dawn: Hokusai's Red Fuji. The camera drifts up toward the summit while mist crosses and birds pass.
   hello: function Hello({ q }) {
     return (
-      <Painting q={q} src="/art/story/red-fuji.jpg" pos="70% 50%" origin="70% 25%" zoom={[1.02, 1.2]} grade="g-dawn" dims={[2000, 1351]}
+      <Painting q={q} src="/art/story/red-fuji-clear.jpg" pos="70% 50%" origin="70% 25%" zoom={[1.02, 1.2]} grade="g-dawn" dims={[1690, 1340]}
         overlay={cover => {
           const d = pathOf(cover, [[1150, 1240], [1400, 1080], [1235, 930], [1470, 780], [1350, 640], [1500, 500], [1420, 380], [1495, 300], [1478, 245]]);
           const [sx, sy] = cover.at(1478, 230);
@@ -376,64 +375,32 @@ function Petals({ strength, wind, live }) {
   return <canvas ref={ref} className="st-petals" aria-hidden="true" />;
 }
 
-// Where the portfolio starts: the porcelain Fuji opening (or the hero if it is missing).
+// Where the portfolio starts: the hero, right after the story.
 function portfolioTop() {
-  const el = document.querySelector('.fj') || document.getElementById('top');
+  const el = document.getElementById('top');
   return el ? el.getBoundingClientRect().top + scrollY : 0;
 }
 
-// The opening shot, no words: a lone figure (Rayyan) sits on a cliff edge above a sea of clouds, laptop glowing,
-// facing a low sun. It follows the visitor's sky like the hero (moon, stars and fireflies at night, rain and
-// lightning in a storm, birds by day), and the camera eases in as the story begins.
-
-function TitleCard() {
-  const ref = useRef(null);
-  const { motionOn, sky, sound } = usePrefs();
-  const mode = resolveSky(sky);
-  const { scrollYProgress: p } = useScroll({ target: ref, offset: ['start start', 'end start'] });
-  const scale = useTransform(p, [0, 1], [1, 1.14]);
-  const cue = useTransform(p, [0, 0.15], [1, 0]);
-  const skip = () => {
-    try { localStorage.setItem(SEEN_KEY, '1'); } catch { /* storage blocked */ }
-    scrollTo({ top: portfolioTop(), behavior: motionOn ? 'smooth' : 'instant' });
-  };
-  return (
-    <section ref={ref} className={`tc tc-${mode}`} aria-labelledby="tc-name">
-      <div className="tc-frame">
-        {/* Kawase Hasui, Evening Snow at Terashima Village (1920): one walker under an umbrella, going on alone */}
-        <motion.img className="tc-paint" src="/art/story/terashima.jpg" alt="" draggable={false} style={motionOn ? { scale } : undefined} />
-        <span className="tc-grade" aria-hidden="true" />
-        {motionOn && (mode === 'storm' ? <Storm sound={sound} /> : <span className="st-snow tc-snow" aria-hidden="true" />)}
-        <span className="tc-grain" aria-hidden="true" />
-        <div className="tc-aura">
-          <p className="tc-kicker">Walk quietly. Leave a mark.</p>
-          <h1 className="tc-name" id="tc-name" aria-label="Rayyan Syed">
-            {[...'Rayyan Syed'].map((ch, i) => <span key={i} aria-hidden="true" style={{ animationDelay: `${0.25 + i * 0.06}s` }}>{ch === ' ' ? ' ' : ch}</span>)}
-          </h1>
-        </div>
-        <motion.div className="tc-cue" style={motionOn ? { opacity: cue } : undefined}>
-          <span className="tc-scroll" aria-hidden="true"><i /></span>
-          <button type="button" className="tc-skip" onClick={skip}>Skip to portfolio</button>
-        </motion.div>
-      </div>
-    </section>
-  );
+// Skipping marks the story as seen, so returning visitors land straight on the portfolio.
+function skipStory(smooth) {
+  try { localStorage.setItem(SEEN_KEY, '1'); } catch { /* storage blocked */ }
+  scrollTo({ top: portfolioTop(), behavior: smooth ? 'smooth' : 'instant' });
 }
 
 export default function StoryIntro() {
   const { motionOn } = usePrefs();
   if (!motionOn) {
-    // Motion off: the title card, the story as plain text, then the portfolio.
+    // Motion off: Fuji as a still, the story as plain text, then the portfolio.
     return (
       <>
-        <TitleCard />
+        <FujiOpening onSkip={() => skipStory(false)} />
         <section className="st-plain" aria-label="About Rayyan">
           {BEATS.map((b, i) => <p key={b.id}><span className="st-label">0{i + 1} · {b.label}</span>{b.line}</p>)}
         </section>
       </>
     );
   }
-  return <><TitleCard /><Film /></>;
+  return <><FujiOpening onSkip={() => skipStory(true)} /><Film /></>;
 }
 
 function Film() {
@@ -446,7 +413,7 @@ function Film() {
   const wind = useVelocity(scrollY);
   useMotionValueEvent(g, 'change', v => {
     setActive(Math.min(N - 1, Math.floor(v * N)));
-    setInStory(v > 0.002 && v < 0.995); // the title card has its own buttons, so the dock waits for the story
+    setInStory(v > 0.002 && v < 0.995); // the opening has its own buttons, so the dock waits for the story
     if (v > 0.95) { try { localStorage.setItem(SEEN_KEY, '1'); } catch { /* storage blocked */ } }
   });
 
@@ -461,10 +428,7 @@ function Film() {
     }
   }, [seen]);
 
-  const skip = () => {
-    try { localStorage.setItem(SEEN_KEY, '1'); } catch { /* storage blocked */ }
-    scrollTo({ top: portfolioTop(), behavior: 'smooth' });
-  };
+  const skip = () => skipStory(true);
 
   return (
     <div ref={ref} className="st-root" aria-label="A short story about Rayyan">

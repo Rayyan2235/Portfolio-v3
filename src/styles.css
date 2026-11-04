@@ -73,46 +73,37 @@ kbd { font: 400 11px/1 var(--mono); padding: 5px 8px; border: 1px solid var(--li
   .hero .corner, .credit { display: none; }
 }
 
-/* opening: a porcelain Red Fuji turning over one day, the name set big behind it */
-.fj { position: relative; height: 240vh; }
+/* opening: Mount Fuji at sunrise from real elevation data, the first page of the story */
+.fj { position: relative; height: 230vh; background: #0f1530; }
 .fj-still { height: auto; }
-.fj-stage { --day: 0; position: sticky; top: 0; height: 100svh; overflow: hidden; }
+.fj-stage { --day: 0; position: sticky; top: 0; height: 100svh; overflow: hidden; color: #fff8ee; }
 .fj-still .fj-stage { position: relative; }
-.fj-sky { position: absolute; inset: 0; background: radial-gradient(70% 55% at 50% 58%, #fde2c2, rgba(253, 226, 194, 0) 70%), linear-gradient(180deg, #f7d6b8 0%, #fbe9d3 45%, #fff8ee 100%); }
-.fj-sky.noon { background: radial-gradient(70% 55% at 50% 58%, #fffaf0, rgba(255, 250, 240, 0) 70%), linear-gradient(180deg, #a9cbe4 0%, #dcebf2 50%, #fff8ee 100%); }
-.fj-sky.night { background:
-  radial-gradient(1.2px 1.2px at 12% 18%, #fff 99%, transparent), radial-gradient(1px 1px at 27% 9%, #fff 99%, transparent), radial-gradient(1.4px 1.4px at 44% 22%, #fff 99%, transparent),
-  radial-gradient(1px 1px at 63% 12%, #fff 99%, transparent), radial-gradient(1.3px 1.3px at 78% 26%, #fff 99%, transparent), radial-gradient(1px 1px at 91% 8%, #fff 99%, transparent),
-  radial-gradient(1px 1px at 6% 40%, #fff 99%, transparent), radial-gradient(1.2px 1.2px at 86% 44%, #fff 99%, transparent),
-  radial-gradient(60% 50% at 50% 60%, rgba(70, 90, 150, .5), rgba(70, 90, 150, 0) 70%), linear-gradient(180deg, #070d1f 0%, #14213f 60%, #1d2c50 100%); }
-.fj-sky.noon { opacity: calc((var(--day) - .18) / .32); } /* stays up under the night so the dusk never goes grey */
-.fj-sky.night { opacity: calc((var(--day) - .55) / .4); }
+.fj-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 1.4s ease; }
+.fj-ready .fj-canvas { opacity: 1; }
 .fj-print { display: none; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .fj-failed .fj-print { display: block; }
-.fj-failed .fj-name, .fj-failed .fj-shadow { display: none; }
-.fj-name { position: absolute; left: 0; right: 0; top: 31%; margin: 0; translate: 0 -50%; text-align: center; pointer-events: none; white-space: nowrap;
-  font: 600 clamp(64px, 12.5vw, 220px)/.9 var(--display); letter-spacing: -.035em; opacity: .92; }
-.fj-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 1.2s ease; }
-.fj-ready .fj-canvas { opacity: 1; }
-.fj-shadow { position: absolute; left: 50%; bottom: 13svh; width: min(46vw, 560px); height: 46px; translate: -50% 0; border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(27, 36, 51, .22), rgba(27, 36, 51, 0)); }
-.fj-copy { position: absolute; inset: 0; pointer-events: none; }
+/* film: grain and a soft vignette over the render, the way a photograph sits */
+.fj-film { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: overlay; opacity: .55;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0, 0, 0, .55)),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+/* the name lives in the 3D sky; this heading is for screen readers, and shows only if the scene cannot run */
+.fj-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); margin: 0; }
+.fj-failed .fj-name { width: auto; height: auto; clip-path: none; left: 0; right: 0; top: 24%; text-align: center; font: 600 clamp(56px, 11vw, 190px)/.9 var(--display); letter-spacing: -.03em; color: #1b2433; }
+.fj-kicker, .fj-line, .fj-credit, .fj-hint { text-shadow: 0 1px 12px rgba(10, 14, 30, .45); }
 .fj-kicker { position: absolute; left: clamp(20px, 4vw, 56px); top: clamp(104px, 15svh, 140px); margin: 0; font: 400 12px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; }
-.fj-line { position: absolute; right: clamp(20px, 4vw, 56px); top: clamp(98px, 14svh, 132px); margin: 0; max-width: 24ch; font: 500 clamp(15px, 1.3vw, 18px)/1.4 var(--sans); text-align: right; }
-.fj-hint { opacity: calc(1 - var(--day) / .12); position: absolute; left: 50%; bottom: 26px; translate: -50% 0; margin: 0; display: flex; align-items: center; gap: 10px; font: 400 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+.fj-line { position: absolute; right: clamp(20px, 4vw, 56px); top: clamp(98px, 14svh, 132px); margin: 0; font: 500 clamp(15px, 1.3vw, 18px)/1.4 var(--sans); text-align: right; }
+.fj-cue { position: absolute; left: 0; right: 0; bottom: 24px; display: flex; justify-content: center; align-items: center; gap: 22px; }
+.fj-hint { opacity: calc(1 - var(--day) / .15); display: flex; align-items: center; gap: 10px; font: 400 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
 .fj-hint i { width: 1px; height: 26px; background: currentColor; transform-origin: 50% 0; animation: fj-drip 1.8s ease-in-out infinite; }
 @keyframes fj-drip { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
-.fj-credit { position: absolute; left: clamp(20px, 4vw, 56px); bottom: 26px; margin: 0; font: 400 12px/1.3 var(--mono); letter-spacing: .08em; opacity: .7; }
-.fj-still .fj-hint { display: none; }
-.fj-br { display: none; }
+.fj-skip { min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(255, 248, 238, .5); background: rgba(15, 21, 48, .25); color: inherit; font: 500 13px/1 var(--sans); cursor: pointer; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.fj-skip:hover { background: rgba(255, 248, 238, .14); }
+.fj-credit { position: absolute; left: clamp(20px, 4vw, 56px); bottom: 34px; margin: 0; max-width: 30ch; font: 400 12px/1.4 var(--mono); letter-spacing: .06em; opacity: .75; }
 html.still .fj-hint i { animation: none; }
+@media (max-width: 900px) { .fj-credit { display: none; } }
 @media (max-width: 640px) {
-  .fj-name { top: 30%; font-size: 21vw; white-space: normal; line-height: .86; }
-  .fj-br { display: inline; }
-  .fj-line { left: 20px; right: auto; top: auto; bottom: 74px; text-align: left; max-width: 26ch; }
-  .fj-credit { display: none; }
-  .fj-shadow { bottom: 22svh; width: 70vw; }
-  .fj-hint { white-space: nowrap; }
+  .fj-line { left: 20px; right: auto; top: auto; bottom: 92px; text-align: left; }
+  .fj-cue { justify-content: space-between; padding: 0 20px; }
 }
 
 /* buttons */
@@ -343,27 +334,6 @@ html.still .close .sea-s { animation: none; }
   .st-root { height: 880svh; }
 }
 
-/* story title card: no words, a lone figure on a cliff above the clouds, keyed to the visitor's sky */
-.tc { --sky-top: #f6c3a1; --sky-bot: #fde7c4; --orb: #e4572e; --glow: rgba(247, 178, 122, .6); --land: #1b2433; --bank: #fff1e2; --mist: rgba(255, 241, 226, .85); padding: calc(10px + env(safe-area-inset-top, 0px)) 10px 10px; background: var(--paper); --torii: #c8361f; --peak: #5b4a6e; }
-.tc-day { --sky-top: #9fc7dc; --sky-bot: #f1ede0; --orb: #fff4d8; --glow: rgba(255, 244, 216, .7); --land: #22303b; --bank: #fbfaf4; --mist: rgba(250, 249, 242, .9); --peak: #4c6a86; }
-.tc-dusk { --sky-top: #5d4170; --sky-bot: #f2a46b; --orb: #c8361f; --glow: rgba(228, 87, 46, .55); --land: #1c1424; --bank: #f6c9a8; --mist: rgba(246, 201, 168, .8); }
-.tc-night { --sky-top: #070d1a; --sky-bot: #22325a; --orb: #f8f3e3; --glow: rgba(220, 230, 255, .35); --land: #05080f; --bank: #3c4c78; --mist: rgba(60, 76, 120, .85); --torii: #6b1e16; --peak: #18223c; }
-.tc-storm { --sky-top: #3f4757; --sky-bot: #8a93a2; --orb: #c9ced8; --glow: rgba(200, 206, 216, .15); --land: #151a22; --bank: #a9b0bc; --mist: rgba(169, 176, 188, .9); --torii: #6e2a22; --peak: #3a4352; }
-.tc-frame { position: relative; height: calc(100svh - 20px); min-height: 520px; border-radius: clamp(18px, 2.4vw, 32px); overflow: hidden; isolation: isolate;
-  background: linear-gradient(180deg, var(--sky-top), var(--sky-bot) 78%); transition: background 1.2s; }
-
-.tc-frame .mtn-birds { height: 45%; }
-.tc-day .mtn-bird, .tc-dawn .mtn-bird { color: #2b3446; } .tc-dusk .mtn-bird { color: #2a1b2c; }
-.tc-cue { position: absolute; left: 0; right: 0; bottom: clamp(16px, 3vw, 32px); z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.tc-scroll { width: 24px; height: 38px; border: 1.5px solid rgba(255, 248, 238, .85); border-radius: 14px; display: flex; justify-content: center; padding-top: 7px; }
-.tc-scroll i { width: 3px; height: 8px; border-radius: 2px; background: rgba(255, 248, 238, .9); animation: tc-wheel 1.8s ease-in-out infinite; }
-@keyframes tc-wheel { 0% { transform: translateY(0); opacity: 1; } 80% { transform: translateY(12px); opacity: 0; } 100% { opacity: 0; } }
-.tc-skip { border: 0; background: none; padding: 8px 4px; color: rgba(255, 248, 238, .9); font: 500 13px var(--sans); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; text-shadow: 0 1px 6px rgba(0, 0, 0, .35); }
-.tc-skip:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
-html.still .tc-scroll i { animation: none; }
-
-.tc-snow { fill: var(--bank); }
-
 .mtn-bird.crane { width: 54px; color: var(--land); }
 .mtn-bird.crane svg { fill: currentColor; stroke: none; animation-duration: .9s; }
 .mtn-bird.crane .cr-legs { fill: none; stroke: currentColor; stroke-width: 1.4; }
@@ -371,8 +341,6 @@ html.still .tc-scroll i { animation: none; }
 .mtn-bird.crane .cr-crown { fill: #c8361f; }
 
 @keyframes tc-fall { 0% { transform: translate(0, 0) rotate(0); } 50% { transform: translate(60px, 50svh) rotate(200deg); } 100% { transform: translate(-20px, 105svh) rotate(420deg); } }
-.tc-grain { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; opacity: .45;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .4 0 0 0 0 .28 0 0 0 .14 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 
 /* story chapters as full bleed paintings (public domain prints in public/art/story) */
 .st-scene { justify-content: flex-end; padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
@@ -399,13 +367,7 @@ html.still .tc-scroll i { animation: none; }
 .st-nightart { height: clamp(150px, 34svh, 360px); }
 html.still .st-burst { animation: none; }
 
-/* title card: Kajikazawa, graded to the visitor's sky */
-.tc-paint { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 55% 50%; user-select: none; transform-origin: 58% 62%; }
-.tc-grade { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; opacity: 0; transition: opacity 1.2s;
-  background: linear-gradient(180deg, var(--sky-top), var(--sky-bot)); }
-.tc-dawn .tc-grade { opacity: .55; } .tc-dusk .tc-grade { opacity: .75; } .tc-night .tc-grade { opacity: .95; } .tc-storm .tc-grade { opacity: .85; }
 
-.tc-frame::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(10, 12, 20, .25), transparent 22%, transparent 70%, rgba(10, 12, 20, .45)); }
 
 /* experience on the mountain painting; the rows sit on paper so they never blend into the art */
 .exp .mtn { --mh: 1300px; top: 0; height: 100%; -webkit-mask-image: linear-gradient(transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(transparent, #000 8%, #000 92%, transparent); }
@@ -425,13 +387,13 @@ html.still .cherry-fall { display: none; }
 
 /* smooth scrolling: nothing blends over a moving painting (mix-blend-mode on top of a layer that moves every frame
    forces a full repaint each tick). Grades are plain translucent overlays, moving art is its own GPU layer. */
-.st-paint > img, .tc-paint { will-change: transform; backface-visibility: hidden; }
+.st-paint > img { will-change: transform; backface-visibility: hidden; }
 .st-grade { mix-blend-mode: normal; }
 .g-dawn .st-grade { background: linear-gradient(180deg, rgba(255, 196, 150, .22), rgba(255, 230, 200, .08)); }
 .st-burst { mix-blend-mode: normal; will-change: transform, opacity; }
-.tc-grade { mix-blend-mode: normal; }
-.tc-dawn .tc-grade { opacity: .28; } .tc-dusk .tc-grade { opacity: .42; } .tc-night .tc-grade { opacity: .7; } .tc-storm .tc-grade { opacity: .5; }
-.tc-grain { mix-blend-mode: normal; opacity: .22; }
+
+
+
 .mtn-tint { mix-blend-mode: normal; }
 .mtn-dawn .mtn-tint { opacity: .3; } .mtn-dusk .mtn-tint { opacity: .4; } .mtn-night .mtn-tint { opacity: .68; } .mtn-storm .mtn-tint { opacity: .5; }
 .mtn-clouds { animation: mtn-drift 34s ease-in-out infinite alternate; will-change: transform; }
@@ -458,18 +420,6 @@ html.still .st-snow { animation: none; }
 
 /* the gliding crane is a transparent PNG now, so it moves without blending */
 .crane-ink { mix-blend-mode: normal; will-change: transform; }
-
-/* title card: Hasui's lone walker in the snow, and the one line that names him */
-.tc-paint { object-position: 58% 64%; }
-.tc-snow { z-index: 1; }
-.tc-aura { position: absolute; left: clamp(20px, 4vw, 56px); bottom: clamp(84px, 12svh, 120px); z-index: 2; max-width: min(92%, 900px); color: #fff8ee; text-shadow: 0 2px 24px rgba(8, 10, 18, .6); }
-.tc-kicker { margin: 0 0 10px; font: 400 clamp(12px, 1.2vw, 14px) var(--mono); letter-spacing: .32em; text-transform: uppercase; opacity: 0; animation: tc-fade 1.2s .1s ease-out forwards; }
-.tc-name { margin: 0; font: 600 clamp(52px, 10vw, 150px)/.9 var(--display); letter-spacing: -.01em; display: flex; flex-wrap: wrap; line-height: 1; }
-.tc-name span { display: inline-block; opacity: 0; transform: translateY(40%); animation: tc-rise .9s cubic-bezier(.16, 1, .3, 1) forwards; }
-@keyframes tc-rise { to { opacity: 1; transform: none; } }
-@keyframes tc-fade { to { opacity: .85; } }
-.tc-frame::after { background: linear-gradient(180deg, rgba(10, 12, 20, .3), transparent 24%, transparent 48%, rgba(10, 12, 20, .72)); }
-html.still .tc-name span, html.still .tc-kicker { animation: none; opacity: 1; transform: none; }
 
 /* text motion (TextMotion.jsx): rotating hero phrase, counting numbers */
 .hero h1 .rt-hero { color: var(--sun); }
@@ -579,8 +529,6 @@ html.still .nav a.cta::before, html.still .sky-dot { animation: none; }
 @media (max-width: 860px) { .ema-rail { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 40px; } .ema-board { min-height: 240px; } }
 html.still .ema-board { animation: none; }
 
-/* type with Japanese roots: Shippori Mincho B1 for display, Yuji Boku brush for the name and the ema, Zen Kaku Gothic New for body */
-.tc-name { font-family: var(--brush); font-weight: 400; letter-spacing: 0; }
 .ema-board h3 { font-family: var(--brush); font-weight: 400; font-size: 26px; }
 .ema-board p { font-weight: 400; font-size: 19px; }
 .st-line, .hero h1, .statement p, .dcard h3 { letter-spacing: -.01em; }
@@ -673,7 +621,6 @@ html.still .csky-mist i, html.still .csky-stars { animation: none; }
 .close svg.waves { margin-top: clamp(170px, 20vw, 300px); }
 .csky-land { bottom: clamp(100px, 12.5vw, 180px); height: clamp(190px, 24vw, 360px); }
 .csky-mist .m2, .csky-mist .m3, .csky-mist .m4 { display: none; }
-
 
 /* frame budget: no blur behind the fixed nav (it re-blurs every scrolled frame), no animated filters */
 .nav { background: rgba(255, 252, 246, .97); }
@@ -839,7 +786,7 @@ html.still .tw-caret { animation: none; }
   .dc-meta, .dc-seal, .deck-hint, .st-alt span, .st-skylan small, .dc-tags span, .st-kake-in small { font-size: 12px; }
   /* keep the corner button off the last lines of the footer */
   footer { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
-  .tc-skip { min-height: 44px; padding-inline: 12px; }
+
 }
 
 /* koi in the statement's currents */
