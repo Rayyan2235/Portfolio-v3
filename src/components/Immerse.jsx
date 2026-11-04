@@ -147,15 +147,15 @@ export function ZoomPrints() {
   const { motionOn } = usePrefs();
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] });
-  const line = useTransform(scrollYProgress, [0.72, 0.92], [0, 1]);
   const lineY = useTransform(scrollYProgress, [0.72, 0.92], [24, 0]);
   if (!motionOn) return null;
+  // the caption fades through --zp in CSS: scroll linked opacity set straight from a motion value never applied here
   return (
     <section ref={ref} className="zp" aria-label="Prints from the road">
-      <div className="zp-sticky">
+      <motion.div className="zp-sticky" style={{ '--zp': scrollYProgress }}>
         {ZOOM.map((z, i) => <ZoomTile key={z.src} {...z} i={i} progress={scrollYProgress} />)}
-        <motion.p className="zp-line" style={{ opacity: line, y: lineY }}>Every road on this page ends at the same mountain.</motion.p>
-      </div>
+        <motion.p className="zp-line" style={{ y: lineY }}>Every road on this page ends at the same mountain.</motion.p>
+      </motion.div>
     </section>
   );
 }

@@ -13,6 +13,7 @@
   <img alt="React 18" src="https://img.shields.io/badge/React-18-1d3557?logo=react&logoColor=white">
   <img alt="Vite 6" src="https://img.shields.io/badge/Vite-6-1d3557?logo=vite&logoColor=white">
   <img alt="Motion" src="https://img.shields.io/badge/Motion-12-1d3557">
+  <img alt="three.js" src="https://img.shields.io/badge/three.js-0.169-1d3557?logo=threedotjs&logoColor=white">
   <img alt="WebGL" src="https://img.shields.io/badge/WebGL-shader%20hero-e4572e">
 </p>
 
@@ -26,10 +27,10 @@ Most portfolios list skills. This one tries to feel like somewhere. It is built 
 
 | Moment | What you see | Where it lives |
 | --- | --- | --- |
-| **Opening** | A small hanging scroll in the middle of the page. Scroll, and it unrolls into the full hero. | `ScrollExpandHero.jsx` |
+| **Opening** | Red Fuji in glazed porcelain on a floating island with a kintsugi gold rim, gold clouds circling it and a seigaiha sea. Scroll turns one day over it, dawn to night; the cursor tilts it. Modelled in code with three.js, loaded while the story plays. | `FujiOpening.jsx`, `scenes/fuji.js` |
 | **The sky** | Hokusai's *Great Wave*, animated in WebGL. The sky follows your clock: dawn, day, dusk or a starry night. Pick **Storm** for rain, lightning and (if you turn it on) thunder. The sun rises as you scroll and the boats bob. | `GreatWaveHero.jsx`, `sky.js` |
 | **Moving around** | Click a section and a transition carries you there: a crashing wave, a storm of sakura petals, falling maple leaves, sumi ink or a lightning flash. | `Transitions.jsx` |
-| **The paper** | A crane glides across the page as you scroll. A cherry branch sways and lets its petals go. | `Sections.jsx` |
+| **The paper** | A crane glides across the page as you scroll. | `Sections.jsx` |
 | **Work** | An ink painted mountain valley that follows the sky (rain and lightning in a storm, birds by day), with every project in one sideways rail of tilting cards. Each opens a spec sheet. | `Sections.jsx`, `MountainSky.jsx` |
 | **Shortcuts** | `Ctrl K` opens a command menu: jump anywhere, copy my email, change the sky, pick a transition. | `CommandMenu.jsx` |
 
@@ -55,21 +56,21 @@ src/
   data.js                 projects and experience
   loop.js                 the shared frame loop every canvas effect runs on
   components/
-    ScrollExpandHero.jsx  hanging scroll opening
+    FujiOpening.jsx       the porcelain Fuji opening (scene in scenes/fuji.js)
     GreatWaveHero.jsx     WebGL Great Wave, sky, rain, lightning, boats
     Transitions.jsx       the five screen transitions
     Sections.jsx          statement, work, experience, notes, contact
     Nav.jsx, CommandMenu.jsx, Ambient.jsx
 public/
   great-wave.jpg          Hokusai, resized for the web
-  art/                    crane and cherry blossom, silk lifted to ink on white
+  art/                    crane and the story prints, silk lifted to ink on white
 ```
 
 A few decisions worth knowing:
 
 * **Real art over drawn art.** The paintings are the actual prints and scrolls. Their aged silk is lifted out ahead of time so only the ink sits on the page.
 * **No scroll hijacking.** The opening uses a sticky section, so trackpads, keyboards and phones all scroll normally.
-* **One frame loop.** Every canvas effect (wave, koi, currents, rain) runs through `loopWhileVisible` in `loop.js`: it draws only while on screen, caps the frame rate, and stops asking for frames once scrolled away. A new effect is a draw function plus one call.
+* **One frame loop.** Every canvas effect (Fuji, wave, koi, currents, rain) runs through `loopWhileVisible` in `loop.js`: it draws only while on screen, caps the frame rate, and stops asking for frames once scrolled away. A new effect is a draw function plus one call.
 
 ## What is next
 
@@ -80,12 +81,11 @@ A few decisions worth knowing:
 
 * Katsushika Hokusai, *Under the Wave off Kanagawa*, ca. 1830 to 32. The Met, object 45434, public domain.
 * Kano Chikanobu, *Crane, Tortoise, Pine, and Bamboo under a Rising Sun*. The Met, object 45728, public domain.
-* Matsumura Goshun, *Cherry Blossoms*. The Met, object 49049, public domain.
 * Story chapters and section backdrops (`public/art/story`), all public domain or CC0 via Wikimedia Commons:
   * Kawase Hasui, *Evening Snow at Terashima Village* (1920). Public domain in Japan (artist died 1957) and in the US (published before 1931).
   * Katsushika Hokusai, *Fine Wind, Clear Morning* (Red Fuji); `red-fuji-clear.jpg` is the same print cropped clear of its title cartouche.
   * Utagawa Hiroshige, *The Whirlpools of Awa* (The Met DP146864), *Fireworks at Ryōgoku* (Musée Guimet EO1841, cropped clear of its cartouches), *Evening Cherry Blossoms at Gotenyama* (The Met DP123249, cropped to the sky and blossoms) *Plum Garden at Kameido* (Rijksmuseum RP-P-1956-743, cropped to the red sky and branches) and *Kinryūzan Temple at Asakusa* (The Met DP122116, CC0, cropped to the snowy court and gate).
-* The opening is adapted from 21st.dev's scroll expansion hero.
+* The opening takes its layout from the 3D hero sites on motionsites.ai (one object in soft light, the name set big behind it); the scene itself is modelled from scratch.
 * The print gallery zoom follows exoape.com's project pages as broken down in Olivier Larose's "Zoom Parallax" tutorial; the scroll inked words follow the same idea from Apple's product pages. Both are rewritten here.
 * Fonts: Shippori Mincho B1, Yuji Boku, Zen Kaku Gothic New and Geist Mono, SIL Open Font License 1.1.
 

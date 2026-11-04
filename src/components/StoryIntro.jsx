@@ -376,11 +376,9 @@ function Petals({ strength, wind, live }) {
   return <canvas ref={ref} className="st-petals" aria-hidden="true" />;
 }
 
-// Where the portfolio starts: the end of the hanging scroll, fully open (or the hero when motion is off).
+// Where the portfolio starts: the porcelain Fuji opening (or the hero if it is missing).
 function portfolioTop() {
-  const sx = document.querySelector('.sx');
-  if (sx) return sx.getBoundingClientRect().top + scrollY + sx.offsetHeight - innerHeight;
-  const el = document.getElementById('top');
+  const el = document.querySelector('.fj') || document.getElementById('top');
   return el ? el.getBoundingClientRect().top + scrollY : 0;
 }
 
