@@ -53,7 +53,7 @@ function CraneGlide() {
   const rotate = useTransform(scrollYProgress, [0, 1], [4, -6]);
   return (
     <div ref={ref} className="crane-sky" aria-hidden="true">
-      <motion.img className="crane-ink" src="/art/crane-alpha.png" alt="" style={motionOn ? { x, y, rotate } : undefined} />
+      <motion.img className="crane-ink" src="/art/crane-ink.webp" alt="" style={motionOn ? { x, y, rotate } : undefined} />
     </div>
   );
 }
