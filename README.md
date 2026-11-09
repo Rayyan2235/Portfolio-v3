@@ -27,7 +27,7 @@ Most portfolios list skills. This one tries to feel like somewhere. It is built 
 
 | Moment | What you see | Where it lives |
 | --- | --- | --- |
-| **Opening** | The first page of the story: Mount Fuji built from real elevation data, rising out of a sea of clouds under an anime magic hour sky (gold, coral and magenta under indigo). Scroll turns it to night: a dense star field, the Milky Way, shooting stars and a twin tailed comet that splits. three.js in its own chunk, resolution adapts to the device. | `FujiOpening.jsx`, `scenes/fuji.js` |
+| **Opening** | The first page of the story: Mount Fuji built from real elevation data, rising out of a sea of painted cloud under a comet night in the style of anime skies: dabbed clouds drifting across a dense star field, the Milky Way, shooting stars and a twin ribbon comet. "Welcome" gathers itself out of the stars (the cursor brushes them aside) and scatters back into the sky as you scroll. three.js in its own chunk, resolution adapts to the device. | `FujiOpening.jsx`, `scenes/fuji.js` |
 | **The hero** | A small hanging scroll in the middle of the page. Scroll, and it unrolls into the full hero. | `ScrollExpandHero.jsx` |
 | **The sky** | Hokusai's *Great Wave*, animated in WebGL. The sky follows your clock: dawn, day, dusk or a starry night. Pick **Storm** for rain, lightning and (if you turn it on) thunder. The sun rises as you scroll and the boats bob. | `GreatWaveHero.jsx`, `sky.js` |
 | **Moving around** | Click a section and a transition carries you there: a crashing wave, a storm of sakura petals, falling maple leaves, sumi ink or a lightning flash. | `Transitions.jsx` |
@@ -35,7 +35,8 @@ Most portfolios list skills. This one tries to feel like somewhere. It is built 
 | **Work** | An ink painted mountain valley that follows the sky (rain and lightning in a storm, birds by day), with every project in one sideways rail of tilting cards. Each opens a spec sheet. | `Sections.jsx`, `MountainSky.jsx` |
 | **Shortcuts** | `Ctrl K` opens a command menu: jump anywhere, copy my email, change the sky, pick a transition. | `CommandMenu.jsx` |
 | **Snapshots** | Photos from life off the screen as instant prints pegged to a line. Drop images into `src/assets/gallery/` and they appear, captioned from the file name (a number prefix sets the order). | `Gallery.jsx` |
-| **Secrets** | Five hidden things, counted across visits: tap the football, type "siu" anywhere, the Konami code (a meteor shower), tap the night sky in the opening (a wish), and leave the tab and come back. Ctrl K shows how many are found. | `Secrets.jsx` |
+| **Secrets** | Eight hidden things, counted across visits: tap the football, type "siu" or "ggmu" anywhere, the Konami code (a meteor shower), tap the night sky in the opening (a wish), set the crane in the finale flying, leave the tab and come back, and visit late at night. Ctrl K shows how many are found. | `Secrets.jsx` |
+| **Finale** | After the footer art on littlebird.ai: the ink valley at the foot of the page with the name set huge across its sky and a crane for a mark. | `Finale.jsx` |
 
 Everything respects a **Motion** switch in the nav, works at phone width, and keeps Resume and Email one click away.
 

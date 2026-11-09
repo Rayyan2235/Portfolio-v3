@@ -38,14 +38,17 @@ export default function FujiOpening({ onSkip }) {
         <img className="fj-print" src="/art/story/red-fuji-clear.jpg" alt="" aria-hidden="true" />
         <canvas ref={cv} className="fj-canvas" aria-hidden="true" />
         <span className="fj-film" aria-hidden="true" />
-        <h1 className="fj-name" id="fj-name">Rayyan Syed</h1>
-        <p className="fj-kicker">Software engineer</p>
-        <p className="fj-line">I walk toward the mountain and leave the path wider than I found it.</p>
+        <h1 className="fj-name" id="fj-name">Welcome</h1>
+        <p className="fj-kicker">A night above the clouds</p>
+        <div className="fj-intro">
+          <p>You made it to the mountain.</p>
+          <p className="soft">Make a wish on a falling star, then scroll. There is a story up there, and a few secrets on the way down.</p>
+        </div>
         <div className="fj-cue">
-          {motionOn && <span className="fj-hint" aria-hidden="true"><i />Scroll into the night</span>}
+          {motionOn && <span className="fj-hint" aria-hidden="true"><i />Tap the sky, then scroll</span>}
           <button type="button" className="fj-skip" onClick={onSkip}>Skip to portfolio</button>
         </div>
-        <p className="fj-credit">Mount Fuji from real elevation data, under a twilight sky</p>
+        <p className="fj-credit">Mount Fuji from real elevation data, under a comet night</p>
       </motion.div>
     </section>
   );

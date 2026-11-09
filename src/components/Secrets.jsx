@@ -9,7 +9,10 @@ export const SECRETS = {
   siu: 'You typed siu',
   konami: 'Konami code',
   wish: 'You made a wish on the night sky',
-  away: 'You came back'
+  away: 'You came back',
+  crane: 'You set the crane flying',
+  ggmu: 'Glory glory Man United',
+  owl: 'Up late, like me'
 };
 export const secret = id => window.dispatchEvent(new CustomEvent('v3:secret', { detail: id }));
 const KEY = 'v3-secrets';
@@ -34,6 +37,7 @@ export default function Secrets({ toast }) {
     const onSecret = ({ detail: id }) => {
       if (id === 'siu') { playSiu(); play('siu'); }
       if (id === 'konami') play('shower');
+      if (id === 'ggmu') play('ggmu');
       const found = read();
       if (found.includes(id) || !SECRETS[id]) return;
       found.push(id);
@@ -46,6 +50,7 @@ export default function Secrets({ toast }) {
       keys.current = [...keys.current, k].slice(-KONAMI.length);
       const tail = keys.current.join(' ');
       if (tail.endsWith('s i u')) { keys.current = []; secret('siu'); }
+      else if (tail.endsWith('g g m u')) { keys.current = []; secret('ggmu'); }
       else if (tail === KONAMI.join(' ')) { keys.current = []; secret('konami'); }
     };
     // leaving the tab: the title calls you back; coming back counts as a secret
@@ -56,25 +61,28 @@ export default function Secrets({ toast }) {
       else { document.title = title; if (left) secret('away'); }
     };
     window.addEventListener('v3:secret', onSecret);
+    // night owls: anyone here between eleven at night and five in the morning, local time
+    const hour = new Date().getHours();
+    const owl = hour >= 23 || hour < 5 ? setTimeout(() => secret('owl'), 9000) : 0;
     window.addEventListener('keydown', onKey);
     document.addEventListener('visibilitychange', onVis);
     return () => {
       window.removeEventListener('v3:secret', onSecret); window.removeEventListener('keydown', onKey);
-      document.removeEventListener('visibilitychange', onVis); clearTimeout(timer.current); document.title = title;
+      document.removeEventListener('visibilitychange', onVis); clearTimeout(timer.current); clearTimeout(owl); document.title = title;
     };
   }, [motionOn, toast]);
 
   // a note for anyone who opens the console
   useEffect(() => {
     console.log('%c\n        /\\\n       /  \\      Rayyan Syed\n      / /\\ \\     you found the console.\n     /_/  \\_\\\n', 'color:#e4572e;font:12px monospace');
-    console.log('%cThere are five secrets on this page. Try typing siu, the Konami code, or tapping the night sky.', 'color:#1d3557;font:13px sans-serif');
+    console.log('%cThere are eight secrets on this page. Start with: type siu, try the Konami code, tap the night sky, find the crane.', 'color:#1d3557;font:13px sans-serif');
   }, []);
 
   if (!party) return null;
-  if (party.kind === 'siu') {
+  if (party.kind === 'siu' || party.kind === 'ggmu') {
     return (
       <div className="egg-party siu" key={party.key} aria-hidden="true">
-        <b>SIUUU</b>
+        <b>{party.kind === 'siu' ? 'SIUUU' : 'GGMU'}</b>
         {Array.from({ length: 46 }, (_, i) => (
           <i key={i} style={{ '--x': `${(i * 37) % 100}vw`, '--d': `${(i % 9) * 0.06}s`, '--r': `${(i * 53) % 360}deg`, '--c': ['#da291c', '#fff8ee', '#f7b27a', '#1b2433'][i % 4] }} />
         ))}

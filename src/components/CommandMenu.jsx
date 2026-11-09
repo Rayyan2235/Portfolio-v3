@@ -24,7 +24,7 @@ export default function CommandMenu({ open, setOpen, toast }) {
     ...['auto', 'dawn', 'day', 'dusk', 'night', 'storm'].map(k => [`Sky: ${k === 'auto' ? 'your time' : SKIES[k].label}`, 'Scene', () => { setSky(k); go('top', undefined, k === 'storm' ? 'storm' : undefined); }]),
     ...['mixed', ...Object.keys(KINDS)].map(k => [`Transition: ${k === 'mixed' ? 'Mixed' : KINDS[k].label}`, 'Preference', () => { setTransition(k); toast('Transition set'); }]),
     [motionOn ? 'Turn motion off' : 'Turn motion on', 'Preference', () => setMotionOn(!motionOn)],
-    ['Secrets', `${secretsFound()} of ${Object.keys(SECRETS).length} found`, () => toast('Try typing siu, the Konami code, or tapping the night sky')]
+    ['Secrets', `${secretsFound()} of ${Object.keys(SECRETS).length} found`, () => toast('Try typing siu or ggmu, the Konami code, tapping the night sky, or finding the crane')]
   ], [go, setSky, setTransition, motionOn, setMotionOn, toast, open]); // open: recount secrets each time the menu opens
 
   const shown = cmds.filter(c => (c[0] + ' ' + c[1]).toLowerCase().includes(q.toLowerCase()));
