@@ -618,7 +618,22 @@ html.still .ema-board { animation: none; }
 .close .wrap, .close svg.waves { position: relative; z-index: 1; }
 .csky { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 .csky-land { position: absolute; left: 0; right: 0; bottom: clamp(150px, 19vw, 270px); width: 100%; height: clamp(150px, 22vw, 340px); }
-.csky-land .far { fill: var(--far); } .csky-land .snow { fill: var(--snow); } .csky-land .mid { fill: var(--mid); } .csky-land .near { fill: var(--near); }
+/* the ink landscape (InkLand.jsx): every layer reads the sky mode's palette */
+.close { --torii: #c2412b; --ink: #1b2433; } .close-day { --torii: #c8452e; } .close-dusk { --torii: #8f2f3f; --ink: #1c1426; }
+.close-night { --torii: #4a2534; --ink: #02060f; } .close-storm { --torii: #4b3236; --ink: #0d1014; }
+.csky-land .crest { fill: none; stroke: var(--ink); stroke-width: 1.4; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.csky-land .tree { fill: var(--mid); filter: brightness(.82); } .csky-land .near { fill: var(--near); } .csky-land .torii { fill: var(--torii); }
+.ct-crane { position: absolute; z-index: 1; right: 9%; bottom: calc(clamp(120px, 14vw, 200px) * .56 + clamp(190px, 24vw, 360px) * .78); width: clamp(44px, 5vw, 76px);
+  padding: 0; border: 0; background: none; color: var(--near); cursor: pointer; }
+.ct-crane svg { display: block; width: 100%; fill: currentColor; transform: scaleX(-1); }
+.ct-crane:hover svg { animation: ct-flap .6s ease-in-out 2; }
+.ct-crane.fly svg { animation: ct-fly 4s cubic-bezier(.45, 0, .2, 1) forwards; }
+.close-night .ct-crane, .close-storm .ct-crane, .close-dusk .ct-crane { color: var(--txt2); }
+@keyframes ct-flap { 50% { transform: scaleX(-1) scaleY(.82) translateY(-4px); } }
+@keyframes ct-fly { 0% { transform: scaleX(-1); } 10% { transform: scaleX(-1) translate(6px, -10px) scaleY(.8); } 45% { transform: scaleX(-1) translate(-38vw, -32vh) scale(.55); opacity: 1; }
+  70% { opacity: 0; transform: scaleX(-1) translate(-70vw, -50vh) scale(.3); } 71% { transform: scaleX(-1) translate(30vw, 20vh) scale(.3); opacity: 0; } 100% { transform: scaleX(-1); opacity: 1; } }
+html.still .ct-crane svg { animation: none !important; }
+@media (max-width: 640px) { .ct-crane { right: 5%; } }
 .csky-mist i { position: absolute; height: clamp(14px, 1.6vw, 22px); border-radius: 999px; background: var(--mist); will-change: transform; animation: csky-drift 38s ease-in-out infinite alternate; }
 .csky-mist .m0 { left: -6%; top: 22%; width: 38%; } .csky-mist .m1 { right: -8%; top: 30%; width: 34%; animation-duration: 46s; animation-direction: alternate-reverse; }
 .csky-mist .m2 { left: 8%; bottom: calc(clamp(150px, 19vw, 270px) + clamp(90px, 12vw, 200px)); width: 30%; animation-duration: 52s; }
@@ -639,7 +654,7 @@ html.still .csky-mist i, html.still .csky-stars { animation: none; }
 @media (max-width: 640px) { .csky-mist .m0, .csky-mist .m1 { width: 60%; } }
 .close .mail code { color: #1b2433; }
 .close svg.waves { margin-top: clamp(170px, 20vw, 300px); }
-.csky-land { bottom: clamp(100px, 12.5vw, 180px); height: clamp(190px, 24vw, 360px); }
+.csky-land { bottom: calc(clamp(120px, 14vw, 200px) * .56); height: clamp(190px, 24vw, 360px); }
 .csky-mist .m2, .csky-mist .m3, .csky-mist .m4 { display: none; }
 
 /* frame budget: no blur behind the fixed nav (it re-blurs every scrolled frame), no animated filters */
@@ -862,20 +877,3 @@ html.still .gal-print { transition: none; }
   background: linear-gradient(90deg, transparent, rgba(255, 248, 238, .8) 70%, #fff); box-shadow: 0 0 8px rgba(160, 200, 255, .9); animation: egg-meteor 1.2s ease-out calc(.5s + var(--d)) forwards; }
 @keyframes egg-meteor { 0% { opacity: 0; translate: 0 0; } 15% { opacity: 1; } 100% { opacity: 0; translate: 260px 160px; } }
 
-/* finale: the ink valley at the foot of the page, the name huge across its sky, a crane for a mark */
-.fin { position: relative; overflow: hidden; height: clamp(340px, 48vw, 780px); background: var(--paper); }
-.fin-art { position: absolute; inset: 0; transform-origin: 50% 100%; }
-.fin-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 62%; filter: saturate(.8) brightness(1.06);
-  -webkit-mask: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, .35) 22%, #000 46%); mask: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, .35) 22%, #000 46%); }
-.fin-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, var(--paper) 0%, rgba(255, 248, 238, .55) 30%, rgba(255, 248, 238, 0) 60%); }
-.fin-mark { position: absolute; left: 0; right: 0; top: 14%; display: flex; align-items: center; justify-content: center; gap: clamp(8px, 1.5vw, 24px); padding-inline: 4vw; }
-.fin-word { font: 600 clamp(44px, 11.2vw, 200px)/.9 var(--display); letter-spacing: -.035em; color: #d6c39b; white-space: nowrap; }
-.fin-crane { flex: 0 0 auto; width: clamp(48px, 9vw, 160px); padding: 0; border: 0; background: none; color: #d6c39b; cursor: pointer; }
-.fin-crane svg { display: block; width: 100%; fill: currentColor; transform: scaleX(-1); }
-.fin-crane:hover svg { animation: fin-flap .6s ease-in-out 2; }
-.fin-crane.fly svg { animation: fin-fly 4s cubic-bezier(.45, 0, .2, 1) forwards; }
-@keyframes fin-flap { 50% { transform: scaleX(-1) scaleY(.82) translateY(-4px); } }
-@keyframes fin-fly { 0% { transform: scaleX(-1); } 10% { transform: scaleX(-1) translate(6px, -10px) scaleY(.8); } 45% { transform: scaleX(-1) translate(-38vw, -32vh) scale(.55); opacity: 1; }
-  70% { opacity: 0; transform: scaleX(-1) translate(-70vw, -50vh) scale(.3); } 71% { transform: scaleX(-1) translate(30vw, 20vh) scale(.3); opacity: 0; } 100% { transform: scaleX(-1); opacity: 1; } }
-html.still .fin-crane svg { animation: none !important; }
-@media (max-width: 640px) { .fin { height: 72vw; } .fin-mark { top: 10%; } }

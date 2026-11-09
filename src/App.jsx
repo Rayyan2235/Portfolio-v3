@@ -11,7 +11,6 @@ import Ambient from './components/Ambient.jsx';
 import Hobbies from './components/Hobbies.jsx';
 import Gallery from './components/Gallery.jsx';
 import Secrets from './components/Secrets.jsx';
-import Finale from './components/Finale.jsx';
 import { Preloader, InkCursor, SmoothScroll, ToolWave } from './components/Flourish.jsx';
 import { KamonTop } from './components/Charms.jsx';
 import { NameRoll } from './components/Flow.jsx';
@@ -46,7 +45,6 @@ function Page() {
         <Contact toast={toast} />
       </main>
       <NameRoll />
-      <Finale />
       <Footer />
       <KamonTop />
       <SectionCounter />

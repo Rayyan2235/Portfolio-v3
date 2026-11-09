@@ -10,6 +10,7 @@ import { Koi, InkWords } from './Immerse.jsx';
 import { Storm, Birds as SkyFlock } from './MountainSky.jsx';
 import { usePrefs } from '../prefs.jsx';
 import { resolveSky } from '../sky.js';
+import { InkLand, SkyCrane } from './InkLand.jsx';
 import { featured, scraps, experience, EMAIL, GITHUB, LINKEDIN, RESUME } from '../data.js';
 
 const head = { initial: { opacity: 0, y: 16 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-80px' }, transition: { duration: 0.6, ease: [0.2, 0.8, 0.2, 1] } };
@@ -288,13 +289,14 @@ export function Contact({ toast }) {
         <div className="mail"><Orbit text="Class of 2027 · Open to internships and new grad roles · "><code>{EMAIL}</code></Orbit><button className="btn solid" type="button" onClick={copy} data-magnet>Copy email</button></div>
         <div className="btns center"><a className="btn" href={GITHUB} data-magnet>GitHub</a><a className="btn" href={LINKEDIN} data-magnet>LinkedIn</a><a className="btn" href={RESUME} data-magnet>Resume</a></div>
       </div>
+      <SkyCrane />
       <SeaBand />
     </section>
   );
 }
 
-// The last view, painted like a print: the sky of the moment, the sun (or the moon) rising over Fuji, mist bands
-// drifting across the ridges; stars at night, rain and lightning in a storm, birds by day.
+// The last view, painted like a print: the sky of the moment, the sun (or the moon) rising over an ink landscape,
+// mist bands drifting across the ridges; stars at night, rain and lightning in a storm, birds by day.
 function ContactSky({ mode, motionOn, sound }) {
   return (
     <div className="csky" aria-hidden="true">
@@ -302,12 +304,7 @@ function ContactSky({ mode, motionOn, sound }) {
       {motionOn && mode === 'storm' && <div className="csky-storm"><Storm sound={sound} /></div>}
       {motionOn && (mode === 'dawn' || mode === 'day' || mode === 'dusk') && <SkyFlock crane={mode !== 'day'} />}
       <div className="csky-mist">{[0, 1, 2, 3, 4].map(i => <i key={i} className={`m${i}`} />)}</div>
-      <svg className="csky-land" viewBox="0 0 1600 400" preserveAspectRatio="xMidYMax slice">
-        <path className="far" d="M380 400 C 590 330, 720 210, 772 118 L 828 118 C 880 210, 1010 330, 1220 400 Z" />
-        <path className="snow" d="M772 118 L 828 118 C 842 142, 856 166, 872 190 L 852 180 L 834 200 L 816 178 L 798 198 L 780 176 L 760 192 L 744 186 C 752 166, 762 142, 772 118 Z" />
-        <path className="mid" d="M0 400 L0 300 Q 150 250 300 290 T 600 285 T 900 312 T 1250 272 T 1600 300 L1600 400Z" />
-        <path className="near" d="M0 400 L0 352 Q 200 318 400 344 T 800 338 T 1200 356 T 1600 334 L1600 400Z" />
-      </svg>
+      <InkLand />
     </div>
   );
 }
