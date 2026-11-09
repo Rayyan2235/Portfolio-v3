@@ -9,6 +9,8 @@ import Nav from './components/Nav.jsx';
 import CommandMenu from './components/CommandMenu.jsx';
 import Ambient from './components/Ambient.jsx';
 import Hobbies from './components/Hobbies.jsx';
+import Gallery from './components/Gallery.jsx';
+import Secrets from './components/Secrets.jsx';
 import { Preloader, InkCursor, SmoothScroll, ToolWave } from './components/Flourish.jsx';
 import { KamonTop } from './components/Charms.jsx';
 import { NameRoll } from './components/Flow.jsx';
@@ -38,6 +40,7 @@ function Page() {
         <ToolWave />
         <Work />
         <Hobbies />
+        <Gallery />
         <ZoomPrints />
         <Contact toast={toast} />
       </main>
@@ -46,6 +49,7 @@ function Page() {
       <KamonTop />
       <SectionCounter />
       <CommandMenu open={menu} setOpen={setMenu} toast={toast} />
+      <Secrets toast={toast} />
       <AnimatePresence>
         {msg && <motion.div className="toast" role="status" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>{msg}</motion.div>}
       </AnimatePresence>

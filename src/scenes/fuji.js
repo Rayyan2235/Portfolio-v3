@@ -47,13 +47,33 @@ function day(p) {
 const GLOW = new THREE.Vector3(-0.62, 0, 0.78).normalize();
 
 // --- terrain -----------------------------------------------------------------------------------------------------
+// Catmull-Rom between the 125 m samples, so a finer mesh gets smooth ridgelines rather than facets
+function heightAt(h, x, y) {
+  const cr = (a, b, c, d, t) => b + 0.5 * t * (c - a + t * (2 * a - 5 * b + 4 * c - d + t * (3 * (b - c) + d - a)));
+  const X = Math.floor(x), Y = Math.floor(y), tx = x - X, ty = y - Y;
+  const at = (i, j) => h[Math.min(GRID - 1, Math.max(0, Y + j)) * GRID + Math.min(GRID - 1, Math.max(0, X + i))];
+  const row = j => cr(at(-1, j), at(0, j), at(1, j), at(2, j), tx);
+  return cr(row(-1), row(0), row(1), row(2), ty);
+}
+
+// the glow every lit edge carries in anime landscapes: a rim of sky colour where a surface turns away from us
+const RIM = { value: new THREE.Color() };
+const rimLight = (s, strength) => {
+  s.uniforms.uRim = RIM;
+  s.fragmentShader = s.fragmentShader
+    .replace('#include <common>', '#include <common>\nuniform vec3 uRim;')
+    .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+      float facing = clamp(dot(normal, normalize(vViewPosition)), 0.0, 1.0);
+      totalEmissiveRadiance += uRim * pow(1.0 - facing, 3.0) * ${strength};`);
+};
+
 async function terrain(phone) {
   const h = new Uint16Array(await (await fetch('/terrain/fuji-288.u16')).arrayBuffer());
-  // phones take every other sample: a quarter of the triangles, still the same mountain
-  const step = phone ? 2 : 1, n = Math.floor((GRID - 1) / step) + 1;
+  // laptops get the data at one and a half times its density, smoothly interpolated; phones take every other sample
+  const scale = phone ? 0.5 : 1.5, n = Math.round((GRID - 1) * scale) + 1;
   const geo = new THREE.PlaneGeometry(SIZE, SIZE, n - 1, n - 1).rotateX(-Math.PI / 2); // row 0 of the data is north, at -z
   const pos = geo.attributes.position;
-  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) pos.setY(r * n + c, h[(r * step) * GRID + c * step] / 1000 * 1.08);
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) pos.setY(r * n + c, heightAt(h, c / scale, r / scale) / 1000 * 1.08);
   geo.computeVertexNormals();
   const bytes = new Uint8Array(GRID * GRID);
   for (let i = 0; i < bytes.length; i++) bytes[i] = Math.min(255, Math.round(h[i] / 1000 * 1.08 / TOP * 255));
@@ -87,6 +107,7 @@ async function terrain(phone) {
         vec3 col = mix(rock, forest, trees * (1.0 - slope * 0.7));
         diffuseColor.rgb = mix(col, vec3(0.86, 0.88, 0.95), snowAmt);
       `);
+    rimLight(s, '(0.35 + snowAmt * 0.65)');
   };
   return { mesh: new THREE.Mesh(geo, mat), heights, raw: h };
 }
@@ -101,6 +122,13 @@ function vnJ(x, y) {
   return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
 }
 const fbmJ = (x, y) => vnJ(x, y) * 0.55 + vnJ(x * 2.1 + 7, y * 2.1) * 0.28 + vnJ(x * 4.4, y * 4.4 + 3) * 0.17;
+
+// lit tops glow along their edges like painted cloud
+function cloudMat() {
+  const m = new THREE.MeshLambertMaterial({ color: '#efe8f2', emissive: '#ffffff', emissiveIntensity: 0.04 });
+  m.onBeforeCompile = s => rimLight(s, '0.8');
+  return m;
+}
 
 // a bed of rounded billows, built once, sunk below the ground where the mountain rises through it
 function cloudBed(phone, h) {
@@ -117,7 +145,7 @@ function cloudBed(phone, h) {
     pos.setY(i, 1.42 + billow * (1 - ss(edge, 0.6, 1)) - ss(edge, 0.75, 1) * 0.3 - Math.max(0, ground - 1.5) * 0.6);
   }
   geo.computeVertexNormals();
-  const mesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: '#efe8f2', emissive: '#ffffff', emissiveIntensity: 0.04 }));
+  const mesh = new THREE.Mesh(geo, cloudMat());
   mesh.position.z = -6;
   return mesh;
 }
@@ -169,9 +197,11 @@ const dirOf = (u, v, out = new THREE.Vector3()) => {
 // the Milky Way's spine across the painted region, rising toward the west
 const band = t => [lerp(0.6, 0.93, t), 0.5 + t * 0.15 + Math.sin(t * 3.1) * 0.025];
 
-// the Milky Way painted once: soft violet, cyan and rose glow, dark dust lanes, a haze of faint stars
+// The Milky Way painted once, the way anime night skies paint it: a broad violet glow, saturated knots of cyan,
+// magenta and gold along the core, a granular dust of tens of thousands of faint stars, and thin dark lanes
+// threaded through it. Painted at roughly screen resolution for the part of the sky the camera sees.
 function milkyWay(phone) {
-  const W = phone ? 1024 : 2048, H = W / 2, cv = document.createElement('canvas');
+  const W = phone ? 1536 : 3072, H = Math.round(W / 2.45), cv = document.createElement('canvas');
   cv.width = W; cv.height = H;
   const g = cv.getContext('2d');
   const at = (u, v) => [(u - U0) / (U1 - U0) * W, (1 - (v - V0) / (V1 - V0)) * H];
@@ -180,29 +210,33 @@ function milkyWay(phone) {
     gr.addColorStop(0, color.replace('A', a)); gr.addColorStop(1, color.replace('A', 0));
     g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2);
   };
+  const near = (spread) => { const t = Math.random(), [u, v] = band(t); return at(u + (Math.random() - 0.5) * spread * 0.4, v + (Math.random() - 0.5) * spread); };
   // start from opaque black and add light: transparent canvas pixels would come back with garbage colour
   g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
   g.globalCompositeOperation = 'lighter';
-  const tints = ['rgba(150,120,255,A)', 'rgba(110,190,255,A)', 'rgba(255,140,210,A)', 'rgba(255,230,240,A)'];
-  for (let i = 0; i < 420; i++) {
-    const t = Math.random(), [u, v] = band(t), [x, y] = at(u, v);
-    const off = (Math.random() - 0.5) * H * 0.16, r = (0.03 + Math.random() * 0.09) * H;
-    blob(x + off * 0.4, y + off, r, tints[i % 4], 0.05 + Math.random() * 0.07);
+  // the broad glow
+  for (let i = 0; i < 260; i++) { const [x, y] = near(0.12); blob(x, y, (0.06 + Math.random() * 0.12) * H, i % 2 ? 'rgba(120,100,255,A)' : 'rgba(90,150,255,A)', 0.03 + Math.random() * 0.04); }
+  // bright knots along the core, in the saturated hues of a painted sky
+  const knots = ['rgba(120,230,255,A)', 'rgba(255,110,210,A)', 'rgba(190,140,255,A)', 'rgba(255,214,150,A)'];
+  for (let i = 0; i < 900; i++) { const [x, y] = near(0.05); blob(x, y, (0.01 + Math.random() * 0.045) * H, knots[i % 4], 0.04 + Math.random() * 0.08); }
+  // star dust: fractional one pixel squares come out as soft points
+  const dust = phone ? 18000 : 46000;
+  for (let i = 0; i < dust; i++) {
+    const [x, y] = Math.random() < 0.7 ? near(0.07) : [Math.random() * W, Math.random() * H];
+    g.fillStyle = `rgba(${200 + (i % 55)},${210 + (i % 45)},255,${0.12 + Math.random() * 0.5})`;
+    const s = 0.6 + Math.random() * 0.9; g.fillRect(x, y, s, s);
   }
-  for (let i = 0; i < (phone ? 3000 : 9000); i++) {
-    const near = Math.random() < 0.6, t = Math.random(), [bu, bv] = band(t);
-    const u = near ? bu + (Math.random() - 0.5) * 0.06 : U0 + Math.random() * (U1 - U0);
-    const v = near ? bv + (Math.random() - 0.5) * 0.08 : V0 + Math.random() * (V1 - V0);
-    const [x, y] = at(u, v);
-    blob(x, y, 1.5 + Math.random() * 1.5, 'rgba(255,255,255,A)', 0.2 + Math.random() * 0.4);
-  }
-  // dust lanes cut through the glow
+  // dark lanes: thin soft filaments along the core
   g.globalCompositeOperation = 'source-over';
-  for (let i = 0; i < 160; i++) {
-    const t = Math.random(), [u, v] = band(t), [x, y] = at(u, v);
-    blob(x + (Math.random() - 0.5) * H * 0.02, y + (Math.random() - 0.3) * H * 0.03, (0.008 + Math.random() * 0.018) * H, 'rgba(0,0,0,A)', 0.2);
+  g.filter = `blur(${phone ? 2 : 4}px)`; g.lineCap = 'round';
+  for (let i = 0; i < 26; i++) {
+    const t = Math.random() * 0.85, [a, b] = at(...band(t)), [c, d] = at(...band(t + 0.06 + Math.random() * 0.1));
+    const off = (Math.random() - 0.5) * H * 0.05;
+    g.strokeStyle = `rgba(0,0,0,${0.18 + Math.random() * 0.2})`; g.lineWidth = (0.002 + Math.random() * 0.006) * H;
+    g.beginPath(); g.moveTo(a, b + off); g.quadraticCurveTo((a + c) / 2, (b + d) / 2 + off + (Math.random() - 0.5) * H * 0.04, c, d + off); g.stroke();
   }
-  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+  g.filter = 'none';
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
   return tex;
 }
 
@@ -232,16 +266,18 @@ function skyDome(phone) {
           c += texture2D(uMilky, box).rgb * uStars * smoothstep(0.02, 0.18, h);
         gl_FragColor = vec4(c, 1.0);
         #include <colorspace_fragment>
+        // a whisper of noise so the long gradients never band into stripes
+        gl_FragColor.rgb += (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) / 255.0;
       }`
   });
-  const mesh = new THREE.Mesh(new THREE.SphereGeometry(1000, 32, 16), mat);
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(1000, 48, 24), mat);
   mesh.renderOrder = -1;
   return mesh;
 }
 
 // crisp stars as points: most scattered across the visible sky, many crowded along the Milky Way, each twinkling
 function starField(phone) {
-  const count = phone ? 1100 : 2600, R = 900;
+  const count = phone ? 1800 : 4200, R = 900;
   const pos = new Float32Array(count * 3), size = new Float32Array(count), phase = new Float32Array(count), tint = new Float32Array(count * 3);
   const v3 = new THREE.Vector3(), c = new THREE.Color();
   const tints = ['#ffffff', '#cfe0ff', '#ffe9d6', '#d8d0ff'];
@@ -251,7 +287,8 @@ function starField(phone) {
     else { u = lerp(0.56, 0.96, Math.random()); v = lerp(0.47, 0.78, Math.pow(Math.random(), 1.3)); }
     dirOf(u, v, v3).multiplyScalar(R); pos.set([v3.x, v3.y, v3.z], i * 3);
     const bright = Math.random();
-    size[i] = bright > 0.985 ? 4.5 + Math.random() * 2 : bright > 0.9 ? 2.6 + Math.random() : 1.2 + Math.random() * 1.1;
+    // mostly pinpricks, some clear stars, and a rare few big enough to throw a glint
+    size[i] = bright > 0.988 ? 16 + Math.random() * 8 : bright > 0.9 ? 2.4 + Math.random() * 1.2 : 0.9 + Math.random() * 0.9;
     phase[i] = Math.random() * 100;
     c.set(tints[i % 4]); tint.set([c.r, c.g, c.b], i * 3);
   }
@@ -264,21 +301,23 @@ function starField(phone) {
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false,
     uniforms: { uTime: { value: 0 }, uVis: { value: 0 }, uPR: { value: 1 } },
     vertexShader: /* glsl */`
-      attribute float size, phase; attribute vec3 tint; uniform float uTime, uVis, uPR; varying vec3 vC; varying float vA;
+      attribute float size, phase; attribute vec3 tint; uniform float uTime, uVis, uPR; varying vec3 vC; varying float vA, vBig;
       void main() {
-        float tw = 0.65 + 0.35 * sin(uTime * (1.3 + fract(phase) * 2.4) + phase);
+        float tw = 0.7 + 0.3 * sin(uTime * (1.3 + fract(phase) * 2.4) + phase);
         float low = smoothstep(0.0, 0.14, normalize(position).y);
+        vBig = step(10.0, size);
         vA = uVis * low * tw; vC = tint;
-        gl_PointSize = size * uPR * (0.85 + 0.25 * tw);
+        gl_PointSize = max(1.0, size * uPR * (0.9 + 0.15 * tw));
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }`,
     fragmentShader: /* glsl */`
-      varying vec3 vC; varying float vA;
+      varying vec3 vC; varying float vA, vBig;
       void main() {
-        vec2 q = gl_PointCoord - 0.5; float r = length(q);
-        float a = smoothstep(0.5, 0.0, r); a *= a;
-        // a faint cross of light on the brightest
-        a += max(0.0, 1.0 - abs(q.x) * 18.0) * max(0.0, 1.0 - abs(q.y) * 2.2) * 0.25 + max(0.0, 1.0 - abs(q.y) * 18.0) * max(0.0, 1.0 - abs(q.x) * 2.2) * 0.25;
+        vec2 q = gl_PointCoord - 0.5; float r2 = dot(q, q);
+        // small stars: a sharp round point; big ones: a tiny hot core, a soft halo and four thin spikes of light
+        float a = mix(exp(-r2 * 14.0), exp(-r2 * 420.0) * 1.6 + exp(-r2 * 40.0) * 0.25, vBig);
+        float spikes = pow(max(0.0, 1.0 - abs(q.x) * 40.0), 2.0) * (1.0 - abs(q.y) * 2.0) + pow(max(0.0, 1.0 - abs(q.y) * 40.0), 2.0) * (1.0 - abs(q.x) * 2.0);
+        a += spikes * 0.7 * vBig;
         gl_FragColor = vec4(vC * a * vA, 1.0);
         #include <colorspace_fragment>
       }`
@@ -361,8 +400,9 @@ export async function createFuji(canvas, { phone, moving, progress, still = 0.12
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: !phone, powerPreference: 'high-performance' });
   // colour is authored directly: no tone curve to wash out the twilight hues
   renderer.toneMapping = THREE.NoToneMapping;
-  const maxPR = Math.min(devicePixelRatio || 1, phone ? 1.25 : 1.5);
-  let pr = Math.min(maxPR, 1);
+  // full screen sharpness to start with (up to 2x on laptops, 1.5x on phones); adapt() steps down only if frames run slow
+  const maxPR = Math.min(devicePixelRatio || 1, phone ? 1.5 : 2);
+  let pr = phone ? Math.min(maxPR, 1.25) : maxPR;
   renderer.setPixelRatio(pr);
 
   const scene = new THREE.Scene();
@@ -448,6 +488,7 @@ export async function createFuji(canvas, { phone, moving, progress, still = 0.12
     stars.material.uniforms.uTime.value = t; stars.material.uniforms.uVis.value = D.stars; stars.material.uniforms.uPR.value = pr;
     hemi.color.copy(D.hemiSky); hemi.groundColor.copy(D.hemiGround); hemi.intensity = D.hemiI;
     glowLight.color.copy(D.glow); glowLight.intensity = D.glowI;
+    RIM.value.copy(D.lit).multiplyScalar(0.55);
     scene.fog.color.copy(D.haze);
     bed.position.x = moving ? -t * 0.012 : 0;
     for (const m of sheetMats) { const u = m.uniforms; u.uTime.value = moving ? t : 0; u.uLit.value.copy(D.lit); u.uShade.value.copy(D.shade); u.uHaze.value.copy(D.haze); }
@@ -482,13 +523,25 @@ export async function createFuji(canvas, { phone, moving, progress, still = 0.12
   };
   size();
   // compile every shader now, while the story is still loading, not on the first frame the visitor sees
+  // (hidden meteors would otherwise compile on the frame the first one appears, a visible stall)
+  meteorList.forEach(m => { m.m.visible = true; });
   renderer.compile(scene, camera);
+  meteorList.forEach(m => { m.m.visible = false; });
 
   const ro = moving ? null : new ResizeObserver(() => { size(); frame(performance.now()); });
   const stop = moving ? loopWhileVisible(canvas, frame, { fps: phone ? 30 : 60, onResize: size }) : (ro.observe(canvas), () => ro.disconnect());
   if (!moving) frame(performance.now());
   return {
     pointer: (x, y) => { tilt.tx = x; tilt.ty = y; },
+    // a shooting star aimed at a point on screen (normalised -1..1), for the make a wish easter egg
+    wish(x, y) {
+      const m = meteorList.find(n => n.life < 0) || meteorList[0];
+      ray.set(x, y, 0.5).unproject(camera).sub(camera.position).normalize();
+      tmp.copy(ray).applyAxisAngle(camera.up, 0.09).add(side.set(0, 0.07, 0)).normalize();
+      m.start.copy(tmp).multiplyScalar(800);
+      m.dir.copy(ray).multiplyScalar(800).sub(m.start).normalize();
+      m.len = 110; m.dur = 0.9; m.life = (performance.now() - t0) / 1000;
+    },
     dispose() {
       stop();
       scene.traverse(o => {

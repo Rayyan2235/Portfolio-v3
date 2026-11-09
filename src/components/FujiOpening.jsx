@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useScroll } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
+import { secret } from './Secrets.jsx';
 
 // The first page of the story: Mount Fuji from real elevation data, rising out of a sea of clouds under a twilight
 // sky that turns to night as you scroll (the scene lives in scenes/fuji.js). Skip jumps straight to the portfolio.
@@ -22,16 +23,24 @@ export default function FujiOpening({ onSkip }) {
     return () => { dead = true; removeEventListener('pointermove', move); api.current?.dispose(); api.current = null; };
   }, [motionOn, p]);
 
+  // tap the sky and a shooting star falls toward the spot: make a wish
+  const wish = e => {
+    if (!motionOn || !api.current || e.target.closest('button, a')) return;
+    const r = cv.current.getBoundingClientRect();
+    api.current.wish((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height * 2 - 1));
+    secret('wish');
+  };
+
   // the cue fades through --day in CSS: scroll linked opacity set straight from a motion value does not apply here
   return (
     <section ref={ref} className={`fj fj-${state}${motionOn ? '' : ' fj-still'}`} aria-labelledby="fj-name">
-      <motion.div className="fj-stage" style={motionOn ? { '--day': p } : undefined}>
+      <motion.div className="fj-stage" style={motionOn ? { '--day': p } : undefined} onPointerDown={wish}>
         <img className="fj-print" src="/art/story/red-fuji-clear.jpg" alt="" aria-hidden="true" />
         <canvas ref={cv} className="fj-canvas" aria-hidden="true" />
         <span className="fj-film" aria-hidden="true" />
         <h1 className="fj-name" id="fj-name">Rayyan Syed</h1>
         <p className="fj-kicker">Software engineer</p>
-        <p className="fj-line">Walk quietly. Leave a mark.</p>
+        <p className="fj-line">I walk toward the mountain and leave the path wider than I found it.</p>
         <div className="fj-cue">
           {motionOn && <span className="fj-hint" aria-hidden="true"><i />Scroll into the night</span>}
           <button type="button" className="fj-skip" onClick={onSkip}>Skip to portfolio</button>

@@ -34,6 +34,8 @@ Most portfolios list skills. This one tries to feel like somewhere. It is built 
 | **The paper** | A crane glides across the page as you scroll. | `Sections.jsx` |
 | **Work** | An ink painted mountain valley that follows the sky (rain and lightning in a storm, birds by day), with every project in one sideways rail of tilting cards. Each opens a spec sheet. | `Sections.jsx`, `MountainSky.jsx` |
 | **Shortcuts** | `Ctrl K` opens a command menu: jump anywhere, copy my email, change the sky, pick a transition. | `CommandMenu.jsx` |
+| **Snapshots** | Photos from life off the screen as instant prints pegged to a line. Drop images into `src/assets/gallery/` and they appear, captioned from the file name (a number prefix sets the order). | `Gallery.jsx` |
+| **Secrets** | Five hidden things, counted across visits: tap the football, type "siu" anywhere, the Konami code (a meteor shower), tap the night sky in the opening (a wish), and leave the tab and come back. Ctrl K shows how many are found. | `Secrets.jsx` |
 
 Everything respects a **Motion** switch in the nav, works at phone width, and keeps Resume and Email one click away.
 

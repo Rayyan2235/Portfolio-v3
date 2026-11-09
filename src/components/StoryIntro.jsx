@@ -7,12 +7,11 @@ import FujiOpening from './FujiOpening.jsx';
 
 const SKY_LANTERNS = [...new Set(featured.flatMap(f => f.stack))].slice(0, 9);
 
-// Story intro: one pinned stage, four scenes cut together like a film. The sky runs one long day
-// (dawn, bright sea, dusk, lantern night, sunrise through the torii) and the text flips light or dark with it.
+// Story intro: the Fuji opening, then one pinned stage of three scenes cut together like a film. The sky runs on
+// from the opening's night: bright sea, lantern night, snow at the temple gate, and the text flips light or dark with it.
 // SVG + CSS + canvas + motion only. Lines are placeholders until Rayyan writes them (ADR 0014).
 // Research: vault reference/story-components.
 export const BEATS = [
-  { id: 'hello', label: 'Hello', line: 'I am Rayyan. I walk toward the mountain and leave the path wider than I found it.' },
   { id: 'from', label: 'Where from', line: 'From the sands of Dubai to the snows of State College, I crossed the water.' },
   { id: 'build', label: 'What I build', line: 'Lanterns for dark roads, bridges over fast water, a light left on for whoever comes next.' },
   { id: 'enter', label: 'Come in', line: 'The lanterns are lit. Step inside.' }
@@ -75,16 +74,6 @@ function InkDefs() {
 }
 
 
-function Birds() {
-  return (
-    <div className="st-birds" aria-hidden="true">
-      {[0, 1, 2].map(i => (
-        <svg key={i} className={`b${i}`} viewBox="0 0 24 10"><path d="M1 6 Q6 0 12 6 Q18 0 23 6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
-      ))}
-    </div>
-  );
-}
-
 // A chapter's painting: a public domain print (public/art/story) filling the whole stage, with a slow camera move
 // driven by the chapter's progress, a color grade for where the day is, and a dark shade at the foot for the line.
 function Painting({ q, src, origin = '50% 50%', pos = '50% 50%', zoom = [1.04, 1.18], pan, grade = '', wide = false, dims, overlay, children }) {
@@ -123,40 +112,6 @@ function useCover(ref, dims, pos) {
   return { W: box.W, H: box.H, s, at: (x, y) => [ox + x * s, oy + y * s] };
 }
 
-// An ink line drawn as the chapter plays, with a small lantern walking at its head.
-function Trail({ q, d, range, className, children }) {
-  const ink = useRef(null), head = useRef(null);
-  const len = useTransform(q, range, [0, 1]);
-  const place = v => {
-    const el = ink.current;
-    if (!el || !head.current) return;
-    const p = el.getPointAtLength(v * el.getTotalLength());
-    head.current.setAttribute('transform', `translate(${p.x} ${p.y})`);
-    head.current.style.opacity = v > 0.002 && v < 0.999 ? 1 : 0;
-  };
-  useMotionValueEvent(len, 'change', place);
-  useEffect(() => place(len.get()), [d]); // eslint-disable-line react-hooks/exhaustive-deps
-  return (
-    <g className={className}>
-      <path d={d} className="tr-guide" />
-      <motion.path ref={ink} d={d} className="tr-ink" style={{ pathLength: len }} />
-      <g ref={head} className="tr-head"><circle r="11" className="glow" /><circle r="4.5" /></g>
-      {children}
-    </g>
-  );
-}
-const pathOf = (cover, pts) => pts.map(([x, y], i) => {
-  const [a, b] = cover.at(x, y);
-  return `${i ? 'L' : 'M'}${a.toFixed(1)} ${b.toFixed(1)}`;
-}).join(' ');
-
-// Mount Fuji is 3,776 m. The counter climbs with the trail.
-function Altitude({ q }) {
-  const m = useTransform(q, [0.1, 0.78], [0, 3776], { clamp: true });
-  const text = useTransform(m, v => `${Math.round(v).toLocaleString('en-US')} m`);
-  return <div className="st-alt" aria-hidden="true"><span>Altitude</span><motion.b>{text}</motion.b></div>;
-}
-
 // Footprints in the snow, one by one, from the viewer to the temple gate.
 function Prints({ q, cover }) {
   const steps = 14;
@@ -186,27 +141,7 @@ function SkyLantern({ q, i, name }) {
 }
 
 const Scenes = {
-  // 01 dawn: Hokusai's Red Fuji. The camera drifts up toward the summit while mist crosses and birds pass.
-  hello: function Hello({ q }) {
-    return (
-      <Painting q={q} src="/art/story/red-fuji-clear.jpg" pos="70% 50%" origin="70% 25%" zoom={[1.02, 1.2]} grade="g-dawn" dims={[1690, 1340]}
-        overlay={cover => {
-          const d = pathOf(cover, [[860, 1240], [1110, 1080], [945, 930], [1180, 780], [1060, 640], [1210, 500], [1130, 380], [1205, 300], [1188, 245]]); // coordinates in the cropped print (290 px in from the original)
-          const [sx, sy] = cover.at(1478, 230);
-          return (
-            <Trail q={q} d={d} range={[0.1, 0.78]} className="st-trail">
-              <Summit q={q} x={sx} y={sy} />
-            </Trail>
-          );
-        }}>
-        <span className="st-mist m1" /><span className="st-mist m2" /><span className="st-mist m3" />
-        <Birds />
-        <Altitude q={q} />
-      </Painting>
-    );
-  },
-
-  // 02 the voyage: Hiroshige's Whirlpools of Awa, a triptych wide enough for the camera to sail across it, with
+  // 01 the voyage: Hiroshige's Whirlpools of Awa, a triptych wide enough for the camera to sail across it, with
   // the route from Dubai to State College inked over it and a small boat sailing the line as it draws.
   from: function Voyage({ q }) {
     const route = useRef(null);
@@ -244,7 +179,7 @@ const Scenes = {
     );
   },
 
-  // 03 night: Hiroshige's Fireworks at Ryogoku. New bursts open over the river while the projects hang in the dark.
+  // 02 night: Hiroshige's Fireworks at Ryogoku. New bursts open over the river while the projects hang in the dark.
   build: function Night({ q }) {
     return (
       <>
@@ -260,7 +195,7 @@ const Scenes = {
     );
   },
 
-  // 04 come in: Hiroshige's Kinryuzan Temple at Asakusa, cropped to the snowy court and the red gate. Footprints
+  // 03 come in: Hiroshige's Kinryuzan Temple at Asakusa, cropped to the snowy court and the red gate. Footprints
   // walk to the gate, the lanterns over it light one by one and the camera follows the steps in until the flash.
   enter: function Gate({ q }) {
     const glow = useTransform(q, [0.3, 0.85], [0, 1]);
@@ -282,16 +217,6 @@ const Scenes = {
     );
   }
 };
-
-function Summit({ q, x, y }) {
-  const s = useTransform(q, [0.74, 0.84], [0, 1]);
-  return (
-    <motion.g className="st-summit" style={{ opacity: s }}>
-      <circle cx={x} cy={y} r="22" className="ring" />
-      <motion.circle cx={x} cy={y} r="22" className="ring2" style={{ pathLength: s }} />
-    </motion.g>
-  );
-}
 
 function GateLantern({ q, i }) {
   const on = useTransform(q, [0.2 + i * 0.09, 0.27 + i * 0.09], [0, 1]);

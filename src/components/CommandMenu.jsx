@@ -4,6 +4,7 @@ import { usePrefs } from '../prefs.jsx';
 import { useTransition, KINDS } from './Transitions.jsx';
 import { SKIES } from '../sky.js';
 import { EMAIL, GITHUB, LINKEDIN } from '../data.js';
+import { SECRETS, secretsFound } from './Secrets.jsx';
 
 export default function CommandMenu({ open, setOpen, toast }) {
   const { setSky, setTransition, motionOn, setMotionOn } = usePrefs();
@@ -22,8 +23,9 @@ export default function CommandMenu({ open, setOpen, toast }) {
     ['Open LinkedIn', 'linkedin.com/in/rayyan-syed-5a846725a', () => { location.href = LINKEDIN; }],
     ...['auto', 'dawn', 'day', 'dusk', 'night', 'storm'].map(k => [`Sky: ${k === 'auto' ? 'your time' : SKIES[k].label}`, 'Scene', () => { setSky(k); go('top', undefined, k === 'storm' ? 'storm' : undefined); }]),
     ...['mixed', ...Object.keys(KINDS)].map(k => [`Transition: ${k === 'mixed' ? 'Mixed' : KINDS[k].label}`, 'Preference', () => { setTransition(k); toast('Transition set'); }]),
-    [motionOn ? 'Turn motion off' : 'Turn motion on', 'Preference', () => setMotionOn(!motionOn)]
-  ], [go, setSky, setTransition, motionOn, setMotionOn, toast]);
+    [motionOn ? 'Turn motion off' : 'Turn motion on', 'Preference', () => setMotionOn(!motionOn)],
+    ['Secrets', `${secretsFound()} of ${Object.keys(SECRETS).length} found`, () => toast('Try typing siu, the Konami code, or tapping the night sky')]
+  ], [go, setSky, setTransition, motionOn, setMotionOn, toast, open]); // open: recount secrets each time the menu opens
 
   const shown = cmds.filter(c => (c[0] + ' ' + c[1]).toLowerCase().includes(q.toLowerCase()));
 
