@@ -2,7 +2,8 @@
 // second, and stops asking for frames at all once the element scrolls away. `frame(now, dt)` gets dt in seconds,
 // capped so a tab coming back from the background never jumps. Returns the cleanup for a useEffect.
 export function loopWhileVisible(el, frame, { fps = 30, onResize } = {}) {
-  const gap = 1000 / fps - 2;
+  // a little under the frame budget, so a 120 or 144 Hz screen draws every second refresh instead of every third
+  const gap = 1000 / fps * 0.8;
   let raf = 0, vis = false, last = 0;
   const tick = now => {
     raf = 0;

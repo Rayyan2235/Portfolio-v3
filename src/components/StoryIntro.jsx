@@ -191,7 +191,7 @@ const Scenes = {
     return (
       <Painting q={q} src="/art/story/red-fuji-clear.jpg" pos="70% 50%" origin="70% 25%" zoom={[1.02, 1.2]} grade="g-dawn" dims={[1690, 1340]}
         overlay={cover => {
-          const d = pathOf(cover, [[1150, 1240], [1400, 1080], [1235, 930], [1470, 780], [1350, 640], [1500, 500], [1420, 380], [1495, 300], [1478, 245]]);
+          const d = pathOf(cover, [[860, 1240], [1110, 1080], [945, 930], [1180, 780], [1060, 640], [1210, 500], [1130, 380], [1205, 300], [1188, 245]]); // coordinates in the cropped print (290 px in from the original)
           const [sx, sy] = cover.at(1478, 230);
           return (
             <Trail q={q} d={d} range={[0.1, 0.78]} className="st-trail">
@@ -375,9 +375,9 @@ function Petals({ strength, wind, live }) {
   return <canvas ref={ref} className="st-petals" aria-hidden="true" />;
 }
 
-// Where the portfolio starts: the hero, right after the story.
+// Where the portfolio starts: the hanging scroll before the hero, so it still opens (or the hero if motion is off).
 function portfolioTop() {
-  const el = document.getElementById('top');
+  const el = document.querySelector('.sx') || document.getElementById('top');
   return el ? el.getBoundingClientRect().top + scrollY : 0;
 }
 

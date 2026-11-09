@@ -1,16 +1,21 @@
 import * as THREE from 'three';
-import { Sky } from 'three/examples/jsm/objects/Sky.js';
 import { loopWhileVisible } from '../loop.js';
 
-// Mount Fuji at sunrise above a sea of clouds. The mountain is real elevation data (public/terrain/fuji-288.u16:
-// 288 x 288 heights in metres, 125 m apart, from the Mapzen Terrarium tiles on AWS Open Data). The look follows
-// what makes igloo.inc read as real (taken apart with rea): physically based light, haze that thickens with
-// distance, and grain over the top, rather than glossy toy materials. Scroll raises the sun from the blue hour
-// through the red glow on the slopes (aka fuji) into morning. Units are kilometres. Only draws while on screen.
+// Mount Fuji under a magic hour sky, the first page of the story. The mountain is real elevation data
+// (public/terrain/fuji-288.u16: 288 x 288 heights in metres, 125 m apart, from the Mapzen Terrarium tiles on AWS
+// Open Data), rising out of a sea of cloud. The sky follows the look of anime twilight skies: a vivid band of
+// gold, coral and magenta under deep indigo, a dense field of stars, a bright Milky Way, shooting stars and a
+// twin tailed comet. Scroll carries it from that twilight into full night and tilts the view up into the stars.
+//
+// Built to run on phones: no shadows and no environment maps; the Milky Way is painted once into a texture;
+// stars are points that twinkle in the vertex shader; meteors are three pooled quads; and the render resolution
+// steps down when frames run slow and back up when they recover. Units are kilometres.
 
 const GRID = 288, SPACING = 0.1247, SIZE = (GRID - 1) * SPACING, TOP = 4.2;
+const lerp = (a, b, t) => a + (b - a) * t;
+const ss = THREE.MathUtils.smoothstep;
 
-// value noise and fbm shared by the terrain and cloud shaders
+// value noise and fbm shared by the shaders
 const NOISE = /* glsl */`
   float h21(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
   float vn(vec2 p) {
@@ -20,31 +25,53 @@ const NOISE = /* glsl */`
   float fbm(vec2 p) { float a = 0.5, s = 0.0; for (int i = 0; i < OCTAVES; i++) { s += a * vn(p); p = p * 2.03 + 17.1; a *= 0.5; } return s; }
 `;
 
+// --- the day: three keys, magic hour, violet dusk, night ---------------------------------------------------------
+// sky stops run from the horizon up: horizon, low, mid, upper, zenith
+const KEYS = [
+  { sky: ['#ffc27a', '#ff7486', '#b8458f', '#4b2f8f', '#1b1f63'], hemiSky: '#ffb0b8', hemiGround: '#2a2462', hemiI: 1.25, glow: '#ff9a72', glowI: 0.9, haze: '#e7809a', lit: '#ffc6c0', shade: '#5b4590', stars: 0.35, comet: 0.25 },
+  { sky: ['#f39389', '#c65c9e', '#6c3c9c', '#2c2a7a', '#0d1245'], hemiSky: '#b08ad0', hemiGround: '#1c1a4e', hemiI: 0.95, glow: '#ff8a8a', glowI: 0.45, haze: '#8a5aa6', lit: '#d9a8d6', shade: '#3a2f74', stars: 0.75, comet: 0.75 },
+  { sky: ['#4f3f8f', '#34307a', '#1c2366', '#0b1240', '#03061a'], hemiSky: '#6f78c8', hemiGround: '#0b0d2a', hemiI: 0.7, glow: '#8ea2ff', glowI: 0.3, haze: '#2b2b6a', lit: '#8f97d6', shade: '#1c1f4e', stars: 1, comet: 1 }
+];
+const ca = new THREE.Color(), cb = new THREE.Color();
+function day(p) {
+  const s = Math.min(1.999, Math.max(0, p) * 2), i = Math.floor(s), t = ss(s - i, 0, 1), A = KEYS[i], B = KEYS[i + 1], out = {};
+  for (const k of Object.keys(A)) {
+    if (typeof A[k] === 'number') out[k] = lerp(A[k], B[k], t);
+    else if (Array.isArray(A[k])) out[k] = A[k].map((c, j) => new THREE.Color(c).lerp(cb.set(B[k][j]), t));
+    else out[k] = ca.set(A[k]).clone().lerp(cb.set(B[k]), t);
+  }
+  return out;
+}
+
+// the afterglow sits low in the west, just off the right edge of the view
+const GLOW = new THREE.Vector3(-0.62, 0, 0.78).normalize();
+
+// --- terrain -----------------------------------------------------------------------------------------------------
 async function terrain(phone) {
-  const buf = await (await fetch('/terrain/fuji-288.u16')).arrayBuffer();
-  const h = new Uint16Array(buf);
+  const h = new Uint16Array(await (await fetch('/terrain/fuji-288.u16')).arrayBuffer());
   // phones take every other sample: a quarter of the triangles, still the same mountain
-  const stepN = phone ? 2 : 1, n = Math.floor((GRID - 1) / stepN) + 1;
-  const geo = new THREE.PlaneGeometry(SIZE, SIZE, n - 1, n - 1);
-  geo.rotateX(-Math.PI / 2); // row 0 of the data is north, which lands at -z
+  const step = phone ? 2 : 1, n = Math.floor((GRID - 1) / step) + 1;
+  const geo = new THREE.PlaneGeometry(SIZE, SIZE, n - 1, n - 1).rotateX(-Math.PI / 2); // row 0 of the data is north, at -z
   const pos = geo.attributes.position;
-  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) pos.setY(r * n + c, h[(r * stepN) * GRID + c * stepN] / 1000 * 1.08);
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) pos.setY(r * n + c, h[(r * step) * GRID + c * step] / 1000 * 1.08);
   geo.computeVertexNormals();
   const bytes = new Uint8Array(GRID * GRID);
   for (let i = 0; i < bytes.length; i++) bytes[i] = Math.min(255, Math.round(h[i] / 1000 * 1.08 / TOP * 255));
   const heights = new THREE.DataTexture(bytes, GRID, GRID, THREE.RedFormat, THREE.UnsignedByteType);
   heights.magFilter = heights.minFilter = THREE.LinearFilter; heights.needsUpdate = true;
 
-  const mat = new THREE.MeshStandardMaterial({ roughness: 0.9, metalness: 0 });
+  // Lambert: per pixel, but far cheaper than the physical material, and twilight has no hard sun to need it
+  const mat = new THREE.MeshLambertMaterial();
   mat.onBeforeCompile = s => {
     s.vertexShader = s.vertexShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vW;\nvarying vec3 vWN;')
       .replace('#include <defaultnormal_vertex>', '#include <defaultnormal_vertex>\nvWN = normalize(mat3(modelMatrix) * objectNormal);')
       .replace('#include <project_vertex>', '#include <project_vertex>\nvW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
     s.fragmentShader = s.fragmentShader
-      .replace('#include <common>', `#include <common>\nvarying vec3 vW;\nvarying vec3 vWN;\n#define OCTAVES ${phone ? 3 : 5}\n${NOISE}\nfloat snowAmt;`)
+      .replace('#include <common>', `#include <common>\nvarying vec3 vW;\nvarying vec3 vWN;\n#define OCTAVES ${phone ? 2 : 3}\n${NOISE}\nfloat snowAmt;`)
       .replace('#include <color_fragment>', /* glsl */`
-        // radial gullies running down from the crater; snow lingers in them below the snowline
+        // radial gullies running down from the crater; snow lingers in them below the snowline,
+        // wind scoured rock ribs break through it, and the crater rim is bare
         float rad = length(vW.xz), ang = atan(vW.z, vW.x);
         float gully = vn(vec2(ang * 40.0, rad * 0.7)) * 0.6 + vn(vec2(ang * 95.0, rad * 1.8)) * 0.4;
         float nz = fbm(vW.xz * 1.6);
@@ -55,26 +82,17 @@ async function terrain(phone) {
         snowAmt *= 1.0 - smoothstep(0.62, 0.86, ribs) * smoothstep(0.15, 0.5, slope) * 0.85;
         snowAmt *= 1.0 - smoothstep(0.55, 0.3, rad) * smoothstep(3.95, 4.05, vW.y) * 0.6;
         float trees = 1.0 - smoothstep(2.2, 2.5, vW.y + (nz - 0.5) * 0.35);
-        vec3 rock = mix(vec3(0.10, 0.055, 0.042), vec3(0.19, 0.095, 0.065), fbm(vW.xz * 7.0));
-        rock = mix(rock, vec3(0.06, 0.05, 0.05), smoothstep(0.35, 0.75, gully) * 0.5);
-        vec3 forest = mix(vec3(0.025, 0.04, 0.022), vec3(0.05, 0.06, 0.03), nz);
+        vec3 rock = mix(vec3(0.07, 0.045, 0.05), vec3(0.13, 0.07, 0.07), fbm(vW.xz * 7.0));
+        vec3 forest = vec3(0.02, 0.03, 0.03);
         vec3 col = mix(rock, forest, trees * (1.0 - slope * 0.7));
-        diffuseColor.rgb = mix(col, vec3(0.82, 0.85, 0.9), snowAmt);
-      `)
-      .replace('#include <roughnessmap_fragment>', 'float roughnessFactor = mix(0.95, 0.55, snowAmt);')
-      .replace('#include <normal_fragment_maps>', /* glsl */`#include <normal_fragment_maps>
-        // fine relief the 125 m grid cannot hold: lava ribs and scree, softened under snow
-        vec2 q = vW.xz * 9.0; float d0 = fbm(q);
-        vec3 dn = vec3(d0 - fbm(q + vec2(0.14, 0.0)), 0.0, d0 - fbm(q + vec2(0.0, 0.14))) * (1.5 - snowAmt);
-        normal = normalize(normal + (viewMatrix * vec4(dn, 0.0)).xyz);
+        diffuseColor.rgb = mix(col, vec3(0.86, 0.88, 0.95), snowAmt);
       `);
   };
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.castShadow = mesh.receiveShadow = true;
-  return { mesh, heights, raw: h };
+  return { mesh: new THREE.Mesh(geo, mat), heights, raw: h };
 }
 
-// value noise on the CPU for the cloud bed, matching the shaders' feel
+// --- clouds ------------------------------------------------------------------------------------------------------
+// value noise on the CPU for the cloud bed
 const hashJ = (x, y) => { const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return s - Math.floor(s); };
 const smJ = v => v * v * (3 - 2 * v);
 function vnJ(x, y) {
@@ -84,65 +102,243 @@ function vnJ(x, y) {
 }
 const fbmJ = (x, y) => vnJ(x, y) * 0.55 + vnJ(x * 2.1 + 7, y * 2.1) * 0.28 + vnJ(x * 4.4, y * 4.4 + 3) * 0.17;
 
+// a bed of rounded billows, built once, sunk below the ground where the mountain rises through it
 function cloudBed(phone, h) {
-  const span = 64, n = phone ? 170 : 300;
+  const span = 64, n = phone ? 140 : 240;
   const geo = new THREE.PlaneGeometry(span, span, n, n).rotateX(-Math.PI / 2);
   const pos = geo.attributes.position;
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i), z = pos.getZ(i);
-    // rounded tops and creased valleys, low and broad like a real sea of cloud seen from above
-    const billow = THREE.MathUtils.smoothstep(fbmJ(x * 0.7, z * 0.7), 0.3, 0.78) * 0.3 + Math.pow(fbmJ(x * 2.2 + 4, z * 2.2), 2) * 0.08;
-    // sink toward the edge of the bed so it slips under the far cloud sheets instead of ending in a line
+    const billow = ss(fbmJ(x * 0.7, z * 0.7), 0.3, 0.78) * 0.3 + Math.pow(fbmJ(x * 2.2 + 4, z * 2.2), 2) * 0.08;
+    // sink toward the edge so the bed slips under the far cloud sheets instead of ending in a line
     const edge = Math.max(Math.abs(x), Math.abs(z)) / (span / 2);
-    // where the mountain stands, the bed sinks below the ground so the slopes rise cleanly out of it
     const c = Math.round((x + SIZE / 2) / SPACING), r = Math.round((z - 6 + SIZE / 2) / SPACING); // the bed sits 6 km north
     const ground = c >= 0 && r >= 0 && c < GRID && r < GRID ? h[r * GRID + c] / 1000 * 1.08 : 0;
-    pos.setY(i, 1.42 + billow * (1 - THREE.MathUtils.smoothstep(edge, 0.6, 1)) - THREE.MathUtils.smoothstep(edge, 0.75, 1) * 0.3 - Math.max(0, ground - 1.5) * 0.6);
+    pos.setY(i, 1.42 + billow * (1 - ss(edge, 0.6, 1)) - ss(edge, 0.75, 1) * 0.3 - Math.max(0, ground - 1.5) * 0.6);
   }
   geo.computeVertexNormals();
-  const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: '#f3eff2', roughness: 1, metalness: 0, emissive: '#ffffff', emissiveIntensity: 0.06 }));
-  mesh.position.z = -6; mesh.receiveShadow = true;
+  const mesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: '#efe8f2', emissive: '#ffffff', emissiveIntensity: 0.04 }));
+  mesh.position.z = -6;
   return mesh;
 }
 
-// A sea of clouds: stacked sheets of the same noise, densest at the bottom so the mountain rises out of something
-// with depth, lit pink from the sun side and fading into the horizon haze
-function cloudSea(phone, heights) {
-  const layers = phone ? 2 : 3, group = new THREE.Group(), mats = [];
+// thin noise sheets over the bed: wisps close up, one continuous sea toward the horizon
+function cloudSheets(phone, heights) {
+  const layers = 1, group = new THREE.Group(), mats = [];
   const geo = new THREE.PlaneGeometry(220, 220, 1, 1).rotateX(-Math.PI / 2);
   for (let i = 0; i < layers; i++) {
     const m = new THREE.ShaderMaterial({
       transparent: true, depthWrite: false,
-      uniforms: { uHeight: { value: heights }, uSize: { value: SIZE }, uTop: { value: TOP }, uTime: { value: 0 }, uSun: { value: new THREE.Vector3() }, uLit: { value: new THREE.Color() }, uShade: { value: new THREE.Color() }, uHaze: { value: new THREE.Color() }, uLayer: { value: i / Math.max(1, layers - 1) } },
+      uniforms: { uHeight: { value: heights }, uSize: { value: SIZE }, uTop: { value: TOP }, uTime: { value: 0 }, uLit: { value: new THREE.Color() }, uShade: { value: new THREE.Color() }, uHaze: { value: new THREE.Color() }, uLayer: { value: i / Math.max(1, layers - 1) } },
       vertexShader: 'varying vec3 vW; void main() { vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }',
       fragmentShader: /* glsl */`
-        #define OCTAVES ${phone ? 4 : 5}
-        uniform float uTime, uLayer, uSize, uTop; uniform sampler2D uHeight; uniform vec3 uSun, uLit, uShade, uHaze; varying vec3 vW;
+        #define OCTAVES 3
+        uniform float uTime, uLayer, uSize, uTop; uniform sampler2D uHeight; uniform vec3 uLit, uShade, uHaze; varying vec3 vW;
         ${NOISE}
         void main() {
           vec2 p = vW.xz * 0.32 + vec2(uTime * 0.02, uTime * 0.008);
-          float n = fbm(p), ns = fbm(p + normalize(uSun.xz + 1e-4) * 0.08);
-          float far = smoothstep(14.0, 34.0, length(vW.xz - cameraPosition.xz));
+          float n = fbm(p), ns = fbm(p + vec2(-0.06, 0.05));
+          float d = length(vW.xz - cameraPosition.xz), far = smoothstep(14.0, 34.0, d);
           float dens = mix(smoothstep(0.5 + uLayer * 0.1, 0.8, n) * (0.55 - uLayer * 0.3), 0.97 - uLayer * 0.3, far);
-          // brighter where the billows rise toward the sun, darker in their lee
-          float lit = clamp(0.5 + (n - ns) * 7.0 + uLayer * 0.25, 0.0, 1.0);
-          vec3 col = mix(uShade, uLit, lit) * (0.8 + 0.4 * n);
+          vec3 col = mix(uShade, uLit, clamp(0.5 + (n - ns) * 7.0 + uLayer * 0.25, 0.0, 1.0)) * (0.8 + 0.4 * n);
           // thin out where the slope comes up through the sheet, instead of a hard waterline
           vec2 uv = (vW.xz + uSize * 0.5) / uSize;
           float ground = all(greaterThan(uv, vec2(0.0))) && all(lessThan(uv, vec2(1.0))) ? texture2D(uHeight, uv).r * uTop : 0.0;
           dens *= smoothstep(-0.02, 0.16, vW.y - ground);
-          float d = length(vW.xz - cameraPosition.xz);
           col = mix(col, uHaze, smoothstep(6.0, 90.0, d));
           gl_FragColor = vec4(col, dens * (1.0 - smoothstep(80.0, 105.0, d)));
-          #include <tonemapping_fragment>
           #include <colorspace_fragment>
         }`
     });
     const mesh = new THREE.Mesh(geo, m);
-    mesh.position.y = 1.6 + i * 0.09; // the lowest sheet lies in the valleys of the bed, softening it mesh.renderOrder = 1 + i;
+    mesh.position.y = 1.6 + i * 0.09; // the lowest sheet lies in the valleys of the bed, softening it
+    mesh.renderOrder = 2 + i;
     group.add(mesh); mats.push(m);
   }
   return { group, mats };
+}
+
+// --- sky ---------------------------------------------------------------------------------------------------------
+// directions on the sky from texture coordinates of the region we paint and scatter stars in:
+// u runs east (0.5) through south (0.75, straight ahead) to west (1.0); v runs from the horizon (0.5) to the zenith (1)
+const U0 = 0.6, U1 = 0.93, V0 = 0.47, V1 = 0.74;
+const dirOf = (u, v, out = new THREE.Vector3()) => {
+  const az = (u - 0.5) * Math.PI * 2, el = (v - 0.5) * Math.PI;
+  return out.set(Math.cos(el) * Math.cos(az), Math.sin(el), Math.cos(el) * Math.sin(az));
+};
+// the Milky Way's spine across the painted region, rising toward the west
+const band = t => [lerp(0.6, 0.93, t), 0.5 + t * 0.15 + Math.sin(t * 3.1) * 0.025];
+
+// the Milky Way painted once: soft violet, cyan and rose glow, dark dust lanes, a haze of faint stars
+function milkyWay(phone) {
+  const W = phone ? 1024 : 2048, H = W / 2, cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const g = cv.getContext('2d');
+  const at = (u, v) => [(u - U0) / (U1 - U0) * W, (1 - (v - V0) / (V1 - V0)) * H];
+  const blob = (x, y, r, color, a) => {
+    const gr = g.createRadialGradient(x, y, 0, x, y, r);
+    gr.addColorStop(0, color.replace('A', a)); gr.addColorStop(1, color.replace('A', 0));
+    g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2);
+  };
+  // start from opaque black and add light: transparent canvas pixels would come back with garbage colour
+  g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
+  g.globalCompositeOperation = 'lighter';
+  const tints = ['rgba(150,120,255,A)', 'rgba(110,190,255,A)', 'rgba(255,140,210,A)', 'rgba(255,230,240,A)'];
+  for (let i = 0; i < 420; i++) {
+    const t = Math.random(), [u, v] = band(t), [x, y] = at(u, v);
+    const off = (Math.random() - 0.5) * H * 0.16, r = (0.03 + Math.random() * 0.09) * H;
+    blob(x + off * 0.4, y + off, r, tints[i % 4], 0.05 + Math.random() * 0.07);
+  }
+  for (let i = 0; i < (phone ? 3000 : 9000); i++) {
+    const near = Math.random() < 0.6, t = Math.random(), [bu, bv] = band(t);
+    const u = near ? bu + (Math.random() - 0.5) * 0.06 : U0 + Math.random() * (U1 - U0);
+    const v = near ? bv + (Math.random() - 0.5) * 0.08 : V0 + Math.random() * (V1 - V0);
+    const [x, y] = at(u, v);
+    blob(x, y, 1.5 + Math.random() * 1.5, 'rgba(255,255,255,A)', 0.2 + Math.random() * 0.4);
+  }
+  // dust lanes cut through the glow
+  g.globalCompositeOperation = 'source-over';
+  for (let i = 0; i < 160; i++) {
+    const t = Math.random(), [u, v] = band(t), [x, y] = at(u, v);
+    blob(x + (Math.random() - 0.5) * H * 0.02, y + (Math.random() - 0.3) * H * 0.03, (0.008 + Math.random() * 0.018) * H, 'rgba(0,0,0,A)', 0.2);
+  }
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+function skyDome(phone) {
+  const mat = new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite: false, fog: false,
+    uniforms: { uStops: { value: [0, 1, 2, 3, 4].map(() => new THREE.Color()) }, uGlowCol: { value: new THREE.Color() }, uGlowDir: { value: GLOW }, uGlow: { value: 1 }, uMilky: { value: milkyWay(phone) }, uStars: { value: 0 }, uBox: { value: new THREE.Vector4(U0, U1, V0, V1) } },
+    vertexShader: 'varying vec3 vD; void main() { vD = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: /* glsl */`
+      uniform vec3 uStops[5]; uniform vec3 uGlowCol, uGlowDir; uniform float uGlow, uStars; uniform sampler2D uMilky; uniform vec4 uBox;
+      varying vec3 vD;
+      void main() {
+        vec3 d = normalize(vD);
+        float h = max(d.y, 0.0);
+        // a five stop gradient packed close to the horizon, where the colour lives at magic hour
+        vec3 c = mix(uStops[0], uStops[1], smoothstep(0.0, 0.06, h));
+        c = mix(c, uStops[2], smoothstep(0.04, 0.16, h));
+        c = mix(c, uStops[3], smoothstep(0.12, 0.34, h));
+        c = mix(c, uStops[4], smoothstep(0.3, 0.75, h));
+        // the afterglow: brightest low in the west, a broad warm bloom
+        float side = max(dot(normalize(vec2(d.x, d.z)), uGlowDir.xz), 0.0);
+        c += uGlowCol * uGlow * pow(side, 3.0) * (1.0 - smoothstep(0.0, 0.32, h)) * 0.55;
+        // the Milky Way, faded into the horizon glow
+        vec2 uv = vec2(atan(d.z, d.x) / 6.2831853 + 0.5, asin(clamp(d.y, -1.0, 1.0)) / 3.1415926 + 0.5);
+        vec2 box = (uv - uBox.xz) / (uBox.yw - uBox.xz);
+        if (all(greaterThan(box, vec2(0.0))) && all(lessThan(box, vec2(1.0))))
+          c += texture2D(uMilky, box).rgb * uStars * smoothstep(0.02, 0.18, h);
+        gl_FragColor = vec4(c, 1.0);
+        #include <colorspace_fragment>
+      }`
+  });
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(1000, 32, 16), mat);
+  mesh.renderOrder = -1;
+  return mesh;
+}
+
+// crisp stars as points: most scattered across the visible sky, many crowded along the Milky Way, each twinkling
+function starField(phone) {
+  const count = phone ? 1100 : 2600, R = 900;
+  const pos = new Float32Array(count * 3), size = new Float32Array(count), phase = new Float32Array(count), tint = new Float32Array(count * 3);
+  const v3 = new THREE.Vector3(), c = new THREE.Color();
+  const tints = ['#ffffff', '#cfe0ff', '#ffe9d6', '#d8d0ff'];
+  for (let i = 0; i < count; i++) {
+    let u, v;
+    if (Math.random() < 0.4) { const [bu, bv] = band(Math.random()); u = bu + (Math.random() - 0.5) * 0.05; v = bv + (Math.random() - 0.5) * 0.07; }
+    else { u = lerp(0.56, 0.96, Math.random()); v = lerp(0.47, 0.78, Math.pow(Math.random(), 1.3)); }
+    dirOf(u, v, v3).multiplyScalar(R); pos.set([v3.x, v3.y, v3.z], i * 3);
+    const bright = Math.random();
+    size[i] = bright > 0.985 ? 4.5 + Math.random() * 2 : bright > 0.9 ? 2.6 + Math.random() : 1.2 + Math.random() * 1.1;
+    phase[i] = Math.random() * 100;
+    c.set(tints[i % 4]); tint.set([c.r, c.g, c.b], i * 3);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('size', new THREE.BufferAttribute(size, 1));
+  geo.setAttribute('phase', new THREE.BufferAttribute(phase, 1));
+  geo.setAttribute('tint', new THREE.BufferAttribute(tint, 3));
+  const mat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false,
+    uniforms: { uTime: { value: 0 }, uVis: { value: 0 }, uPR: { value: 1 } },
+    vertexShader: /* glsl */`
+      attribute float size, phase; attribute vec3 tint; uniform float uTime, uVis, uPR; varying vec3 vC; varying float vA;
+      void main() {
+        float tw = 0.65 + 0.35 * sin(uTime * (1.3 + fract(phase) * 2.4) + phase);
+        float low = smoothstep(0.0, 0.14, normalize(position).y);
+        vA = uVis * low * tw; vC = tint;
+        gl_PointSize = size * uPR * (0.85 + 0.25 * tw);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }`,
+    fragmentShader: /* glsl */`
+      varying vec3 vC; varying float vA;
+      void main() {
+        vec2 q = gl_PointCoord - 0.5; float r = length(q);
+        float a = smoothstep(0.5, 0.0, r); a *= a;
+        // a faint cross of light on the brightest
+        a += max(0.0, 1.0 - abs(q.x) * 18.0) * max(0.0, 1.0 - abs(q.y) * 2.2) * 0.25 + max(0.0, 1.0 - abs(q.y) * 18.0) * max(0.0, 1.0 - abs(q.x) * 2.2) * 0.25;
+        gl_FragColor = vec4(vC * a * vA, 1.0);
+        #include <colorspace_fragment>
+      }`
+  });
+  const pts = new THREE.Points(geo, mat);
+  pts.frustumCulled = false;
+  return pts;
+}
+
+// a comet with two tails, a straight blue ion tail and a broad rose dust tail, painted once and shown as a sprite
+function comet() {
+  const W = 1024, H = 256, cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const g = cv.getContext('2d'), cx = W * 0.9, cy = H * 0.5;
+  g.globalCompositeOperation = 'lighter';
+  // dust tail: wide, curving slightly, warm
+  for (let i = 0; i < 60; i++) {
+    const t = i / 60, x = cx - t * W * 0.85, y = cy + t * t * H * 0.22, r = 10 + t * 90;
+    const gr = g.createRadialGradient(x, y, 0, x, y, r);
+    gr.addColorStop(0, `rgba(255,190,220,${0.16 * (1 - t)})`); gr.addColorStop(1, 'rgba(255,190,220,0)');
+    g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+  // ion tail: straight, narrow, blue
+  const ion = g.createLinearGradient(cx, cy, 0, cy);
+  ion.addColorStop(0, 'rgba(160,220,255,0.9)'); ion.addColorStop(0.35, 'rgba(110,170,255,0.35)'); ion.addColorStop(1, 'rgba(90,120,255,0)');
+  g.fillStyle = ion; g.beginPath(); g.moveTo(cx, cy - 3); g.lineTo(0, cy - 10); g.lineTo(0, cy + 6); g.lineTo(cx, cy + 3); g.fill();
+  // the head: a hot core in a soft coma
+  const head = g.createRadialGradient(cx, cy, 0, cx, cy, 46);
+  head.addColorStop(0, 'rgba(255,255,255,1)'); head.addColorStop(0.15, 'rgba(210,240,255,0.95)'); head.addColorStop(0.5, 'rgba(140,200,255,0.3)'); head.addColorStop(1, 'rgba(140,200,255,0)');
+  g.fillStyle = head; g.fillRect(cx - 46, cy - 46, 92, 92);
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+  const mk = () => new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false, rotation: -0.42 }));
+  const main = mk(), piece = mk();
+  return { main, piece };
+}
+
+// shooting stars: three quads reused, each a streak that runs for under a second with a bright head
+function meteors() {
+  const group = new THREE.Group(), list = [];
+  const geo = new THREE.PlaneGeometry(1, 1).translate(0.5, 0, 0);
+  for (let i = 0; i < 3; i++) {
+    const mat = new THREE.ShaderMaterial({
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false,
+      uniforms: { uA: { value: 0 } },
+      vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      fragmentShader: /* glsl */`
+        uniform float uA; varying vec2 vUv;
+        void main() {
+          float across = 1.0 - abs(vUv.y * 2.0 - 1.0);
+          float a = pow(vUv.x, 2.4) * across * across * uA;
+          vec3 c = mix(vec3(1.0, 0.55, 0.85), vec3(0.85, 0.95, 1.0), vUv.x);
+          gl_FragColor = vec4(c * a * 1.6, 1.0);
+          #include <colorspace_fragment>
+        }`
+    });
+    const m = new THREE.Mesh(geo, mat);
+    m.matrixAutoUpdate = false; m.frustumCulled = false; m.visible = false;
+    group.add(m); list.push({ m, life: -1, dur: 0.8, start: new THREE.Vector3(), dir: new THREE.Vector3(), len: 0 });
+  }
+  return { group, list };
 }
 
 // The name set in the sky well behind the summit, so the mountain stands in front of it
@@ -157,106 +353,136 @@ function nameInSky(lines) {
   g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#fff8ee';
   lines.forEach((l, i) => g.fillText(l, W / 2, H / 2 + (i - (lines.length - 1) / 2) * size * 0.92));
   const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
-  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false, fog: false, opacity: 0.92 });
-  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, H / W), mat);
-  return mesh;
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, fog: false, opacity: 0.9 });
+  return new THREE.Mesh(new THREE.PlaneGeometry(1, H / W), mat);
 }
 
-// light by sun elevation in degrees: the blue hour, the red glow at sunrise, then morning
-const KEYS = [
-  { e: -5, sun: [0.3, 0.35, 0.6], sunI: 0, hemi: [0.16, 0.2, 0.4], hemiI: 0.9, haze: [0.2, 0.24, 0.42], lit: [0.42, 0.47, 0.68], shade: [0.16, 0.19, 0.34], exp: 0.62, ink: 0.9 },
-  { e: 0.6, sun: [1, 0.36, 0.16], sunI: 3.2, hemi: [0.5, 0.42, 0.6], hemiI: 0.6, haze: [0.9, 0.55, 0.45], lit: [1, 0.62, 0.5], shade: [0.42, 0.34, 0.48], exp: 0.5, ink: 0.92 },
-  { e: 5, sun: [1, 0.66, 0.42], sunI: 3.6, hemi: [0.6, 0.66, 0.85], hemiI: 0.6, haze: [0.92, 0.8, 0.72], lit: [1, 0.9, 0.8], shade: [0.55, 0.55, 0.66], exp: 0.44, ink: 0.8 },
-  { e: 14, sun: [1, 0.94, 0.86], sunI: 3.8, hemi: [0.55, 0.68, 0.95], hemiI: 0.7, haze: [0.74, 0.82, 0.93], lit: [1, 0.98, 0.96], shade: [0.6, 0.65, 0.76], exp: 0.38, ink: 0.7 }
-];
-function light(e) {
-  let i = 0; while (i < KEYS.length - 2 && e > KEYS[i + 1].e) i++;
-  const A = KEYS[i], B = KEYS[i + 1], t = THREE.MathUtils.smoothstep(e, A.e, B.e), out = {};
-  for (const k of Object.keys(A)) out[k] = Array.isArray(A[k]) ? A[k].map((v, j) => v + (B[k][j] - v) * t) : A[k] + (B[k] - A[k]) * t;
-  return out;
-}
-
-export async function createFuji(canvas, { phone, moving, progress, still = 0.32 }) {
+export async function createFuji(canvas, { phone, moving, progress, still = 0.12 }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: !phone, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, phone ? 1 : 1.25));
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // colour is authored directly: no tone curve to wash out the twilight hues
+  renderer.toneMapping = THREE.NoToneMapping;
+  const maxPR = Math.min(devicePixelRatio || 1, phone ? 1.25 : 1.5);
+  let pr = Math.min(maxPR, 1);
+  renderer.setPixelRatio(pr);
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x334466, 0.018);
-  const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 9000);
+  scene.fog = new THREE.FogExp2(0x8a5aa6, 0.02);
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 3000);
 
-  const sky = new Sky(); sky.scale.setScalar(4000); scene.add(sky);
-  const su = sky.material.uniforms;
-  su.turbidity.value = 5; su.rayleigh.value = 2.2; su.mieCoefficient.value = 0.004; su.mieDirectionalG.value = 0.82;
-  // the sky also lights the scene: a second sky in its own scene is rendered into an environment map now and then
-  const envSky = new Sky(); envSky.scale.setScalar(4000); envSky.material = sky.material;
-  const envScene = new THREE.Scene(); envScene.add(envSky);
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  let envRT = null, envE = 99;
-
+  const sky = skyDome(phone); scene.add(sky);
+  const stars = starField(phone); scene.add(stars);
+  const { main: cometMain, piece: cometPiece } = comet(); scene.add(cometMain, cometPiece);
+  const { group: meteorGroup, list: meteorList } = meteors(); scene.add(meteorGroup);
   const { mesh: land, heights, raw } = await terrain(phone); scene.add(land);
   const bed = cloudBed(phone, raw); scene.add(bed);
-  const { group: clouds, mats: cloudMats } = cloudSea(phone, heights); scene.add(clouds);
+  const { group: sheets, mats: sheetMats } = cloudSheets(phone, heights); scene.add(sheets);
   await document.fonts?.load?.('600 100px "Shippori Mincho B1"').catch(() => {});
   const name = nameInSky(phone ? ['Rayyan', 'Syed'] : ['Rayyan Syed']); scene.add(name);
 
-  const sun = new THREE.DirectionalLight(0xffffff, 3); sun.castShadow = true;
-  sun.shadow.mapSize.set(phone ? 1024 : 2048, phone ? 1024 : 2048);
-  Object.assign(sun.shadow.camera, { left: -20, right: 20, top: 20, bottom: -20, near: 1, far: 120 });
-  sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.04;
-  scene.add(sun, sun.target);
-  const hemi = new THREE.HemisphereLight(0xffffff, 0x1a1410, 0.6); scene.add(hemi);
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x000000, 1); scene.add(hemi);
+  const glowLight = new THREE.DirectionalLight(0xffffff, 1); glowLight.position.copy(GLOW).setY(0.25).multiplyScalar(50); scene.add(glowLight);
 
   // where we stand: on a ridge to the north, just above the clouds, looking south at the summit
-  const eye = new THREE.Vector3(4, 2.25, -18.5), look = new THREE.Vector3(0, 2.55, 0);
-  const sunDir = new THREE.Vector3();
+  const eye = new THREE.Vector3(4, 2.25, -18.5);
+  const NAME_DIST = 48, ray = new THREE.Vector3(), tmp = new THREE.Vector3(), toCam = new THREE.Vector3(), side = new THREE.Vector3();
+  let W = 0, H = 0;
   const size = () => {
-    const W = canvas.clientWidth, h = canvas.clientHeight;
-    if (!W || !h) return;
-    renderer.setSize(W, h, false);
-    camera.aspect = W / h;
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    if (!W || !H) return;
+    renderer.setSize(W, H, false);
+    camera.aspect = W / H;
     // keep at least 22 degrees across on tall phones: the flanks crop, the mountain stays big
     camera.fov = Math.max(30, THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(11)) / camera.aspect)));
     camera.updateProjectionMatrix();
-    // the name spans about 70% of the view, wherever the screen is
     const across = 2 * NAME_DIST * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
     name.scale.setScalar(across * (phone ? 0.86 : 0.7));
   };
-  const NAME_DIST = 48, ray = new THREE.Vector3();
+
+  // Resolution follows the device: if frames come slower than the target, drop the pixel ratio a step;
+  // after a few seconds of headroom, raise it again. Checked once a second, never every frame.
+  const target = phone ? 1 / 30 : 1 / 60;
+  let acc = 0, frames = 0, calm = 0;
+  const adapt = dt => {
+    acc += dt; frames++;
+    if (acc < 1) return;
+    const avg = acc / frames; acc = 0; frames = 0;
+    if (avg > target * 1.45 && pr > 0.6) { pr = Math.max(0.6, pr - 0.15); calm = 0; }
+    else if (avg < target * 1.08 && pr < maxPR && ++calm >= 8) { pr = Math.min(maxPR, pr + 0.1); calm = 0; }
+    else return;
+    renderer.setPixelRatio(pr); renderer.setSize(W, H, false);
+  };
+
+  // meteors start somewhere in the upper sky in view and fall diagonally; more of them as night comes on
+  let nextMeteor = 1.5;
+  const launch = (m, t) => {
+    const u = lerp(0.66, 0.86, Math.random()), v = lerp(0.56, 0.7, Math.random());
+    dirOf(u, v, m.start).multiplyScalar(800);
+    dirOf(u + (Math.random() < 0.5 ? -1 : 1) * 0.05, v - 0.06, tmp).multiplyScalar(800);
+    m.dir.copy(tmp).sub(m.start).normalize();
+    m.len = 60 + Math.random() * 70; m.dur = 0.6 + Math.random() * 0.5; m.life = t;
+  };
+  const drawMeteor = (m, t) => {
+    const k = (t - m.life) / m.dur;
+    if (k >= 1) { m.life = -1; m.m.visible = false; return; }
+    const head = tmp.copy(m.start).addScaledVector(m.dir, k * 160);
+    const len = m.len * Math.min(1, k * 3);
+    toCam.copy(camera.position).sub(head).normalize();
+    side.crossVectors(m.dir, toCam).normalize().multiplyScalar(1.4);
+    const back = head.clone().addScaledVector(m.dir, -len);
+    m.m.matrix.makeBasis(m.dir.clone().multiplyScalar(len), side, toCam).setPosition(back);
+    m.m.material.uniforms.uA.value = Math.sin(Math.PI * k);
+    m.m.visible = true;
+  };
 
   const tilt = { x: 0, y: 0, tx: 0, ty: 0 };
   const t0 = performance.now();
-  const frame = now => {
+  const frame = (now, dt = 1 / 60) => {
     const t = (now - t0) / 1000, p = moving ? progress() : still;
+    if (moving) adapt(dt);
     tilt.x += (tilt.tx - tilt.x) * 0.05; tilt.y += (tilt.ty - tilt.y) * 0.05;
-    const e = -5 + p * 19, L = light(e);
-    // summer sunrise is east-northeast: behind the left shoulder from here, so the face we see takes the red light
-    const er = THREE.MathUtils.degToRad(e), az = THREE.MathUtils.degToRad(-35);
-    sunDir.set(Math.cos(er) * Math.cos(az), Math.sin(er), Math.cos(er) * Math.sin(az));
-    su.sunPosition.value.copy(sunDir);
-    sun.position.copy(sunDir).multiplyScalar(60); sun.color.setRGB(...L.sun); sun.intensity = L.sunI;
-    hemi.color.setRGB(...L.hemi); hemi.intensity = L.hemiI;
-    scene.fog.color.setRGB(...L.haze);
-    renderer.toneMappingExposure = L.exp;
-    name.material.opacity = L.ink;
+    const D = day(p);
+
+    const su = sky.material.uniforms;
+    D.sky.forEach((c, i) => su.uStops.value[i].copy(c));
+    su.uGlowCol.value.copy(D.glow); su.uGlow.value = D.glowI; su.uStars.value = D.stars;
+    stars.material.uniforms.uTime.value = t; stars.material.uniforms.uVis.value = D.stars; stars.material.uniforms.uPR.value = pr;
+    hemi.color.copy(D.hemiSky); hemi.groundColor.copy(D.hemiGround); hemi.intensity = D.hemiI;
+    glowLight.color.copy(D.glow); glowLight.intensity = D.glowI;
+    scene.fog.color.copy(D.haze);
     bed.position.x = moving ? -t * 0.012 : 0;
-    for (const m of cloudMats) { const u = m.uniforms; u.uTime.value = moving ? t : 0; u.uSun.value.copy(sunDir); u.uLit.value.setRGB(...L.lit); u.uShade.value.setRGB(...L.shade); u.uHaze.value.setRGB(...L.haze); }
-    if (Math.abs(e - envE) > 0.75) {
-      const next = pmrem.fromScene(envScene, 0, 1, 9000);
-      if (envRT) envRT.dispose();
-      envRT = next; envE = e; scene.environment = envRT.texture;
-    }
-    // a slow drift forward as the sun comes up, and a little give toward the cursor
-    camera.position.set(eye.x + tilt.x * 0.5, eye.y + p * 0.15 - tilt.y * 0.12, eye.z + p * 2.2 + (moving ? Math.sin(t * 0.1) * 0.05 : 0));
-    camera.lookAt(look.x + tilt.x * 0.3, look.y - tilt.y * 0.1, look.z);
+    for (const m of sheetMats) { const u = m.uniforms; u.uTime.value = moving ? t : 0; u.uLit.value.copy(D.lit); u.uShade.value.copy(D.shade); u.uHaze.value.copy(D.haze); }
+
+    // the view lifts from the mountain toward the stars as night comes on
+    const lift = ss(p, 0.2, 1);
+    camera.position.set(eye.x + tilt.x * 0.5, eye.y - tilt.y * 0.12, eye.z + p * 1.6 + (moving ? Math.sin(t * 0.1) * 0.05 : 0));
+    camera.lookAt(tilt.x * 0.3, 2.55 + lift * 2.4 - tilt.y * 0.1, 0);
     camera.updateMatrixWorld();
+
+    // the comet hangs high in the east, its tails streaming away from the afterglow; at night a piece breaks off
+    dirOf(0.717, 0.572, tmp).multiplyScalar(850); cometMain.position.copy(tmp);
+    const cs = 110 + (moving ? Math.sin(t * 0.7) * 3 : 0);
+    cometMain.scale.set(cs * 3.2, cs * 0.8, 1); cometMain.material.opacity = D.comet;
+    const split = ss(p, 0.7, 1);
+    cometPiece.position.copy(tmp).add(side.set(6, -4, 0).multiplyScalar(split * 2.2));
+    cometPiece.scale.set(cs * 2.4, cs * 0.6, 1); cometPiece.material.opacity = D.comet * split * 0.8;
+
+    if (moving) {
+      if (t > nextMeteor) {
+        const free = meteorList.find(m => m.life < 0);
+        if (free) launch(free, t);
+        nextMeteor = t + lerp(4.5, 1.2, D.stars) * (0.5 + Math.random());
+      }
+      for (const m of meteorList) if (m.life >= 0) drawMeteor(m, t);
+    }
+
     ray.set(0, phone ? 0.36 : 0.24, 0.5).unproject(camera).sub(camera.position).normalize();
     name.position.copy(camera.position).addScaledVector(ray, NAME_DIST);
     name.lookAt(camera.position);
     renderer.render(scene, camera);
   };
   size();
+  // compile every shader now, while the story is still loading, not on the first frame the visitor sees
+  renderer.compile(scene, camera);
 
   const ro = moving ? null : new ResizeObserver(() => { size(); frame(performance.now()); });
   const stop = moving ? loopWhileVisible(canvas, frame, { fps: phone ? 30 : 60, onResize: size }) : (ro.observe(canvas), () => ro.disconnect());
@@ -265,8 +491,11 @@ export async function createFuji(canvas, { phone, moving, progress, still = 0.32
     pointer: (x, y) => { tilt.tx = x; tilt.ty = y; },
     dispose() {
       stop();
-      scene.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach(m => { if (m.map) m.map.dispose(); m.dispose(); }); });
-      if (envRT) envRT.dispose(); pmrem.dispose(); renderer.dispose();
+      scene.traverse(o => {
+        if (o.geometry) o.geometry.dispose();
+        if (o.material) [].concat(o.material).forEach(m => { if (m.map) m.map.dispose(); if (m.uniforms?.uMilky) m.uniforms.uMilky.value.dispose(); m.dispose(); });
+      });
+      renderer.dispose();
     }
   };
 }

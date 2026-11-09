@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useScroll } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
 
-// The first page of the story: Mount Fuji from real elevation data, rising out of a sea of clouds as the sun comes
-// up (the scene lives in scenes/fuji.js). Scrolling raises the sun; Skip jumps straight to the portfolio.
+// The first page of the story: Mount Fuji from real elevation data, rising out of a sea of clouds under a twilight
+// sky that turns to night as you scroll (the scene lives in scenes/fuji.js). Skip jumps straight to the portfolio.
 // three.js loads in its own chunk, so the page around it never waits on it.
 export default function FujiOpening({ onSkip }) {
   const { motionOn } = usePrefs();
@@ -33,10 +33,10 @@ export default function FujiOpening({ onSkip }) {
         <p className="fj-kicker">Software engineer</p>
         <p className="fj-line">Walk quietly. Leave a mark.</p>
         <div className="fj-cue">
-          {motionOn && <span className="fj-hint" aria-hidden="true"><i />Scroll to raise the sun</span>}
+          {motionOn && <span className="fj-hint" aria-hidden="true"><i />Scroll into the night</span>}
           <button type="button" className="fj-skip" onClick={onSkip}>Skip to portfolio</button>
         </div>
-        <p className="fj-credit">Mount Fuji from real elevation data, at sunrise above a sea of clouds</p>
+        <p className="fj-credit">Mount Fuji from real elevation data, under a twilight sky</p>
       </motion.div>
     </section>
   );

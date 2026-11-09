@@ -27,7 +27,8 @@ Most portfolios list skills. This one tries to feel like somewhere. It is built 
 
 | Moment | What you see | Where it lives |
 | --- | --- | --- |
-| **Opening** | The first page of the story: Mount Fuji built from real elevation data, rising out of a sea of clouds. Scroll raises the sun from the blue hour through the red glow on its face into morning; the name sits in the sky behind the summit. three.js, loaded in its own chunk. | `FujiOpening.jsx`, `scenes/fuji.js` |
+| **Opening** | The first page of the story: Mount Fuji built from real elevation data, rising out of a sea of clouds under an anime magic hour sky (gold, coral and magenta under indigo). Scroll turns it to night: a dense star field, the Milky Way, shooting stars and a twin tailed comet that splits. three.js in its own chunk, resolution adapts to the device. | `FujiOpening.jsx`, `scenes/fuji.js` |
+| **The hero** | A small hanging scroll in the middle of the page. Scroll, and it unrolls into the full hero. | `ScrollExpandHero.jsx` |
 | **The sky** | Hokusai's *Great Wave*, animated in WebGL. The sky follows your clock: dawn, day, dusk or a starry night. Pick **Storm** for rain, lightning and (if you turn it on) thunder. The sun rises as you scroll and the boats bob. | `GreatWaveHero.jsx`, `sky.js` |
 | **Moving around** | Click a section and a transition carries you there: a crashing wave, a storm of sakura petals, falling maple leaves, sumi ink or a lightning flash. | `Transitions.jsx` |
 | **The paper** | A crane glides across the page as you scroll. | `Sections.jsx` |
@@ -57,6 +58,7 @@ src/
   loop.js                 the shared frame loop every canvas effect runs on
   components/
     FujiOpening.jsx       the Fuji opening, first page of the story (scene in scenes/fuji.js)
+    ScrollExpandHero.jsx  hanging scroll that opens into the hero
     GreatWaveHero.jsx     WebGL Great Wave, sky, rain, lightning, boats
     Transitions.jsx       the five screen transitions
     Sections.jsx          statement, work, experience, notes, contact
