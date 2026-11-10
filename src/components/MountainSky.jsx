@@ -65,7 +65,7 @@ export function Storm({ sound }) {
         ctx.shadowBlur = 0; bolt.life -= dt * 2.5; if (bolt.life <= 0) bolt = null;
       }
     };
-    return loopWhileVisible(c, loop, { fps: 60, onResize: size });
+    return loopWhileVisible(c, loop, { fps: 30, onResize: size });
   }, []);
   return <><canvas ref={cv} className="mtn-rain" /><span ref={flash} className="mtn-flash" /></>;
 }

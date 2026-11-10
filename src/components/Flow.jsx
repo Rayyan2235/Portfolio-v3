@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useScroll } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
 import { loopWhileVisible } from '../loop.js';
 import { secret } from './Secrets.jsx';
@@ -96,33 +97,30 @@ function makeNoise() {
 export function NameRoll() {
   const { motionOn } = usePrefs();
   const ref = useRef(null), kick = useRef(() => {});
+  const { scrollY } = useScroll();
   // drifts on its own and speeds up with the scroll, turning round when you scroll back up. Driven from script, not
   // a CSS animation, so a burst of tiny scroll steps at the bottom of the page can no longer flip it back and forth
-  // until it looks stuck.
+  // until it looks stuck. It reads the page's scroll speed from motion's shared value instead of reading scrollY on
+  // every scroll event, which forced a layout on every frame anywhere on the page.
   useEffect(() => {
     const track = ref.current?.querySelector('.roll-track');
     if (!motionOn || !track) return undefined;
     track.style.animation = 'none';
-    let x = 0, dir = 1, boost = 0, lastY = scrollY, last = 0, raf = 0;
+    let x = 0, dir = 1, boost = 0, last = 0, raf = 0, half = 1;
     const tick = now => {
       const dt = Math.min(0.05, last ? (now - last) / 1000 : 0); last = now;
-      const half = track.scrollWidth / 2;
+      const v = scrollY.getVelocity();
+      if (Math.abs(v) > 60) dir = v > 0 ? 1 : -1;
+      boost = Math.max(boost * 0.92, Math.min(900, Math.abs(v) * 0.5));
       x = (x - dir * (70 + boost) * dt) % half; if (x > 0) x -= half;
-      boost *= 0.92;
       track.style.transform = `translate3d(${x}px, 0, 0)`;
       raf = requestAnimationFrame(tick);
     };
-    const io = new IntersectionObserver(([e]) => { cancelAnimationFrame(raf); last = 0; if (e.isIntersecting) raf = requestAnimationFrame(tick); });
+    const io = new IntersectionObserver(([e]) => { cancelAnimationFrame(raf); last = 0; if (e.isIntersecting) { half = track.scrollWidth / 2 || 1; raf = requestAnimationFrame(tick); } });
     io.observe(ref.current);
-    const onScroll = () => {
-      const d = scrollY - lastY; lastY = scrollY;
-      if (Math.abs(d) > 2) dir = d > 0 ? 1 : -1;
-      boost = Math.min(900, boost + Math.abs(d) * 6);
-    };
-    addEventListener('scroll', onScroll, { passive: true });
     kick.current = () => { boost = 2800; };
-    return () => { io.disconnect(); cancelAnimationFrame(raf); removeEventListener('scroll', onScroll); track.style.animation = ''; track.style.transform = ''; };
-  }, [motionOn]);
+    return () => { io.disconnect(); cancelAnimationFrame(raf); track.style.animation = ''; track.style.transform = ''; };
+  }, [motionOn, scrollY]);
   const phrase = <span>Rayyan Syed<i aria-hidden="true" />Walk quietly<i aria-hidden="true" />Leave a mark<i aria-hidden="true" /></span>;
   return (
     <div className="roll" ref={ref} aria-label="Rayyan Syed. Walk quietly, leave a mark." onClick={() => { kick.current(); secret('roll'); }}>

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import Lenis from 'lenis';
 import { usePrefs } from '../prefs.jsx';
 
 // The small details that make the page feel made by hand. Each one is cheap: CSS animations, a single rAF loop
@@ -50,87 +49,24 @@ export function Preloader() {
   );
 }
 
-// Ink cursor: a soft ring trails the pointer, swells over anything clickable, and a click scatters a few petals.
-// Elements marked data-magnet lean toward the pointer and spring back with an elastic settle when it leaves (traced
-// with rea from dennissnellenberg.com: a 1.5s ease toward the pointer, an elastic return, the frame lagging for depth).
-// Desktop mouse only; the system cursor stays visible.
-export function InkCursor() {
-  const { motionOn } = usePrefs();
-  const ring = useRef(null);
-  useEffect(() => {
-    if (!motionOn || !finePointer()) return undefined;
-    const el = ring.current;
-    let x = innerWidth / 2, y = innerHeight / 2, tx = x, ty = y, raf = 0, hot = false, magnet = null;
-    const loop = () => {
-      x += (tx - x) * 0.2; y += (ty - y) * 0.2;
-      el.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${hot ? 2.2 : 1})`;
-      if (Math.abs(tx - x) > 0.1 || Math.abs(ty - y) > 0.1) raf = requestAnimationFrame(loop); else raf = 0;
-    };
-    const kick = () => { if (!raf) raf = requestAnimationFrame(loop); };
-    const move = e => {
-      tx = e.clientX; ty = e.clientY; el.style.opacity = '1';
-      const t = e.target instanceof Element ? e.target : null;
-      hot = !!t?.closest('a, button, [role="button"], input, .dcard');
-      el.classList.toggle('hot', hot);
-      const m = t?.closest('[data-magnet]');
-      if (magnet && magnet !== m) { release(magnet); magnet = null; }
-      if (m) {
-        const r = m.getBoundingClientRect();
-        m.classList.remove('magnet-off');
-        m.style.setProperty('--pull-x', `${(e.clientX - (r.left + r.width / 2)) * 0.3}px`);
-        m.style.setProperty('--pull-y', `${(e.clientY - (r.top + r.height / 2)) * 0.35}px`);
-        magnet = m;
-      }
-      kick();
-    };
-    const release = m => { m.classList.add('magnet-off'); m.style.setProperty('--pull-x', '0px'); m.style.setProperty('--pull-y', '0px'); };
-    const leave = () => { el.style.opacity = '0'; if (magnet) { release(magnet); magnet = null; } };
-    const click = e => {
-      for (let i = 0; i < 5; i++) {
-        const p = document.createElement('i');
-        p.className = 'petal-spark';
-        const a = (i / 5) * Math.PI * 2 + Math.random() * 0.6, d = 26 + Math.random() * 22;
-        p.style.left = `${e.clientX}px`; p.style.top = `${e.clientY}px`;
-        p.style.setProperty('--dx', `${Math.cos(a) * d}px`); p.style.setProperty('--dy', `${Math.sin(a) * d}px`);
-        p.style.setProperty('--r', `${(Math.random() * 240) | 0}deg`);
-        document.body.appendChild(p);
-        setTimeout(() => p.remove(), 700);
-      }
-    };
-    addEventListener('pointermove', move, { passive: true });
-    document.addEventListener('pointerleave', leave);
-    addEventListener('pointerdown', click, { passive: true });
-    return () => {
-      cancelAnimationFrame(raf);
-      removeEventListener('pointermove', move); document.removeEventListener('pointerleave', leave); removeEventListener('pointerdown', click);
-      if (magnet) release(magnet);
-    };
-  }, [motionOn]);
-  if (!motionOn) return null;
-  return <span ref={ring} className="ink-cursor" aria-hidden="true" />;
-}
-
-// Lenis smooth scrolling for mouse wheels on desktop. Touch keeps native scrolling, and sticky sections keep working
-// because Lenis drives the real scroll position.
-export function SmoothScroll() {
-  const { motionOn } = usePrefs();
-  useEffect(() => {
-    if (!motionOn || !finePointer()) return undefined;
-    const lenis = new Lenis({ duration: 1.05, smoothWheel: true, syncTouch: false });
-    let raf = requestAnimationFrame(function tick(t) { lenis.raf(t); raf = requestAnimationFrame(tick); });
-    return () => { cancelAnimationFrame(raf); lenis.destroy(); };
-  }, [motionOn]);
-  return null;
-}
-
 // A line of the tools used, flowing along a wave (after React Bits' Curved Loop). Pure SVG with a SMIL offset
 // animation, so no JavaScript runs per frame.
 const TOOLS = 'TypeScript · Claude · Python · FastAPI · React · Next.js · MongoDB · LiveKit · Ollama · Gemini · Postgres · ';
 export function ToolWave() {
   const { motionOn } = usePrefs();
+  const svg = useRef(null);
+  // SMIL keeps animating (and laying out the text on its path) even off screen, so pause it whenever it is not seen
+  useEffect(() => {
+    const el = svg.current;
+    if (!el || !el.pauseAnimations) return undefined;
+    el.pauseAnimations();
+    const io = new IntersectionObserver(([e]) => (e.isIntersecting ? el.unpauseAnimations() : el.pauseAnimations()));
+    io.observe(el);
+    return () => io.disconnect();
+  }, [motionOn]);
   return (
     <div className="toolwave" aria-label="Tools I use: TypeScript, Claude, Python, FastAPI, React, Next.js, MongoDB, LiveKit, Ollama, Gemini, Postgres">
-      <svg viewBox="0 0 1440 160" preserveAspectRatio="none" aria-hidden="true">
+      <svg ref={svg} viewBox="0 0 1440 160" preserveAspectRatio="none" aria-hidden="true">
         <path id="tw-path" d="M-40 96 C 200 30, 420 150, 720 90 S 1240 30, 1480 96" fill="none" />
         <text className="tw-text">
           <textPath href="#tw-path" startOffset="0%">

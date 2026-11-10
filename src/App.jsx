@@ -12,7 +12,7 @@ import Hobbies from './components/Hobbies.jsx';
 import Gallery from './components/Gallery.jsx';
 import Secrets from './components/Secrets.jsx';
 import SecretsTab from './components/SecretsTab.jsx';
-import { Preloader, InkCursor, SmoothScroll, ToolWave } from './components/Flourish.jsx';
+import { Preloader, ToolWave } from './components/Flourish.jsx';
 import { KamonTop } from './components/Charms.jsx';
 import { NameRoll } from './components/Flow.jsx';
 import { SectionCounter } from './components/Craft.jsx';
@@ -29,8 +29,6 @@ function Page() {
     <MotionConfig reducedMotion={motionOn ? 'never' : 'always'}>
     <TransitionProvider>
       <Preloader />
-      <SmoothScroll />
-      <InkCursor />
       <Ambient />
       <Nav onOpenMenu={() => setMenu(true)} />
       <main>

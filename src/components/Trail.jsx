@@ -43,29 +43,3 @@ export function Footprints({ target }) {
   return <div className="fp-layer" ref={layer} aria-hidden="true" />;
 }
 
-// Ink lens, after Olivier Larose's mask cursor (the awwwards style "hidden text" hover): a soft circle follows the
-// pointer over the statement and shows a second line written underneath. On touch it stays closed.
-export function InkLens({ under, children }) {
-  const ref = useRef(null);
-  const { motionOn } = usePrefs();
-  useEffect(() => {
-    const el = ref.current;
-    if (!motionOn || !el || !matchMedia('(pointer: fine)').matches) return undefined;
-    const move = e => {
-      const r = el.getBoundingClientRect();
-      el.style.setProperty('--lx', `${e.clientX - r.left}px`);
-      el.style.setProperty('--ly', `${e.clientY - r.top}px`);
-      el.classList.add('lens-on');
-    };
-    const leave = () => el.classList.remove('lens-on');
-    el.addEventListener('pointermove', move, { passive: true });
-    el.addEventListener('pointerleave', leave);
-    return () => { el.removeEventListener('pointermove', move); el.removeEventListener('pointerleave', leave); };
-  }, [motionOn]);
-  return (
-    <div className="lens" ref={ref}>
-      {children}
-      <p className="lens-under" aria-hidden="true">{under}</p>
-    </div>
-  );
-}

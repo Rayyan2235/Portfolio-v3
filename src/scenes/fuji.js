@@ -398,23 +398,32 @@ function starField(phone) {
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false,
     uniforms: { uTime: { value: 0 }, uVis: { value: 0 }, uPR: { value: 1 } },
     vertexShader: /* glsl */`
-      attribute float size, phase; attribute vec3 tint; uniform float uTime, uVis, uPR; varying vec3 vC; varying float vA, vBig;
+      attribute float size, phase; attribute vec3 tint; uniform float uTime, uVis, uPR; varying vec3 vC; varying float vA, vBig, vCore, vGlint;
       void main() {
         float tw = 0.7 + 0.3 * sin(uTime * (1.3 + fract(phase) * 2.4) + phase);
         float low = smoothstep(0.0, 0.14, normalize(position).y);
         vBig = step(10.0, size);
-        vA = uVis * low * tw; vC = tint;
-        gl_PointSize = max(1.0, size * uPR * (0.9 + 0.15 * tw));
+        // the star's true size on screen is often under a pixel. The sprite is drawn a few pixels wide around it and
+        // the dot shaded inside, so it lands as a smooth point of light instead of one hard square pixel
+        float px = size * uPR * (0.9 + 0.15 * tw);
+        gl_PointSize = vBig > 0.5 ? px : max(5.0, px * 2.6);
+        vCore = vBig > 0.5 ? 1.0 : px / gl_PointSize;
+        vGlint = smoothstep(2.2, 3.6, px) * (1.0 - vBig);
+        vA = uVis * low * tw * (vBig > 0.5 ? 1.0 : clamp(px * 0.75, 0.45, 1.35)); vC = tint;
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }`,
     fragmentShader: /* glsl */`
-      varying vec3 vC; varying float vA, vBig;
+      varying vec3 vC; varying float vA, vBig, vCore, vGlint;
       void main() {
         vec2 q = gl_PointCoord - 0.5; float r2 = dot(q, q);
-        // small stars: a sharp round point; big ones: a tiny hot core, a soft halo and four thin spikes of light
-        float a = mix(exp(-r2 * 14.0), exp(-r2 * 420.0) * 1.6 + exp(-r2 * 40.0) * 0.25, vBig);
-        float spikes = pow(max(0.0, 1.0 - abs(q.x) * 40.0), 2.0) * (1.0 - abs(q.y) * 2.0) + pow(max(0.0, 1.0 - abs(q.y) * 40.0), 2.0) * (1.0 - abs(q.x) * 2.0);
-        a += spikes * 0.7 * vBig;
+        // small stars: a smooth core the size of the star and a faint halo, the clearer ones with two hairline glints;
+        // big ones: a tiny hot core, a soft halo and four thin spikes of light
+        float d2 = r2 / max(1e-4, vCore * vCore * 0.25);
+        float small = exp(-d2 * 2.0) + 0.1 * exp(-d2 * 0.18);
+        small += vGlint * 0.35 * (exp(-abs(q.x) * 90.0 - r2 * 16.0) + exp(-abs(q.y) * 90.0 - r2 * 16.0));
+        float big = exp(-r2 * 420.0) * 1.6 + exp(-r2 * 40.0) * 0.25;
+        big += (pow(max(0.0, 1.0 - abs(q.x) * 40.0), 2.0) * (1.0 - abs(q.y) * 2.0) + pow(max(0.0, 1.0 - abs(q.y) * 40.0), 2.0) * (1.0 - abs(q.x) * 2.0)) * 0.7;
+        float a = mix(small, big, vBig);
         gl_FragColor = vec4(vC * a * vA, 1.0);
         #include <colorspace_fragment>
       }`

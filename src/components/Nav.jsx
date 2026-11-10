@@ -47,7 +47,7 @@ export default function Nav({ onOpenMenu }) {
       <a className={`l${here === 'work' ? ' on' : ''}`} href="#work" data-go="work"><Roll>Work</Roll></a>
       <a className={`l${here === 'hobbies' ? ' on' : ''} opt`} href="#hobbies" data-go="hobbies"><Roll>Off the clock</Roll></a>
       <a className="l" href={RESUME}><Roll>Resume</Roll></a>
-      <a className="cta" href="#contact" data-go="contact" data-magnet>Email</a>
+      <a className="cta" href="#contact" data-go="contact">Email</a>
       <button ref={btnRef} type="button" className="l sky-btn" aria-expanded={open} aria-haspopup="true" onClick={() => setOpen(o => !o)}>
         <span className={`sky-dot sky-dot-${now}`} aria-hidden="true" />{SKIES[now].label}
       </button>

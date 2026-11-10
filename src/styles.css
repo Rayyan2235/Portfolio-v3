@@ -93,10 +93,8 @@ kbd { font: 400 11px/1 var(--mono); padding: 5px 8px; border: 1px solid var(--li
 html.still .fj-paint span { animation: none; }
 .fj-print { display: none; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .fj-failed .fj-print { display: block; }
-/* film: grain and a soft vignette over the render, the way a photograph sits */
-.fj-film { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: overlay; opacity: .55;
-  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0, 0, 0, .55)),
-  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+/* film: a soft vignette over the render, the way a photograph sits (plain blending: an overlay over a live canvas cost frames) */
+.fj-film { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 50% 45%, transparent 58%, rgba(4, 8, 24, .32)); }
 /* the name lives in the 3D sky; this heading is for screen readers, and shows only if the scene cannot run */
 .fj-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); margin: 0; }
 .fj-failed .fj-name { width: auto; height: auto; clip-path: none; left: 0; right: 0; top: 24%; text-align: center; font: 600 clamp(56px, 11vw, 190px)/.9 var(--display); letter-spacing: -.03em; color: #1b2433; }
@@ -114,45 +112,33 @@ html.still .fj-intro p { animation: none; opacity: 1; translate: 0 0; filter: no
 .fj-hint { opacity: calc(1 - var(--day) / .15); display: flex; align-items: center; gap: 10px; font: 400 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
 .fj-hint i { width: 1px; height: 26px; background: currentColor; transform-origin: 50% 0; animation: fj-drip 1.8s ease-in-out infinite; }
 @keyframes fj-drip { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
-.fj-skip { min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(255, 248, 238, .5); background: rgba(15, 21, 48, .25); color: inherit; font: 500 13px/1 var(--sans); cursor: pointer; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.fj-skip { white-space: nowrap; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(255, 248, 238, .5); background: rgba(15, 21, 48, .42); color: inherit; font: 500 13px/1 var(--sans); cursor: pointer; }
 .fj-skip:hover { background: rgba(255, 248, 238, .14); }
 .fj-credit { position: absolute; left: clamp(20px, 4vw, 56px); bottom: 34px; margin: 0; max-width: 30ch; font: 400 12px/1.4 var(--mono); letter-spacing: .06em; opacity: .75; }
 html.still .fj-hint i { animation: none; }
 @media (max-width: 900px) { .fj-credit { display: none; } }
 @media (max-width: 640px) {
   .fj-intro { left: 20px; right: auto; top: auto; bottom: 92px; text-align: left; }
-  .fj-cue { justify-content: flex-start; padding: 0 20px; } /* clear of the round corner button */
+  .fj-cue { flex-direction: row-reverse; justify-content: flex-end; padding: 0 20px; } /* skip first on the left, clear of the round corner button */
 }
 
 /* scroll-expand hero (adapted from 21st.dev): a hanging scroll that opens into the full hero */
 .sx { position: relative; height: 230vh; }
 .sx-sticky { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; overflow: hidden; background: var(--paper); }
-/* the room around the scroll: a red sun, ink hills under drifting mist, a blossom bough and loose petals */
+/* the room around the scroll: a red sun, drifting mist and a blossom bough */
 .sx-bg { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(60% 50% at 50% 55%, rgba(253, 231, 196, .9), rgba(253, 231, 196, 0) 70%), var(--paper); }
 .sx-sun { position: absolute; left: 11vw; top: 13vh; width: clamp(150px, 20vw, 320px); aspect-ratio: 1; border-radius: 50%; will-change: transform;
   background: radial-gradient(circle at 42% 38%, #ef6a3e, var(--sun) 62%, #c8441f); box-shadow: 0 0 90px 30px rgba(247, 178, 122, .35); opacity: .88; }
-/* blend on the moving wrappers: their transform isolates whatever is inside them from the paper */
-.sx-hills { position: absolute; left: -4vw; right: -4vw; bottom: -2vh; height: 52vh; will-change: transform; mix-blend-mode: multiply; opacity: .42;
-  -webkit-mask: linear-gradient(180deg, transparent, #000 42%); mask: linear-gradient(180deg, transparent, #000 42%); }
-.sx-hills img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 70%; filter: saturate(.55); }
 .sx-mist { position: absolute; left: -20vw; width: 90vw; height: 22vh; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 248, 238, .95), rgba(255, 248, 238, 0)); animation: sx-drift 28s ease-in-out infinite alternate; }
 .sx-mist.m1 { bottom: 26vh; }
 .sx-mist.m2 { bottom: 8vh; left: 40vw; animation-duration: 34s; animation-direction: alternate-reverse; }
 @keyframes sx-drift { to { transform: translateX(22vw); } }
-.sx-bough { position: absolute; right: 0; top: -6vh; height: 118vh; will-change: transform; mix-blend-mode: multiply; }
-.sx-bough img { height: 100%; width: auto; display: block; transform-origin: 85% 0%; animation: sway 9s ease-in-out infinite alternate;
-  -webkit-mask: radial-gradient(115% 100% at 100% 0%, #000 45%, transparent 82%); mask: radial-gradient(115% 100% at 100% 0%, #000 45%, transparent 82%); }
-.sx-petals { position: absolute; inset: 0; }
-.sx-grain { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; opacity: .45;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .4 0 0 0 0 .28 0 0 0 .14 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-.sx-petals i { position: absolute; top: -20px; width: 11px; height: 8px; border-radius: 70% 0 70% 0; background: #f7c3c9; box-shadow: 0 0 1px rgba(150, 60, 80, .3); animation: tc-fall linear infinite; }
+.sx-bough { position: absolute; right: 0; top: -6vh; height: 118vh; mix-blend-mode: multiply; }
+.sx-bough img { height: 100%; width: auto; display: block; transform-origin: 85% 0%; -webkit-mask: radial-gradient(115% 100% at 100% 0%, #000 45%, transparent 82%); mask: radial-gradient(115% 100% at 100% 0%, #000 45%, transparent 82%); }
 html.still .sx-mist, html.still .sx-bough img { animation: none; }
-html.still .sx-petals { display: none; }
 @media (max-width: 640px) {
   .sx-sun { left: 8vw; top: 12vh; width: 34vw; }
-  .sx-hills { height: 40vh; }
   .sx-bough { height: 80vh; opacity: .6; }
-  .sx-petals i:nth-child(even) { display: none; }
 }
 .sx-media { position: absolute; inset: 0; z-index: 1; will-change: transform, clip-path; }
 .sx-shade { position: absolute; inset: 0; z-index: 0; border-radius: 14px; box-shadow: 0 30px 70px -30px rgba(29, 53, 87, .55); background: #1d3557; will-change: transform; }
@@ -468,7 +454,7 @@ html.still .st-snow { animation: none; }
 .cu-n { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
-/* flourishes (Flourish.jsx): enso preloader, ink cursor, petal sparks, magnets, tool wave, card spotlight */
+/* flourishes (Flourish.jsx): enso preloader, tool wave, card spotlight */
 .pre { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; align-content: center; gap: 18px; background: var(--paper); pointer-events: none;
   animation: pre-lift .6s cubic-bezier(.65, 0, .35, 1) 1.35s forwards; }
 .pre-enso { width: min(38vw, 180px); height: auto; overflow: visible; }
@@ -476,13 +462,6 @@ html.still .st-snow { animation: none; }
 .pre-num { font: 400 13px var(--mono); letter-spacing: .3em; color: var(--muted); font-variant-numeric: tabular-nums; }
 @keyframes pre-draw { to { stroke-dashoffset: 0; } }
 @keyframes pre-lift { to { transform: translateY(-100%); } }
-.ink-cursor { position: fixed; left: -9px; top: -9px; z-index: 150; width: 18px; height: 18px; border-radius: 50%; pointer-events: none; opacity: 0;
-  border: 1.5px solid var(--ink); background: rgba(27, 36, 51, .08); transition: opacity .2s, background .2s, border-color .2s; will-change: transform; }
-.ink-cursor.hot { background: rgba(228, 87, 46, .12); border-color: var(--sun); }
-.petal-spark { position: fixed; z-index: 150; width: 9px; height: 7px; margin: -3px 0 0 -4px; border-radius: 70% 0 70% 0; background: #f4a9b4; pointer-events: none;
-  animation: petal-spark .65s ease-out forwards; }
-@keyframes petal-spark { to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); opacity: 0; } }
-[data-magnet] { transition: transform .25s cubic-bezier(.16, 1, .3, 1); }
 .toolwave { position: relative; z-index: 1; height: clamp(90px, 12vw, 160px); margin-block: clamp(10px, 3vw, 40px); overflow: hidden; }
 .toolwave svg { width: 100%; height: 100%; display: block; overflow: visible; }
 .tw-text { font: 600 clamp(26px, 3.2vw, 46px) var(--display); fill: var(--sea); letter-spacing: -.01em; }
@@ -490,13 +469,9 @@ html.still .st-snow { animation: none; }
 .dc-inner::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .3s;
   background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 248, 238, .22), transparent 60%); }
 .dc-inner:hover::after { opacity: 1; }
-@media (pointer: coarse) { .ink-cursor { display: none; } }
-html.still .pre, html.still .ink-cursor { display: none; }
+html.still .pre { display: none; }
 
 /* Lenis smooth scroll base styles */
-html.lenis, html.lenis body { height: auto; }
-.lenis.lenis-smooth { scroll-behavior: auto !important; }
-.lenis.lenis-stopped { overflow: hidden; }
 
 /* cherry backdrop follows the visitor's sky */
 .cherry > img { object-position: 50% 78%; }
@@ -744,14 +719,6 @@ html.still .roll-track { animation: none; }
 @media (hover: hover) and (pointer: fine) { .xp-list:hover .xp-item:not(:hover) .xp-card { opacity: .55; } }
 .close .btn:not(.solid) { border-color: transparent; }
 
-/* magnetic pull (traced with rea from dennissnellenberg.com): ease in toward the pointer, elastic settle on release,
-   the corner frame lags behind the label so the button reads as two layers */
-[data-magnet] { translate: var(--pull-x, 0px) var(--pull-y, 0px); transition: translate .9s cubic-bezier(.16, 1, .3, 1); }
-[data-magnet].magnet-off { transition: translate 1.4s linear(0, .22 7%, .78 15%, 1.13 22%, 1.2 26%, 1.13 31%, .97 39%, .94 44%, .97 51%, 1.01 60%, 1.02 66%, 1 80%, 1); }
-.btn[data-magnet]::before { translate: calc(var(--pull-x, 0px) * -.35) calc(var(--pull-y, 0px) * -.35); transition: --k .35s cubic-bezier(.39, .575, .565, 1), translate .9s cubic-bezier(.16, 1, .3, 1); }
-.btn[data-magnet].magnet-off::before { transition: --k .35s cubic-bezier(.39, .575, .565, 1), translate 1.4s linear(0, .22 7%, .78 15%, 1.13 22%, 1.2 26%, 1.13 31%, .97 39%, .94 44%, .97 51%, 1.01 60%, 1.02 66%, 1 80%, 1); }
-html.still [data-magnet] { translate: none; }
-
 /* rolling labels (after art-yakushev.com): letters roll up one by one and their copies take their place */
 .rl { display: inline-flex; overflow: hidden; line-height: 1.2; padding-block: .06em; vertical-align: bottom; }
 .rl-ch { position: relative; display: inline-block; transition: transform .45s cubic-bezier(.65, 0, .35, 1) calc(var(--i) * 18ms); }
@@ -805,10 +772,6 @@ html.still .orbit-ring i { animation: none; }
 .hobby-wrap { z-index: 2; }
 
 /* ink lens over the statement (after the mask cursor hover) */
-.lens { position: relative; }
-.lens-under { position: absolute; inset: 0; margin: 0; pointer-events: none; font: 500 clamp(32px, 4.6vw, 60px)/1.08 var(--display); letter-spacing: -.01em; max-width: 20ch;
-  color: #fff8ee; background: #c8361f; padding: 0; clip-path: circle(0 at var(--lx, 50%) var(--ly, 50%)); transition: clip-path .35s cubic-bezier(.16, 1, .3, 1); }
-.lens.lens-on .lens-under { clip-path: circle(110px at var(--lx, 50%) var(--ly, 50%)); }
 
 /* typewriter in the hero: the hidden longest phrase holds the space, the typed text sits on top of it */
 .tw { display: inline-grid; vertical-align: top; }

@@ -59,21 +59,6 @@ function Scene({ i, g, children }) {
   );
 }
 
-// Rough brush edge: noise displaces the stroke so it reads as ink soaked into paper.
-function InkDefs() {
-  return (
-    <svg width="0" height="0" aria-hidden="true" style={{ position: 'absolute' }}>
-      <filter id="st-ink" x="-5%" y="-40%" width="110%" height="180%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" seed="7" result="n" />
-        <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G" />
-      </filter>
-      <pattern id="st-sei" width="24" height="12" patternUnits="userSpaceOnUse">
-        <path d="M0 12a12 12 0 0 1 24 0M4 12a8 8 0 0 1 16 0M8 12a4 4 0 0 1 8 0" fill="none" stroke={C.sea} strokeOpacity=".22" />
-      </pattern>
-    </svg>
-  );
-}
-
 
 // A chapter's painting: a public domain print (public/art/story) filling the whole stage, with a slow camera move
 // driven by the chapter's progress, a color grade for where the day is, and a dark shade at the foot for the line.
@@ -299,7 +284,7 @@ function Petals({ strength, wind, live }) {
         }
       }
     };
-    return loopWhileVisible(c, tick, { fps: 60, onResize: size });
+    return loopWhileVisible(c, tick, { fps: 30, onResize: size });
   }, [live, strength, wind]);
   return <canvas ref={ref} className="st-petals" aria-hidden="true" />;
 }
@@ -361,7 +346,6 @@ function Film() {
 
   return (
     <div ref={ref} className="st-root" aria-label="A short story about Rayyan">
-      <InkDefs />
       <div className="st-stage">
         {BEATS.map((b, i) => {
           const Art = Scenes[b.id];

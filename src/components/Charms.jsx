@@ -35,7 +35,7 @@ export function KamonTop() {
   const ring = useTransform(scrollYProgress, [0.35, 1], [0, 1]);
   return (
     <AnimatePresence>{show && (
-      <motion.button type="button" className="kamon" aria-label="Back to the top" data-magnet onClick={() => go('top')}
+      <motion.button type="button" className="kamon" aria-label="Back to the top" onClick={() => go('top')}
         initial={{ opacity: 0, scale: 0.6, rotate: -90 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} exit={{ opacity: 0, scale: 0.6, rotate: 90 }}
         whileHover={{ rotate: 30 }} whileTap={{ scale: 0.9 }}>
         <svg viewBox="0 0 56 56" aria-hidden="true">
