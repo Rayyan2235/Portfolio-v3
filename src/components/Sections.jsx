@@ -11,6 +11,7 @@ import { Storm, Birds as SkyFlock } from './MountainSky.jsx';
 import { usePrefs } from '../prefs.jsx';
 import { resolveSky } from '../sky.js';
 import { InkLand, SkyCrane } from './InkLand.jsx';
+import { secret } from './Secrets.jsx';
 import { featured, scraps, experience, EMAIL, GITHUB, LINKEDIN, RESUME } from '../data.js';
 
 const head = { initial: { opacity: 0, y: 16 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-80px' }, transition: { duration: 0.6, ease: [0.2, 0.8, 0.2, 1] } };
@@ -283,7 +284,7 @@ export function Contact({ toast }) {
     <section className={`close close-${mode}`} id="contact" ref={ref} aria-labelledby="contact-title">
       {motionOn && <motion.i className="close-dome" style={{ scaleY: dome }} aria-hidden="true" />}
       <ContactSky mode={mode} motionOn={motionOn} sound={sound} />
-      <div className="sunwrap" aria-hidden="true"><motion.div className="sun" style={motionOn ? { y: sunY, opacity: mode === 'storm' ? 0.2 : sunOpacity } : undefined} /></div>
+      <div className="sunwrap" aria-hidden="true" onClick={e => { const s = e.currentTarget; s.classList.remove('set'); void s.offsetWidth; s.classList.add('set'); secret('sun'); }}><motion.div className="sun" style={motionOn ? { y: sunY, opacity: mode === 'storm' ? 0.2 : sunOpacity } : undefined} /></div>
       <div className="wrap">
         <span className="label"><Hanko n="04" />Contact</span>
         <h2 id="contact-title">The tea is warm. Bring me a problem worth solving.</h2>

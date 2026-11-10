@@ -304,8 +304,8 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 .scrim { position: fixed; inset: 0; z-index: 45; background: rgba(29, 53, 87, .35); }
 .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(560px, 100%); z-index: 50; background: var(--raised); box-shadow: -30px 0 60px -30px rgba(29, 53, 87, .45); display: flex; flex-direction: column; gap: 16px; padding: calc(28px + env(safe-area-inset-top, 0px)) max(28px, env(safe-area-inset-right, 0px)) 28px 28px; overflow-y: auto; }
 .drawer .top { display: flex; justify-content: space-between; align-items: center; }
-.drawer .x { all: unset; cursor: pointer; width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; }
-.drawer .x:focus-visible { outline: 2px solid var(--sun); }
+.drawer .x, .sec-panel .x { all: unset; cursor: pointer; width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; }
+.drawer .x:focus-visible, .sec-panel .x:focus-visible { outline: 2px solid var(--sun); }
 .drawer h3 { font-size: 52px; line-height: 1; font-weight: 600; letter-spacing: -.02em; }
 .dr-text { margin: 0; color: var(--soft); }
 .spec .hd { display: flex; justify-content: space-between; font: 400 12px var(--mono); letter-spacing: .1em; color: var(--muted); padding-bottom: 10px; border-bottom: 2px solid var(--ink); }
@@ -899,3 +899,37 @@ html.still .gal-print { transition: none; }
 .who-seal.stamped { animation: seal-stamp .9s cubic-bezier(.2, 1.6, .4, 1); }
 @keyframes seal-stamp { 0% { transform: scale(1) rotate(0); } 30% { transform: scale(1.9) rotate(-14deg); box-shadow: 0 0 0 10px rgba(200, 54, 31, .25); } 60% { transform: scale(.85) rotate(4deg); } 100% { transform: none; } }
 html.still .csky-land .torii.rang, html.still .who-seal.stamped { animation: none; }
+
+/* the Secrets tab on the right edge, and its panel of hints */
+.sec-tab { position: fixed; right: 0; top: 50%; z-index: 55; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 7px 10px;
+  border: 0; border-radius: 12px 0 0 12px; background: var(--sea); color: #fff8ee; cursor: pointer; translate: 0 -50%; box-shadow: -4px 6px 20px rgba(13, 22, 40, .25);
+  transition: padding .25s ease; }
+.sec-tab:hover, .sec-tab:focus-visible { padding-right: 11px; }
+.sec-word { writing-mode: vertical-rl; rotate: 180deg; font: 600 12px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; }
+.sec-tab b { font: 500 11px/1 var(--mono); opacity: .8; }
+.sec-lamp { width: 12px; height: 15px; border-radius: 45%; background: #e4572e; box-shadow: 0 0 10px 2px rgba(247, 178, 122, .7); animation: sec-glow 2.6s ease-in-out infinite alternate; }
+@keyframes sec-glow { to { box-shadow: 0 0 4px 1px rgba(247, 178, 122, .4); } }
+.sec-panel { position: fixed; top: 0; right: 0; bottom: 0; z-index: 91; width: min(400px, 92vw); overflow-y: auto; padding: 28px 26px 40px; background: var(--paper); color: var(--ink);
+  box-shadow: -20px 0 60px rgba(13, 22, 40, .25); }
+.sec-top { display: flex; align-items: center; justify-content: space-between; }
+.sec-top h2 { margin: 0; font: 600 30px/1 var(--display); letter-spacing: -.02em; }
+.sec-sub { margin: 10px 0 16px; color: var(--soft); font-size: 15px; }
+.sec-bar { height: 4px; border-radius: 4px; background: rgba(29, 53, 87, .12); overflow: hidden; margin-bottom: 18px; }
+.sec-bar i { display: block; height: 100%; background: #c8361f; transform-origin: 0 50%; transition: transform .6s ease; }
+.sec-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; counter-reset: sec; }
+.sec-list li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; padding: 10px 0; border-bottom: 1px solid rgba(29, 53, 87, .1); font-size: 15px; line-height: 1.45; color: var(--soft); }
+.sec-mark { width: 16px; height: 16px; margin-top: 3px; border-radius: 4px; border: 1.5px solid rgba(29, 53, 87, .35); }
+.sec-list li.got { color: var(--ink); }
+.sec-list li.got .sec-mark { background: #c8361f; border-color: #c8361f; box-shadow: inset 0 0 0 3px var(--paper); }
+@media (max-width: 640px) { .sec-tab { top: auto; bottom: 96px; translate: none; padding: 10px 6px 8px; } .sec-word { font-size: 11px; } }
+html.still .sec-lamp { animation: none; }
+
+/* the easy secrets: a lantern that flares, a sun that sets and rises, a name you can tap */
+.st-chochin { pointer-events: auto; cursor: pointer; }
+.st-chochin.lit { animation: st-lit 1.4s ease-out, st-sway 4.5s ease-in-out infinite; }
+@keyframes st-lit { 0% { filter: none; } 20% { filter: brightness(1.7) drop-shadow(0 0 18px #ffb347); rotate: 18deg; } 50% { rotate: -12deg; } 100% { filter: none; rotate: 0deg; } }
+.close .sunwrap { z-index: 2; cursor: pointer; }
+.close .sunwrap.set { animation: sun-set 2.6s cubic-bezier(.6, 0, .3, 1); }
+@keyframes sun-set { 0% { translate: 0 0; } 45% { translate: 0 60vh; opacity: .2; } 55% { translate: 0 60vh; opacity: .2; } 100% { translate: 0 0; opacity: 1; } }
+.roll { cursor: pointer; }
+html.still .st-chochin.lit, html.still .close .sunwrap.set { animation: none; }

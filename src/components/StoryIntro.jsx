@@ -4,6 +4,7 @@ import { usePrefs } from '../prefs.jsx';
 import { featured } from '../data.js';
 import { loopWhileVisible } from '../loop.js';
 import FujiOpening from './FujiOpening.jsx';
+import { secret } from './Secrets.jsx';
 
 const SKY_LANTERNS = [...new Set(featured.flatMap(f => f.stack))].slice(0, 9);
 
@@ -128,6 +129,9 @@ function Print({ q, at, x, y, r, tilt }) {
   return <motion.ellipse cx={x} cy={y} rx={r * 0.55} ry={r} className="st-print" style={{ opacity }} transform={`rotate(${tilt} ${x} ${y})`} />;
 }
 
+// tap a red lantern over the scrolls: it swings and flares (a secret)
+const lightLantern = e => { const l = e.currentTarget; l.classList.remove('lit'); void l.offsetWidth; l.classList.add('lit'); secret('lantern'); };
+
 // Sky lanterns carry the tools the projects are built with up past the fireworks.
 function SkyLantern({ q, i, name }) {
   const start = 0.04 + (i % 5) * 0.06;
@@ -188,7 +192,7 @@ const Scenes = {
           <div className="st-skylans">{SKY_LANTERNS.map((s, i) => <SkyLantern key={s} q={q} i={i} name={s} />)}</div>
         </Painting>
         <div className="st-art st-nightart">
-          <div className="st-lanterns" aria-hidden="true">{[0, 1, 2].map(i => <span key={i} className={`st-chochin l${i}`}><i /></span>)}</div>
+          <div className="st-lanterns" aria-hidden="true">{[0, 1, 2].map(i => <span key={i} className={`st-chochin l${i}`} onClick={lightLantern}><i /></span>)}</div>
           <div className="st-hang">{featured.map((f, i) => <Hang key={f.name} q={q} i={i} f={f} />)}</div>
         </div>
       </>

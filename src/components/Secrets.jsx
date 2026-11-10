@@ -4,23 +4,27 @@ import { siu as playSiu } from '../audio.js';
 
 // Easter eggs. Anything hidden on the page announces itself with secret('id'); this keeps count across visits,
 // thanks the visitor with a toast, and plays the bigger effects. Adding one is a SECRETS entry plus one call.
+// Listed easiest first. The hint shows in the Secrets tab until it is found, then the line under it does.
 export const SECRETS = {
-  ball: 'You tapped the ball',
-  siu: 'You typed siu',
-  konami: 'Konami code',
-  wish: 'You made a wish on the night sky',
-  away: 'You came back',
-  crane: 'You set the crane flying',
-  ggmu: 'Glory glory Man United',
-  owl: 'Up late, like me',
-  koi: 'You fed the koi',
-  torii: 'You rang the shrine gate',
-  stamp: 'You stamped the seal',
-  console: 'You knocked on the console door'
+  lantern: { hint: 'In the story, the red lanterns over the scrolls like to be touched.', found: 'You lit a lantern' },
+  ball: { hint: 'Off the clock, one of the hobbies is asking for a kick.', found: 'You tapped the ball' },
+  sun: { hint: 'In Contact, the sun is close enough to touch.', found: 'You set the sun' },
+  roll: { hint: 'The giant name near the bottom of the page can be tapped.', found: 'You sped up the name' },
+  torii: { hint: 'A red gate stands in the water at the bottom of Contact.', found: 'You rang the shrine gate' },
+  crane: { hint: 'A crane drifts over the Contact landscape.', found: 'You set the crane flying' },
+  wish: { hint: 'In the opening, tap the night sky and make a wish.', found: 'You made a wish on the night sky' },
+  koi: { hint: 'The koi are hungry: tap their pond a few times, quickly.', found: 'You fed the koi' },
+  stamp: { hint: 'The red R at the top likes being pressed. Five times in a row.', found: 'You stamped the seal' },
+  siu: { hint: 'On a keyboard, type the most famous goal celebration in football.', found: 'You typed siu' },
+  ggmu: { hint: 'On a keyboard, type the four letters every Manchester United fan knows.', found: 'Glory glory Man United' },
+  konami: { hint: 'On a keyboard: up, up, down, down... the oldest cheat code in games.', found: 'Konami code' },
+  away: { hint: 'Leave this tab for a moment, then come back.', found: 'You came back' },
+  owl: { hint: 'Visit between 11 at night and 5 in the morning.', found: 'Up late, like me' },
+  console: { hint: 'Developers: open the console and type hire().', found: 'You knocked on the console door' }
 };
 export const secret = id => window.dispatchEvent(new CustomEvent('v3:secret', { detail: id }));
 const KEY = 'v3-secrets';
-const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } };
+export const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } };
 export const secretsFound = () => read().length;
 
 const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
@@ -46,7 +50,8 @@ export default function Secrets({ toast }) {
       if (found.includes(id) || !SECRETS[id]) return;
       found.push(id);
       try { localStorage.setItem(KEY, JSON.stringify(found)); } catch { /* storage blocked */ }
-      toast(`Secret ${found.length} of ${Object.keys(SECRETS).length}: ${SECRETS[id]}`);
+      toast(`Secret ${found.length} of ${Object.keys(SECRETS).length}: ${SECRETS[id].found}`);
+      window.dispatchEvent(new Event('v3:secrets-changed'));
     };
     const onKey = e => {
       if (typing(document.activeElement) || e.metaKey || e.ctrlKey || e.altKey) return;

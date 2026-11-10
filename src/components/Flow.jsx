@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { usePrefs } from '../prefs.jsx';
 import { loopWhileVisible } from '../loop.js';
+import { secret } from './Secrets.jsx';
 
 // Pieces reverse engineered from award winning portfolios and redrawn for the prints.
 // Each one runs only while on screen and touches a single canvas or a transform.
@@ -94,7 +95,7 @@ function makeNoise() {
 // it runs left while you scroll down and turns around when you scroll back up.
 export function NameRoll() {
   const { motionOn } = usePrefs();
-  const ref = useRef(null);
+  const ref = useRef(null), kick = useRef(() => {});
   // drifts on its own and speeds up with the scroll, turning round when you scroll back up. Driven from script, not
   // a CSS animation, so a burst of tiny scroll steps at the bottom of the page can no longer flip it back and forth
   // until it looks stuck.
@@ -119,11 +120,12 @@ export function NameRoll() {
       boost = Math.min(900, boost + Math.abs(d) * 6);
     };
     addEventListener('scroll', onScroll, { passive: true });
+    kick.current = () => { boost = 2800; };
     return () => { io.disconnect(); cancelAnimationFrame(raf); removeEventListener('scroll', onScroll); track.style.animation = ''; track.style.transform = ''; };
   }, [motionOn]);
   const phrase = <span>Rayyan Syed<i aria-hidden="true" />Walk quietly<i aria-hidden="true" />Leave a mark<i aria-hidden="true" /></span>;
   return (
-    <div className="roll" ref={ref} aria-label="Rayyan Syed. Walk quietly, leave a mark.">
+    <div className="roll" ref={ref} aria-label="Rayyan Syed. Walk quietly, leave a mark." onClick={() => { kick.current(); secret('roll'); }}>
       <div className="roll-track" aria-hidden="true">{phrase}{phrase}</div>
     </div>
   );
