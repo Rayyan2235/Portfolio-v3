@@ -18,16 +18,20 @@ export function Preloader() {
   useEffect(() => {
     if (!show) return undefined;
     try { sessionStorage.setItem('v3-loaded', '1'); } catch { /* storage blocked */ }
+    // the count runs to 90 on its own, then waits for the opening scene to be built (or 5 seconds at most), so the
+    // first thing after the ink circle is the mountain, not a half built page
     const t0 = performance.now(), dur = 1300;
-    let id = 0;
+    let id = 0, ready = !!window.__v3OpeningReady, finished = 0, done = 0;
+    const onReady = () => { ready = true; };
+    addEventListener('v3:opening-ready', onReady);
     // a timer, not rAF, so the count still finishes in a background tab
     id = setInterval(() => {
-      const p = Math.min(1, (performance.now() - t0) / dur);
-      if (num.current) num.current.textContent = String(Math.round(p * 100)).padStart(3, '0');
-      if (p >= 1) clearInterval(id);
+      const el = performance.now() - t0, p = Math.min(0.9, el / dur);
+      const go = ready || el > 5000;
+      if (num.current) num.current.textContent = String(Math.round((go && el > dur ? 1 : p) * 100)).padStart(3, '0');
+      if (go && el > dur && !finished) { finished = 1; clearInterval(id); done = setTimeout(() => setShow(false), 450); }
     }, 30);
-    const done = setTimeout(() => setShow(false), dur + 650);
-    return () => { clearInterval(id); clearTimeout(done); };
+    return () => { clearInterval(id); clearTimeout(done); removeEventListener('v3:opening-ready', onReady); };
   }, [show]);
   if (!show) return null;
   return (

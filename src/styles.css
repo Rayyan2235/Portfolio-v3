@@ -62,7 +62,7 @@ kbd { font: 400 11px/1 var(--mono); padding: 5px 8px; border: 1px solid var(--li
 .hero .ed p { margin: 0; font-size: clamp(16px, 1.3vw, 19px); max-width: 34ch; opacity: .88; }
 .hero .corner { position: absolute; left: max(24px, 5vw); top: clamp(92px, 12vh, 120px); margin: 0; font: 400 12px/1.5 var(--mono); letter-spacing: .04em; color: var(--hero-ink); }
 .hero.sky-night .corner, .hero.sky-storm .corner { color: #dbe2ec; }
-.hero .idx { position: absolute; left: max(24px, 5vw); bottom: clamp(24px, 5vh, 48px); display: flex; flex-wrap: wrap; gap: 4px 28px; z-index: 2; }
+.hero .idx { position: absolute; left: max(176px, 5vw + 150px); bottom: clamp(24px, 5vh, 48px); display: flex; flex-wrap: wrap; gap: 4px 28px; z-index: 2; }
 .hero .idx a { display: inline-flex; align-items: baseline; gap: 10px; min-height: 44px; font: 600 16px/44px var(--sans); color: var(--cream); text-decoration: none; border-bottom: 1.5px solid rgba(255, 248, 238, .55); }
 .hero .idx a span { font: 400 12px var(--mono); opacity: .85; }
 .hero .idx a:hover { border-color: var(--cream); }
@@ -74,12 +74,23 @@ kbd { font: 400 11px/1 var(--mono); padding: 5px 8px; border: 1px solid var(--li
 }
 
 /* opening: Mount Fuji at sunrise from real elevation data, the first page of the story */
-.fj { position: relative; height: 230vh; background: #0f1530; }
+.fj { position: relative; height: 340vh; background: #0f1530; }
 .fj-still { height: auto; }
 .fj-stage { --day: 0; position: sticky; top: 0; height: 100svh; overflow: hidden; color: #fff8ee; }
 .fj-still .fj-stage { position: relative; }
 .fj-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 1.4s ease; }
 .fj-ready .fj-canvas { opacity: 1; }
+/* the painted stand in while the scene builds: the same magic hour sky, a few stars and the word, glowing softly */
+.fj-paint { position: absolute; inset: 0; display: grid; place-items: start center; padding-top: 24svh; transition: opacity 1.6s ease;
+  background: radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent), radial-gradient(1px 1px at 34% 9%, #fff 50%, transparent), radial-gradient(1.5px 1.5px at 58% 14%, #fff 50%, transparent),
+  radial-gradient(1px 1px at 76% 22%, #fff 50%, transparent), radial-gradient(1.5px 1.5px at 88% 7%, #fff 50%, transparent), radial-gradient(1px 1px at 22% 31%, #fff 50%, transparent),
+  radial-gradient(1px 1px at 66% 33%, #fff 50%, transparent), radial-gradient(1px 1px at 46% 4%, #fff 50%, transparent),
+  linear-gradient(0deg, #ffc58a 0%, #f08e9a 22%, #8e70b8 45%, #3d4f98 70%, #16235c 100%); }
+.fj-paint span { font: 600 clamp(64px, 12vw, 200px)/1 var(--display); letter-spacing: -.02em; color: #fff8ee;
+  text-shadow: 0 0 18px rgba(255, 236, 210, .75), 0 0 60px rgba(180, 200, 255, .5); animation: fj-glow 2.4s ease-in-out infinite alternate; }
+@keyframes fj-glow { from { opacity: .55; filter: blur(1.5px); } to { opacity: 1; filter: blur(0); } }
+.fj-ready .fj-paint, .fj-failed .fj-paint { opacity: 0; pointer-events: none; }
+html.still .fj-paint span { animation: none; }
 .fj-print { display: none; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .fj-failed .fj-print { display: block; }
 /* film: grain and a soft vignette over the render, the way a photograph sits */
@@ -352,6 +363,8 @@ html.still .close .sea-s { animation: none; }
 .st-kake-in b { font: 600 clamp(15px, 3.6vw, 22px)/1.1 var(--display); }
 .st-kake-in small { font: 400 10px/1.3 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .st-kake-in .seal { width: 14px; height: 14px; margin-top: auto; margin-bottom: 16px; background: var(--sun); border-radius: 2px; }
+/* the one line under each name fills the middle of the scroll, brushed in the display face */
+.st-kake-in p { margin: auto 0 0; padding-inline: 10px; text-align: center; font: italic 400 clamp(12px, 1.25vw, 16px)/1.35 var(--display); color: var(--soft); text-wrap: balance; }
 .st-flash { position: absolute; inset: 0; z-index: 5; background: var(--paper); pointer-events: none; }
 .st-enter .st-line { text-shadow: 0 0 10px rgba(255, 248, 238, .7); }
 
@@ -757,7 +770,7 @@ html.still .rl-ch { transition: none; }
 .sc-name span { display: block; }
 .sc-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: #c8361f; transform-origin: 0 50%; }
 .sc:focus-visible { outline: 2px solid #c8361f; outline-offset: 3px; }
-@media (max-width: 640px) { .sc { display: none; } }
+@media (max-width: 640px) { .sc { display: none; } .hero .idx { left: max(20px, 5vw); } }
 
 /* orbit (after pacomepertant.com): letters travel round the email chip */
 .orbit { position: relative; display: inline-block; }
@@ -877,3 +890,12 @@ html.still .gal-print { transition: none; }
   background: linear-gradient(90deg, transparent, rgba(255, 248, 238, .8) 70%, #fff); box-shadow: 0 0 8px rgba(160, 200, 255, .9); animation: egg-meteor 1.2s ease-out calc(.5s + var(--d)) forwards; }
 @keyframes egg-meteor { 0% { opacity: 0; translate: 0 0; } 15% { opacity: 1; } 100% { opacity: 0; translate: 260px 160px; } }
 
+
+/* secrets: the torii glows like a struck bell, the nav seal stamps itself */
+.close svg.waves { pointer-events: none; } /* decoration only: lets taps reach the torii behind its clear top */
+.csky-land .torii { pointer-events: auto; cursor: pointer; transform-box: fill-box; transform-origin: 50% 100%; }
+.csky-land .torii.rang { animation: torii-ring 1.6s ease-out; }
+@keyframes torii-ring { 0% { filter: none; } 15% { filter: brightness(1.8) drop-shadow(0 0 10px #ffb27a) drop-shadow(0 0 30px #ff7a4a); transform: scale(1.04); } 100% { filter: none; transform: none; } }
+.who-seal.stamped { animation: seal-stamp .9s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes seal-stamp { 0% { transform: scale(1) rotate(0); } 30% { transform: scale(1.9) rotate(-14deg); box-shadow: 0 0 0 10px rgba(200, 54, 31, .25); } 60% { transform: scale(.85) rotate(4deg); } 100% { transform: none; } }
+html.still .csky-land .torii.rang, html.still .who-seal.stamped { animation: none; }

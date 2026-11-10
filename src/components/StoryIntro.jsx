@@ -235,7 +235,7 @@ function Hang({ q, i, f }) {
     <motion.figure className="st-kake" style={{ y, opacity }}>
       <i className="rod" />
       <motion.div className="st-kake-body" style={{ clipPath: clip }}>
-        <div className="st-kake-in"><b>{f.name}</b><small>{f.meta}</small><i className="seal" /></div>
+        <div className="st-kake-in"><b>{f.name}</b><small>{f.meta}</small><p>{f.line}</p><i className="seal" /></div>
       </motion.div>
       <motion.i className="rod" style={{ transform: drop }} />
     </motion.figure>

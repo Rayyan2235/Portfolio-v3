@@ -109,6 +109,8 @@ const Wash = ({ id, color, top = 1, foot = 0 }) => (
 const MistBand = ({ y, h, o }) => <rect x="-40" y={y} width="1680" height={h} fill="url(#il-mist)" opacity={o} />;
 
 export function InkLand() {
+  // tap the torii and it glows like a struck bell: a secret
+  const ring = e => { const g = e.currentTarget; g.classList.remove('rang'); void g.getBBox(); g.classList.add('rang'); secret('torii'); };
   return (
     <svg className="csky-land ink" viewBox="0 0 1600 400" preserveAspectRatio="xMidYMax slice">
       <defs>
@@ -134,7 +136,7 @@ export function InkLand() {
       <MistBand y={346} h={50} o={0.8} />
       <path className="near" d={LAND.shore} />
       <path className="near" d={LAND.lantern} />
-      <path className="torii" d={LAND.torii} />
+      <path className="torii" d={LAND.torii} onClick={ring} />
       {LAND.pines.map((p, i) => (
         <g key={i} className="near">
           <path d={p.trunk} />

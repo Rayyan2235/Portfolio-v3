@@ -16,7 +16,8 @@ import { featured, scraps, experience, EMAIL, GITHUB, LINKEDIN, RESUME } from '.
 const head = { initial: { opacity: 0, y: 16 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-80px' }, transition: { duration: 0.6, ease: [0.2, 0.8, 0.2, 1] } };
 
 // The hero line keeps "I build" and turns over what comes next; every phrase is something on this site.
-const HERO_PHRASES = ['what outlasts the storm.', 'bridges where there were none.', 'paths others can follow.', 'like the tide, a little every day.'];
+// what he builds, each with a little of the sea and the mountain in it
+const HERO_PHRASES = ['AI agents that hold steady in a storm.', 'voice apps that carry across the water.', 'evals that tell the tide from the wave.', 'systems that outlast the season.'];
 
 export function HeroText() {
   const [time, setTime] = useState('');
@@ -28,8 +29,7 @@ export function HeroText() {
     <>
       <p className="corner">Rayyan Syed<br />CS at Penn State, May 2027<br />University Park, {time}</p>
       <div className="ed">
-        <h1 id="hero-title" aria-label="I build what outlasts the storm."><span aria-hidden="true">I build </span><Typewriter className="rt-hero" phrases={HERO_PHRASES} /></h1>
-        <p>Patient as the tide, steady as the mountain. Every line written to leave the path a little wider.</p>
+        <h1 id="hero-title" aria-label="I build AI agents that hold steady in a storm."><span aria-hidden="true">I build </span><Typewriter className="rt-hero" phrases={HERO_PHRASES} /></h1>
       </div>
       <nav className="idx" aria-label="Sections">
         <a href="#work" data-go="work"><span>01</span>Work</a>
@@ -74,10 +74,12 @@ export function Statement() {
   );
 }
 
-// Every project in one list: the featured three first, then the smaller builds.
+// Every project in one list: the featured three first, then the smaller builds, then a last card that points to
+// everything else on GitHub.
 const projects = [
   ...featured.map(f => ({ ...f, featured: true, blurb: f.text.split('. ')[0] + '.' })),
-  ...scraps.map(s => ({ name: s.name, meta: s.year, text: s.result, blurb: s.result, stack: [], spec: [], url: s.url }))
+  ...scraps.map(s => ({ name: s.name, meta: s.year, text: s.text || s.result, blurb: s.result, stack: s.stack || [], spec: [], url: s.url })),
+  { name: 'More on GitHub', meta: 'Everything else', blurb: 'Notebooks, experiments, coursework and whatever I am building this week.', stack: [], spec: [], url: GITHUB, more: true }
 ];
 
 function Drawer({ p, i, onClose }) {
@@ -156,11 +158,11 @@ function DeckCard({ p, i, n, prog, phone, onOpen }) {
   const scale = useTransform(prog, v => (phone ? 1 - 0.06 * Math.max(0, Math.min(n - 1 - i, v * (n - 1) - i)) : 1));
   const github = p.url && p.url !== '#' && p.url.includes('github.com');
   return (
-    <motion.li className="dcard" style={{ x, rotate, y, scale, '--bg': bg, '--fg': fg, zIndex: i + 1 }}>
+    <motion.li className={`dcard${p.more ? ' dc-more' : ''}`} style={{ x, rotate, y, scale, '--bg': bg, '--fg': fg, zIndex: i + 1 }}>
       {/* a soft light follows the pointer across the card (after React Bits' Spotlight Card) */}
       <div className="dc-inner" onPointerMove={e => { const r = e.currentTarget.getBoundingClientRect(); e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`); e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`); }}>
         <div className="dc-shot">
-          {p.img ? <img src={p.img} alt={`${p.name} screenshot`} loading="lazy" /> : <span className="dc-mono" aria-hidden="true">{p.name.slice(0, 1)}</span>}
+          {p.img ? <img src={p.img} alt={`${p.name} screenshot`} loading="lazy" /> : <span className="dc-mono" aria-hidden="true">{p.more ? "+" : p.name.slice(0, 1)}</span>}
           {p.featured && <span className="dc-seal">Featured</span>}
         </div>
         <span className="dc-meta">{String(i + 1).padStart(2, '0')} · {p.meta}</span>
@@ -168,8 +170,8 @@ function DeckCard({ p, i, n, prog, phone, onOpen }) {
         <p>{p.blurb}</p>
         {p.stack.length > 0 && <span className="dc-tags">{p.stack.slice(0, 3).map(s => <span key={s}>{s}</span>)}</span>}
         <span className="dc-btns">
-          {github && <a className="dc-gh" href={p.url} target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>}
-          <button type="button" className="dc-open" onClick={onOpen}>Details <span aria-hidden="true">→</span></button>
+          {github && <a className="dc-gh" href={p.url} target="_blank" rel="noreferrer">{p.more ? 'See all my projects' : 'GitHub'} <span aria-hidden="true">↗</span></a>}
+          {!p.more && <button type="button" className="dc-open" onClick={onOpen}>Details <span aria-hidden="true">→</span></button>}
         </span>
       </div>
     </motion.li>
@@ -198,7 +200,7 @@ export function Work() {
             <motion.ul className="deck-list" style={{ x: listX }} aria-label={`${n} projects`}>
               {projects.map((p, i) => <DeckCard key={p.name} p={p} i={i} n={n} prog={prog} phone={phone} onOpen={() => setOpen(i)} />)}
             </motion.ul>
-            <motion.span className="deck-hint" style={{ opacity: hint }}>{n} projects · keep scrolling</motion.span>
+            <motion.span className="deck-hint" style={{ opacity: hint }}>{n - 1} projects · keep scrolling</motion.span>
           </div>
         </div>
       ) : (

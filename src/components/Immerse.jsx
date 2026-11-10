@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
 import { loopWhileVisible } from '../loop.js';
+import { secret } from './Secrets.jsx';
 
 // A fourth round of pieces after award winning portfolios, kept to one canvas or plain transforms.
 
@@ -27,15 +28,24 @@ export function Koi({ host }) {
       const seg = 11, gap = 9 * k.len, x = W * (0.2 + i * 0.3), y = H * (0.3 + (i % 2) * 0.4);
       return { ...k, seg, gap, a: i * 2.1, v: 1.4, wob: i, pts: Array.from({ length: seg }, (_, j) => ({ x: x - j * gap, y })) };
     });
-    const step = (f, now) => {
+    const turn = (from, to) => ((to - from + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+    const step = (f, now, i) => {
       const h = f.pts[0];
       // wander, steer toward the cursor or the last tap, and turn away from the edges
       let ta = f.a + Math.sin(now * 0.0006 + f.wob * 3) * 0.04;
       const chasing = now < aim.until || aim.near;
       if (chasing) {
-        const want = Math.atan2(aim.y - h.y, aim.x - h.x), d = Math.hypot(aim.x - h.x, aim.y - h.y);
+        // each koi heads for its own spot on a ring around the cursor, so they gather around it instead of on it
+        const ox = aim.x + Math.cos(i * 2.4 + now * 0.0004) * 90, oy = aim.y + Math.sin(i * 2.4 + now * 0.0004) * 60;
+        const want = Math.atan2(oy - h.y, ox - h.x), d = Math.hypot(ox - h.x, oy - h.y);
         let diff = ((want - f.a + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
         if (d > 40) ta = f.a + diff * 0.08;
+      }
+      // keep some water between them: turn away from any other koi that swims too close
+      for (const o of fish) {
+        if (o === f) continue;
+        const dx = h.x - o.pts[0].x, dy = h.y - o.pts[0].y, d = Math.hypot(dx, dy);
+        if (d < 150) ta += turn(ta, Math.atan2(dy, dx)) * 0.05 * (1 - d / 150);
       }
       const m = 60;
       if (h.x < m || h.x > W - m || h.y < m || h.y > H - m) {
@@ -69,8 +79,8 @@ export function Koi({ host }) {
         c.strokeStyle = `rgba(29,53,87,${0.35 * (1 - k)})`; c.lineWidth = 1.5;
         for (let i = 0; i < 3; i++) { const rr = (k * 90 - i * 16); if (rr > 0) { c.beginPath(); c.ellipse(r.x, r.y, rr, rr * 0.55, 0, 0, 7); c.stroke(); } }
       }
-      for (const f of fish) {
-        step(f, now);
+      for (const [i, f] of fish.entries()) {
+        step(f, now, i);
         const flick = Math.sin(now * 0.012 + f.wob) * 0.5;
         // shadow on the river bed, then fins, body, spots and tail
         c.fillStyle = 'rgba(29,53,87,.12)'; outline(f, 6, 9); c.fill();
@@ -92,7 +102,13 @@ export function Koi({ host }) {
     const local = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
     const move = e => { if (e.pointerType !== 'mouse') return; [aim.x, aim.y] = local(e); aim.near = true; };
     const leave = () => { aim.near = false; };
-    const tap = e => { const [x, y] = local(e); aim.x = x; aim.y = y; aim.until = performance.now() + 1600; ripples.push({ x, y, t: 0 }); };
+    // five taps on the pond in a few seconds counts as feeding them
+    let feeds = [];
+    const tap = e => {
+      const [x, y] = local(e); aim.x = x; aim.y = y; aim.until = performance.now() + 1600; ripples.push({ x, y, t: 0 });
+      const now = Date.now(); feeds = [...feeds.filter(t => now - t < 4000), now];
+      if (feeds.length >= 5) { feeds = []; secret('koi'); }
+    };
     el.addEventListener('pointermove', move, { passive: true }); el.addEventListener('pointerleave', leave); el.addEventListener('pointerdown', tap, { passive: true });
     const stop = loopWhileVisible(cv, draw, { onResize: size });
     return () => { stop(); el.removeEventListener('pointermove', move); el.removeEventListener('pointerleave', leave); el.removeEventListener('pointerdown', tap); };

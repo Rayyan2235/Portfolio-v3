@@ -95,22 +95,31 @@ function makeNoise() {
 export function NameRoll() {
   const { motionOn } = usePrefs();
   const ref = useRef(null);
+  // drifts on its own and speeds up with the scroll, turning round when you scroll back up. Driven from script, not
+  // a CSS animation, so a burst of tiny scroll steps at the bottom of the page can no longer flip it back and forth
+  // until it looks stuck.
   useEffect(() => {
     const track = ref.current?.querySelector('.roll-track');
-    if (!motionOn || !track || !track.getAnimations) return undefined;
-    const anim = track.getAnimations()[0];
-    if (!anim) return undefined;
-    let lastY = scrollY, dir = 1, on = false;
-    const io = new IntersectionObserver(([e]) => { on = e.isIntersecting; if (on) anim.play(); else anim.pause(); });
+    if (!motionOn || !track) return undefined;
+    track.style.animation = 'none';
+    let x = 0, dir = 1, boost = 0, lastY = scrollY, last = 0, raf = 0;
+    const tick = now => {
+      const dt = Math.min(0.05, last ? (now - last) / 1000 : 0); last = now;
+      const half = track.scrollWidth / 2;
+      x = (x - dir * (70 + boost) * dt) % half; if (x > 0) x -= half;
+      boost *= 0.92;
+      track.style.transform = `translate3d(${x}px, 0, 0)`;
+      raf = requestAnimationFrame(tick);
+    };
+    const io = new IntersectionObserver(([e]) => { cancelAnimationFrame(raf); last = 0; if (e.isIntersecting) raf = requestAnimationFrame(tick); });
     io.observe(ref.current);
     const onScroll = () => {
-      if (!on) return;
-      const d = scrollY > lastY ? 1 : scrollY < lastY ? -1 : dir;
-      lastY = scrollY;
-      if (d !== dir) { dir = d; anim.playbackRate = dir; }
+      const d = scrollY - lastY; lastY = scrollY;
+      if (Math.abs(d) > 2) dir = d > 0 ? 1 : -1;
+      boost = Math.min(900, boost + Math.abs(d) * 6);
     };
     addEventListener('scroll', onScroll, { passive: true });
-    return () => { io.disconnect(); removeEventListener('scroll', onScroll); };
+    return () => { io.disconnect(); cancelAnimationFrame(raf); removeEventListener('scroll', onScroll); track.style.animation = ''; track.style.transform = ''; };
   }, [motionOn]);
   const phrase = <span>Rayyan Syed<i aria-hidden="true" />Walk quietly<i aria-hidden="true" />Leave a mark<i aria-hidden="true" /></span>;
   return (

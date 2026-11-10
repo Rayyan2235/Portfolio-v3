@@ -68,8 +68,8 @@ const rimLight = (s, strength) => {
       totalEmissiveRadiance += uRim * pow(1.0 - facing, 3.0) * ${strength};`);
 };
 
-async function terrain(phone) {
-  const h = new Uint16Array(await (await fetch('/terrain/fuji-288.u16')).arrayBuffer());
+async function terrain(phone, data) {
+  const h = new Uint16Array(await data);
   // laptops get the data at one and a half times its density, smoothly interpolated; phones take every other sample
   const scale = phone ? 0.5 : 1.5, n = Math.round((GRID - 1) * scale) + 1;
   const geo = new THREE.PlaneGeometry(SIZE, SIZE, n - 1, n - 1).rotateX(-Math.PI / 2); // row 0 of the data is north, at -z
@@ -119,7 +119,9 @@ async function terrain(phone) {
 // (alpha), the way background painters dab clouds in anime night skies.
 function puffAtlas(phone) {
   const T = phone ? 160 : 256, S = T * 2, img = new ImageData(S, S);
-  const hash = (x, y) => { const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return s - Math.floor(s); };
+  // value noise from a precomputed lattice: a table lookup per corner instead of a sine, which made this the
+  // slowest step of the whole scene setup
+  const LAT = new Float32Array(256 * 256).map(Math.random), hash = (x, y) => LAT[((y & 255) << 8) | (x & 255)];
   const vn = (x, y) => {
     const X = Math.floor(x), Y = Math.floor(y), u = x - X, v = y - Y, a = hash(X, Y), b = hash(X + 1, Y), c = hash(X, Y + 1), d = hash(X + 1, Y + 1);
     const su = u * u * (3 - 2 * u), sv = v * v * (3 - 2 * v);
@@ -555,7 +557,13 @@ function welcomeStars(phone) {
   return pointsMesh;
 }
 
+// gives the browser a frame between the heavy setup steps, so the painted sky in front keeps moving while we build
+const breathe = () => new Promise(r => setTimeout(r, 0));
+
 export async function createFuji(canvas, { phone, moving, progress, still = 0.12 }) {
+  // start the downloads first and build the sky while they arrive (index.html preloads the terrain too)
+  const data = fetch('/terrain/fuji-288.u16').then(r => r.arrayBuffer());
+  const font = document.fonts?.load?.('600 100px "Shippori Mincho B1"').catch(() => {});
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: !phone, powerPreference: 'high-performance' });
   // colour is authored directly: no tone curve to wash out the twilight hues
   renderer.toneMapping = THREE.NoToneMapping;
@@ -569,13 +577,16 @@ export async function createFuji(canvas, { phone, moving, progress, still = 0.12
   const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 3000);
 
   const sky = skyDome(phone); scene.add(sky);
+  await breathe();
   const stars = starField(phone); scene.add(stars);
   const { main: cometMain, piece: cometPiece } = comet(); scene.add(cometMain, cometPiece);
   const { group: meteorGroup, list: meteorList } = meteors(); scene.add(meteorGroup);
-  const { mesh: land, heights, raw } = await terrain(phone); scene.add(land);
+  const { mesh: land, heights, raw } = await terrain(phone, data); scene.add(land);
+  await breathe();
   const { group: sheets, mats: sheetMats } = cloudSheets(phone, heights); scene.add(sheets);
-  await document.fonts?.load?.('600 100px "Shippori Mincho B1"').catch(() => {});
+  await font;
   const word = welcomeStars(phone); scene.add(word);
+  await breathe();
 
   const hemi = new THREE.HemisphereLight(0xffffff, 0x000000, 1); scene.add(hemi);
   const glowLight = new THREE.DirectionalLight(0xffffff, 1); glowLight.position.copy(GLOW).setY(0.25).multiplyScalar(50); scene.add(glowLight);
@@ -583,6 +594,7 @@ export async function createFuji(canvas, { phone, moving, progress, still = 0.12
   // where we stand: on a ridge to the north, just above the clouds, looking south at the summit
   const eye = new THREE.Vector3(4, 2.25, -18.5);
   const atlas = puffAtlas(phone);
+  await breathe();
   const sea = cloudSea(phone, atlas, raw, eye); scene.add(sea);
   const high = skyClouds(phone, atlas); scene.add(high);
   const NAME_DIST = 48, ray = new THREE.Vector3(), tmp = new THREE.Vector3(), toCam = new THREE.Vector3(), side = new THREE.Vector3();

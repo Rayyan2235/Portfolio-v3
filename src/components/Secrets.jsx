@@ -12,7 +12,11 @@ export const SECRETS = {
   away: 'You came back',
   crane: 'You set the crane flying',
   ggmu: 'Glory glory Man United',
-  owl: 'Up late, like me'
+  owl: 'Up late, like me',
+  koi: 'You fed the koi',
+  torii: 'You rang the shrine gate',
+  stamp: 'You stamped the seal',
+  console: 'You knocked on the console door'
 };
 export const secret = id => window.dispatchEvent(new CustomEvent('v3:secret', { detail: id }));
 const KEY = 'v3-secrets';
@@ -61,13 +65,22 @@ export default function Secrets({ toast }) {
       else { document.title = title; if (left) secret('away'); }
     };
     window.addEventListener('v3:secret', onSecret);
+    // the R seal in the nav: press it five times in a row and it stamps itself
+    let presses = [];
+    const onPress = e => {
+      const seal = e.target.closest?.('.who-seal');
+      if (!seal) return;
+      const now = Date.now(); presses = [...presses.filter(p => now - p < 2500), now];
+      if (presses.length >= 5) { presses = []; seal.classList.remove('stamped'); void seal.offsetWidth; seal.classList.add('stamped'); secret('stamp'); }
+    };
+    document.addEventListener('click', onPress);
     // night owls: anyone here between eleven at night and five in the morning, local time
     const hour = new Date().getHours();
     const owl = hour >= 23 || hour < 5 ? setTimeout(() => secret('owl'), 9000) : 0;
     window.addEventListener('keydown', onKey);
     document.addEventListener('visibilitychange', onVis);
     return () => {
-      window.removeEventListener('v3:secret', onSecret); window.removeEventListener('keydown', onKey);
+      window.removeEventListener('v3:secret', onSecret); window.removeEventListener('keydown', onKey); document.removeEventListener('click', onPress);
       document.removeEventListener('visibilitychange', onVis); clearTimeout(timer.current); clearTimeout(owl); document.title = title;
     };
   }, [motionOn, toast]);
@@ -75,7 +88,13 @@ export default function Secrets({ toast }) {
   // a note for anyone who opens the console
   useEffect(() => {
     console.log('%c\n        /\\\n       /  \\      Rayyan Syed\n      / /\\ \\     you found the console.\n     /_/  \\_\\\n', 'color:#e4572e;font:12px monospace');
-    console.log('%cThere are eight secrets on this page. Start with: type siu, try the Konami code, tap the night sky, find the crane.', 'color:#1d3557;font:13px sans-serif');
+    console.log(`%cThere are ${Object.keys(SECRETS).length} secrets on this page. Start with: type siu, try the Konami code, tap the night sky, find the crane. Or type hire() right here.`, 'color:#1d3557;font:13px sans-serif');
+    window.hire = () => {
+      secret('console');
+      console.log('%cThanks for knocking. The fastest way in is email: open the Contact section, or press Ctrl K and pick Email.', 'color:#e4572e;font:13px sans-serif');
+      return 'The lanterns are lit.';
+    };
+    return () => { delete window.hire; };
   }, []);
 
   if (!party) return null;
