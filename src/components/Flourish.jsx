@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import Lenis from 'lenis';
+import { frame, cancelFrame } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
 
 // The small details that make the page feel made by hand. Each one is cheap: CSS animations, a single rAF loop
@@ -47,6 +49,22 @@ export function Preloader() {
       <span className="pre-num" ref={num}>000</span>
     </div>
   );
+}
+
+// Smooth wheel scrolling for mouse wheels on desktop (touch keeps native scrolling). Lenis runs inside motion's own
+// frame loop, in its setup step, so each frame the scroll moves first and every scroll linked animation reads the new
+// position in the same frame: one loop, no extra layout. A slower wheel and a softer glide give the sticky chapters
+// time to be seen.
+export function SmoothScroll() {
+  const { motionOn } = usePrefs();
+  useEffect(() => {
+    if (!motionOn || !finePointer()) return undefined;
+    const lenis = new Lenis({ autoRaf: false, lerp: 0.085, wheelMultiplier: 0.7, smoothWheel: true, syncTouch: false });
+    const update = ({ timestamp }) => lenis.raf(timestamp);
+    frame.setup(update, true);
+    return () => { cancelFrame(update); lenis.destroy(); };
+  }, [motionOn]);
+  return null;
 }
 
 // A line of the tools used, flowing along a wave (after React Bits' Curved Loop). Pure SVG with a SMIL offset

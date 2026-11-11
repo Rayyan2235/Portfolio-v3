@@ -573,12 +573,16 @@ export async function createFuji(canvas, { phone, moving, progress, still = 0.12
   // start the downloads first and build the sky while they arrive (index.html preloads the terrain too)
   const data = fetch('/terrain/fuji-288.u16').then(r => r.arrayBuffer());
   const font = document.fonts?.load?.('600 100px "Shippori Mincho B1"').catch(() => {});
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: !phone, powerPreference: 'high-performance' });
+  // MSAA only on low density screens: at 1.5x and up the extra pixels already smooth every edge, and 4x MSAA on a
+  // 2x canvas (5 million pixels) was the single biggest cost of the scene, more than the terrain, sky and clouds
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: !phone && (devicePixelRatio || 1) < 1.5, powerPreference: 'high-performance' });
   // colour is authored directly: no tone curve to wash out the twilight hues
   renderer.toneMapping = THREE.NoToneMapping;
   // full screen sharpness to start with (up to 2x on laptops, 1.5x on phones); adapt() steps down only if frames run slow
   const maxPR = Math.min(devicePixelRatio || 1, phone ? 1.5 : 2);
   let pr = phone ? Math.min(maxPR, 1.25) : maxPR;
+  // never softer than this: a scene drawn at 0.6x looked blurry, so past the floor the frame rate gives way instead
+  const minPR = phone ? Math.min(maxPR, 1) : Math.min(maxPR, Math.max(1, maxPR * 0.75));
   renderer.setPixelRatio(pr);
 
   const scene = new THREE.Scene();
@@ -622,16 +626,19 @@ export async function createFuji(canvas, { phone, moving, progress, still = 0.12
     word.material.uniforms.uPx.value = Math.min(2.2, Math.max(1.3, W / 900));
   };
 
-  // Resolution follows the device: if frames come slower than the target, drop the pixel ratio a step;
-  // after a few seconds of headroom, raise it again. Checked once a second, never every frame.
-  const target = phone ? 1 / 30 : 1 / 60;
-  let acc = 0, frames = 0, calm = 0;
+  // Resolution follows the device: if frames come slower than 60 a second, drop the pixel ratio a step, down to the
+  // floor; at the floor and still slow, draw every other frame. After a few seconds of headroom, step back up.
+  // Checked once a second, never every frame.
+  const target = 1 / 60;
+  let acc = 0, frames = 0, calm = 0, half = false, skip = false;
   const adapt = dt => {
     acc += dt; frames++;
     if (acc < 1) return;
     const avg = acc / frames; acc = 0; frames = 0;
-    if (avg > target * 1.45 && pr > 0.6) { pr = Math.max(0.6, pr - 0.15); calm = 0; }
-    else if (avg < target * 1.08 && pr < maxPR && ++calm >= 8) { pr = Math.min(maxPR, pr + 0.1); calm = 0; }
+    const slow = avg * (half ? 0.5 : 1) > target * 1.45;
+    if (slow && pr > minPR) { pr = Math.max(minPR, pr - 0.15); calm = 0; }
+    else if (slow) { half = true; calm = 0; return; }
+    else if (avg < target * 1.08 * (half ? 2 : 1) && ++calm >= 8) { calm = 0; if (half) { half = false; return; } if (pr >= maxPR) return; pr = Math.min(maxPR, pr + 0.1); }
     else return;
     renderer.setPixelRatio(pr); renderer.setSize(W, H, false);
   };
@@ -664,7 +671,10 @@ export async function createFuji(canvas, { phone, moving, progress, still = 0.12
   const frame = (now, dt = 1 / 60) => {
     const t = (now - t0) / 1000, p = moving ? progress() : still;
     if (moving) adapt(dt);
-    tilt.x += (tilt.tx - tilt.x) * 0.05; tilt.y += (tilt.ty - tilt.y) * 0.05;
+    if (half && (skip = !skip)) return;
+    // eased by time, not by frame, so the drift feels the same at 60 and at 144 frames a second
+    const ease = 1 - Math.pow(0.95, dt * 60);
+    tilt.x += (tilt.tx - tilt.x) * ease; tilt.y += (tilt.ty - tilt.y) * ease;
     const D = day(p);
 
     const su = sky.material.uniforms;
@@ -727,7 +737,7 @@ export async function createFuji(canvas, { phone, moving, progress, still = 0.12
   meteorList.forEach(m => { m.m.visible = false; });
 
   const ro = moving ? null : new ResizeObserver(() => { size(); frame(performance.now()); });
-  const stop = moving ? loopWhileVisible(canvas, frame, { fps: phone ? 30 : 60, onResize: size }) : (ro.observe(canvas), () => ro.disconnect());
+  const stop = moving ? loopWhileVisible(canvas, frame, { fps: phone ? 60 : 120, onResize: size }) : (ro.observe(canvas), () => ro.disconnect());
   if (!moving) frame(performance.now());
   return {
     pointer: (x, y) => { tilt.tx = x; tilt.ty = y; mouseOn = true; },

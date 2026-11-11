@@ -896,3 +896,8 @@ html.still .sec-lamp { animation: none; }
 @keyframes sun-set { 0% { translate: 0 0; } 45% { translate: 0 60vh; opacity: .2; } 55% { translate: 0 60vh; opacity: .2; } 100% { translate: 0 0; opacity: 1; } }
 .roll { cursor: pointer; }
 html.still .st-chochin.lit, html.still .close .sunwrap.set { animation: none; }
+
+/* Lenis */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
