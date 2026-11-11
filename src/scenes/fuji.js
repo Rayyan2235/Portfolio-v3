@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { loopWhileVisible } from '../loop.js';
+import { loopWhileVisible, activeNow } from '../loop.js';
 
 // Mount Fuji under an anime night sky, the first page of the story. The mountain is real elevation data
 // (public/terrain/fuji-288.u16: 288 x 288 heights in metres, 125 m apart, from the Mapzen Terrarium tiles on AWS
@@ -632,6 +632,8 @@ export async function createFuji(canvas, { phone, moving, progress, still = 0.12
   const target = 1 / 60;
   let acc = 0, frames = 0, calm = 0, half = false, skip = false;
   const adapt = dt => {
+    // idle frames come slowly on purpose (see loop.js): only frames drawn while the visitor is active say anything
+    if (!activeNow()) { acc = 0; frames = 0; return; }
     acc += dt; frames++;
     if (acc < 1) return;
     const avg = acc / frames; acc = 0; frames = 0;
@@ -737,7 +739,7 @@ export async function createFuji(canvas, { phone, moving, progress, still = 0.12
   meteorList.forEach(m => { m.m.visible = false; });
 
   const ro = moving ? null : new ResizeObserver(() => { size(); frame(performance.now()); });
-  const stop = moving ? loopWhileVisible(canvas, frame, { fps: phone ? 60 : 120, onResize: size }) : (ro.observe(canvas), () => ro.disconnect());
+  const stop = moving ? loopWhileVisible(canvas, frame, { fps: phone ? 60 : 120, idleFps: 30, onResize: size }) : (ro.observe(canvas), () => ro.disconnect());
   if (!moving) frame(performance.now());
   return {
     pointer: (x, y) => { tilt.tx = x; tilt.ty = y; mouseOn = true; },
