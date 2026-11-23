@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef } from 'react';
 import { usePrefs } from '../prefs.jsx';
 import { thunder } from '../audio.js';
+import { scrollToY } from '../scroll.js';
 
 // Screen transitions. Each one covers the screen, the page jumps while covered, then it reveals the target.
 export const KINDS = {
@@ -355,7 +356,7 @@ export function TransitionProvider({ children }) {
   const jump = useCallback(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    scrollTo({ top: el.getBoundingClientRect().top + scrollY, behavior: 'instant' });
+    scrollToY(el.getBoundingClientRect().top + scrollY);
     try { history.replaceState(null, '', '#' + id); } catch { /* sandboxed frames */ }
   }, []);
 

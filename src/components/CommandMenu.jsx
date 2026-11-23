@@ -57,7 +57,7 @@ export default function CommandMenu({ open, setOpen, toast }) {
             initial={{ y: -12, scale: 0.98 }} animate={{ y: 0, scale: 1 }} exit={{ y: -8, scale: 0.98 }} transition={{ type: 'spring', stiffness: 420, damping: 34 }}>
             <input ref={inputRef} value={q} onChange={e => { setQ(e.target.value); setSel(0); }} placeholder="Jump to a section, change the sky, or run a command"
               aria-controls="cml" aria-activedescendant={shown.length ? 'cmo' + sel : undefined} />
-            <ul id="cml" role="listbox">
+            <ul id="cml" role="listbox" data-lenis-prevent>
               {shown.map((c, i) => (
                 <li key={c[0]} id={'cmo' + i} role="option" aria-selected={i === sel} onMouseEnter={() => setSel(i)} onClick={() => run(c)}>
                   <span>{c[0]}</span><small>{c[1]}</small>

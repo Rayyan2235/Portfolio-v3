@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import Lenis from 'lenis';
 import { frame, cancelFrame } from 'motion/react';
 import { usePrefs } from '../prefs.jsx';
+import { setLenis } from '../scroll.js';
 
 // The small details that make the page feel made by hand. Each one is cheap: CSS animations, a single rAF loop
 // that only moves transforms, or pure SVG. All of them stand down when the Motion switch is off.
@@ -54,7 +55,8 @@ export function Preloader() {
 // Smooth wheel scrolling for mouse wheels on desktop (touch keeps native scrolling). Lenis runs inside motion's own
 // frame loop, in its setup step, so each frame the scroll moves first and every scroll linked animation reads the new
 // position in the same frame: one loop, no extra layout. A slower wheel and a softer glide give the sticky chapters
-// time to be seen.
+// time to be seen. Panels that scroll on their own (the project drawer, the command menu, the Secrets panel) carry
+// data-lenis-prevent so the wheel scrolls them, not the page behind. Scripted scrolls go through scroll.js.
 export function SmoothScroll() {
   const { motionOn } = usePrefs();
   useEffect(() => {
@@ -62,7 +64,8 @@ export function SmoothScroll() {
     const lenis = new Lenis({ autoRaf: false, lerp: 0.085, wheelMultiplier: 0.7, smoothWheel: true, syncTouch: false });
     const update = ({ timestamp }) => lenis.raf(timestamp);
     frame.setup(update, true);
-    return () => { cancelFrame(update); lenis.destroy(); };
+    setLenis(lenis);
+    return () => { setLenis(null); cancelFrame(update); lenis.destroy(); };
   }, [motionOn]);
   return null;
 }

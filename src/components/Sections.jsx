@@ -86,7 +86,7 @@ function Drawer({ p, i, onClose }) {
   return (
     <>
       <motion.div className="scrim" onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
-      <motion.aside className="drawer" role="dialog" aria-modal="true" aria-labelledby="dr-title"
+      <motion.aside className="drawer" data-lenis-prevent role="dialog" aria-modal="true" aria-labelledby="dr-title"
         initial={{ x: '105%' }} animate={{ x: 0 }} exit={{ x: '105%' }} transition={{ type: 'spring', stiffness: 260, damping: 32 }}>
         <div className="top"><span className="label">{p.meta}</span>
           <button ref={closeRef} className="x" type="button" onClick={onClose} aria-label="Close case study">

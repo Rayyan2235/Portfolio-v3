@@ -35,7 +35,7 @@ export default function SecretsTab() {
         {open && (
           <>
             <motion.div className="scrim" onClick={() => setOpen(false)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
-            <motion.aside className="sec-panel" role="dialog" aria-modal="true" aria-labelledby="sec-title"
+            <motion.aside className="sec-panel" data-lenis-prevent role="dialog" aria-modal="true" aria-labelledby="sec-title"
               initial={{ x: '105%' }} animate={{ x: 0 }} exit={{ x: '105%' }} transition={{ type: 'spring', stiffness: 260, damping: 32 }}>
               <div className="sec-top">
                 <h2 id="sec-title">{IDS.length} secrets</h2>

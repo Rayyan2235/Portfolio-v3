@@ -471,8 +471,6 @@ html.still .st-snow { animation: none; }
 .dc-inner:hover::after { opacity: 1; }
 html.still .pre { display: none; }
 
-/* Lenis smooth scroll base styles */
-
 /* cherry backdrop follows the visitor's sky */
 .cherry > img { object-position: 50% 78%; }
 .cherry-dawn .cherry-wash { background: linear-gradient(180deg, rgba(255, 200, 160, .3), rgba(255, 236, 214, .12)); }
@@ -897,7 +895,5 @@ html.still .sec-lamp { animation: none; }
 .roll { cursor: pointer; }
 html.still .st-chochin.lit, html.still .close .sunwrap.set { animation: none; }
 
-/* Lenis */
-html.lenis, html.lenis body { height: auto; }
+/* Lenis: the library's own stylesheet is imported in main.jsx; this keeps CSS smooth scrolling from fighting it */
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
-.lenis.lenis-stopped { overflow: hidden; }

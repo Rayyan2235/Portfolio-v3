@@ -5,6 +5,7 @@ import { featured } from '../data.js';
 import { loopWhileVisible } from '../loop.js';
 import FujiOpening from './FujiOpening.jsx';
 import { secret } from './Secrets.jsx';
+import { scrollToY } from '../scroll.js';
 
 const SKY_LANTERNS = [...new Set(featured.flatMap(f => f.stack))].slice(0, 9);
 
@@ -298,7 +299,7 @@ function portfolioTop() {
 // Skipping marks the story as seen, so returning visitors land straight on the portfolio.
 function skipStory(smooth) {
   try { localStorage.setItem(SEEN_KEY, '1'); } catch { /* storage blocked */ }
-  scrollTo({ top: portfolioTop(), behavior: smooth ? 'smooth' : 'instant' });
+  scrollToY(portfolioTop(), { smooth });
 }
 
 export default function StoryIntro() {
@@ -338,7 +339,7 @@ function Film() {
   // Returning visitors land past the story, at the portfolio.
   useEffect(() => {
     if (seen && !location.hash) {
-      requestAnimationFrame(() => scrollTo({ top: portfolioTop(), behavior: 'instant' }));
+      requestAnimationFrame(() => scrollToY(portfolioTop()));
     }
   }, [seen]);
 
