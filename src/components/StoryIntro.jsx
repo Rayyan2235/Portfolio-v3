@@ -334,7 +334,7 @@ function Film() {
 
   const petals = useTransform(g, [0, 0.18, 0.28], [1, 1, 0]); // dawn only; the last chapter has its own snow
   // walking through the torii ends in light; lives on the stage so it can never cover the page below
-  const flash = useTransform(g, [0.956, 1], [0, 1]);
+  const flash = useTransform(g, v => Math.max(0, (v - 0.956) / 0.044)); // a function: see the deck hint in Sections.jsx
 
   // Returning visitors land past the story, at the portfolio.
   useEffect(() => {

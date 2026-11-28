@@ -226,7 +226,7 @@ html.still .mtn-drift, html.still .mtn-stars i { animation: none; }
 .dots i.on { background: var(--sun); }
 
 /* project deck: a sticky stage in front of the valley; cards fly across (desktop) or stack (phones) */
-.deck { position: relative; height: calc(100svh + var(--n) * 45svh); margin-top: 24px; }
+.deck { position: relative; height: calc(100svh + var(--n) * 24svh); margin-top: 24px; }
 .deck-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; display: flex; align-items: center; }
 .deck-stage .mtn { --mh: 100svh; top: 0; height: 100%; -webkit-mask-image: linear-gradient(transparent, #000 10%, #000 90%, transparent); mask-image: linear-gradient(transparent, #000 10%, #000 90%, transparent); }
 .deck-list { position: relative; z-index: 1; display: flex; gap: 28px; margin: 0; padding: 0; list-style: none; width: max-content; }
@@ -804,7 +804,7 @@ html.still .tw-caret { animation: none; }
 .iw { display: inline; }
 
 /* print gallery zoom (after exoape.com, by way of Olivier Larose) */
-.zp { position: relative; height: 300vh; background: #101826; }
+.zp { position: relative; height: 210vh; background: #101826; }
 .zp-sticky { position: sticky; top: 0; height: 100svh; overflow: hidden; }
 .zp-el { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; will-change: transform; pointer-events: none; }
 .zp-img { position: relative; width: 25vw; height: 25vh; overflow: hidden; }
@@ -817,7 +817,7 @@ html.still .tw-caret { animation: none; }
 .zp-el.z6 .zp-img { top: 22.5vh; left: 25vw; width: 15vw; height: 15vh; }
 .zp-line { opacity: calc((var(--zp, 0) - .72) / .2); position: absolute; left: 0; right: 0; bottom: 14vh; z-index: 2; margin: 0 auto; padding: 0 20px; max-width: 22ch; text-align: center;
   font: 600 clamp(26px, 3.6vw, 48px)/1.1 var(--display); color: #fff8ee; text-shadow: 0 2px 24px rgba(16, 24, 38, .7); }
-@media (max-width: 640px) { .zp { height: 240vh; } .zp-el.z0 .zp-img { width: 34vw; height: 25vh; } }
+@media (max-width: 640px) { .zp { height: 180vh; } .zp-el.z0 .zp-img { width: 34vw; height: 25vh; } }
 
 /* snapshots: photos as instant prints pegged to a line */
 .gal { position: relative; overflow: hidden; padding-block: clamp(90px, 10vw, 140px); background: var(--paper); }

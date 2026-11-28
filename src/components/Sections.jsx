@@ -184,7 +184,9 @@ export function Work() {
   const { scrollYProgress: prog } = useScroll({ target: ref, offset: ['start start', 'end end'] });
   // the whole row: starts with the first card right of center, ends with the last card near the middle
   const listX = useTransform(prog, v => (phone ? '0px' : `calc(${56 - 6 * v}vw - ${v * 100}%)`));
-  const hint = useTransform(prog, [0, 0.08], [1, 0]);
+  // a function, not a [0, 0.08] range: motion hands range maps of a target's scroll to a native ViewTimeline with
+  // keyframes only inside the range, and past it the browser eased the hint back in, so it never left
+  const hint = useTransform(prog, v => Math.max(0, 1 - v / 0.08));
   const n = projects.length;
   return (
     <section className="work" id="work" aria-labelledby="work-title">
